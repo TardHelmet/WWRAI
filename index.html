@@ -680,10 +680,10 @@
         }
         
         function displayFullStory() {
-            document.getElementById('fullStory').textContent = currentOriginalStory;
-            document.getElementById('editStory').value = currentOriginalStory;
-            document.getElementById('finalStory').textContent = currentAIStory || currentOriginalStory;
-        }
+    document.getElementById('fullStory').textContent = currentOriginalStory;
+    // Don't overwrite editStory here - let generateAlienStory handle it
+    document.getElementById('finalStory').textContent = currentAIStory || currentOriginalStory;
+}
         
      async function sendToEditor() {
     const sendButton = document.getElementById('sendEditorButton');
