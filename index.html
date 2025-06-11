@@ -8,45 +8,30 @@
         body {
             font-family: Arial, sans-serif;
             margin: 0;
-            padding: 0;
+            padding: 20px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            overflow: hidden;
+            min-height: 100vh;
         }
         
-        .screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
+        .page {
+            display: none;
+            max-width: 800px;
+            margin: 0 auto;
             padding: 40px;
-            box-sizing: border-box;
-            opacity: 0;
-            transition: opacity 0.8s ease-in-out;
-        }
-        
-        .screen.active {
-            opacity: 1;
-        }
-        
-        .content-box {
             background: rgba(255,255,255,0.1);
-            padding: 40px;
             border-radius: 20px;
             backdrop-filter: blur(10px);
-            max-width: 600px;
-            width: 100%;
-            text-align: center;
+        }
+        
+        .page.active {
+            display: block;
         }
         
         h1, h2 {
             color: #ffd700;
-            margin-bottom: 20px;
+            text-align: center;
+            margin-bottom: 30px;
         }
         
         button {
@@ -59,25 +44,23 @@
             font-weight: bold;
             font-size: 16px;
             margin: 10px;
-            transition: all 0.3s ease;
         }
         
         button:hover {
             background: #ffed4e;
-            transform: translateY(-2px);
         }
         
         button:disabled {
             background: #ccc;
             color: #666;
             cursor: not-allowed;
-            transform: none;
         }
         
         .video-container {
             width: 100%;
             max-width: 500px;
-            margin: 20px 0;
+            margin: 20px auto;
+            text-align: center;
         }
         
         textarea {
@@ -100,6 +83,7 @@
             border-radius: 15px;
             border: 2px solid #ffd700;
             margin: 20px 0;
+            display: none;
         }
         
         .notification {
@@ -110,14 +94,7 @@
             color: white;
             padding: 15px 25px;
             border-radius: 10px;
-            animation: slideIn 0.5s ease-out;
-            cursor: pointer;
             z-index: 1000;
-        }
-        
-        @keyframes slideIn {
-            from { transform: translateX(100%); }
-            to { transform: translateX(0); }
         }
         
         .editor-response {
@@ -126,7 +103,6 @@
             border-radius: 15px;
             margin: 20px 0;
             border-left: 5px solid #ffd700;
-            text-align: left;
         }
         
         .character-name {
@@ -141,14 +117,13 @@
             padding: 20px;
             border-radius: 10px;
             margin: 20px 0;
-            text-align: left;
             line-height: 1.6;
             max-height: 300px;
             overflow-y: auto;
         }
         
         .timer {
-            position: absolute;
+            position: fixed;
             top: 20px;
             left: 20px;
             background: rgba(0,0,0,0.5);
@@ -156,24 +131,18 @@
             border-radius: 25px;
             font-family: monospace;
             font-size: 18px;
+            display: none;
         }
 
-        .error-message {
-            background: rgba(220, 53, 69, 0.3);
-            border: 2px solid #dc3545;
-            padding: 15px;
-            border-radius: 10px;
-            margin: 15px 0;
-            color: #fff;
+        .status {
+            text-align: center;
+            margin: 20px 0;
+            font-size: 14px;
+            opacity: 0.8;
         }
 
-        .success-message {
-            background: rgba(40, 167, 69, 0.3);
-            border: 2px solid #28a745;
-            padding: 15px;
-            border-radius: 10px;
-            margin: 15px 0;
-            color: #fff;
+        .center {
+            text-align: center;
         }
 
         @keyframes spin {
@@ -183,74 +152,73 @@
     </style>
 </head>
 <body>
-    <!-- Welcome Screen -->
-    <div class="screen active" id="welcomeScreen">
-        <div class="content-box">
-            <h1>✨ Story Creator ✨</h1>
+    <!-- Welcome Page -->
+    <div class="page active" id="welcomePage">
+        <h1>✨ Story Creator ✨</h1>
+        <div class="center">
             <p>Watch a magical video and help create an amazing story!</p>
             <button id="startButton">Start Your Story Adventure! 🚀</button>
-            
-            <!-- Connection status indicator -->
-            <div id="connectionStatus" style="margin-top: 20px; font-size: 14px; opacity: 0.7;"></div>
+            <div id="connectionStatus" class="status"></div>
         </div>
     </div>
 
-    <!-- Video Watching Screen -->
-    <div class="screen" id="videoScreen">
+    <!-- Video Page -->
+    <div class="page" id="videoPage">
         <div class="timer" id="timer">00:00</div>
-        <div class="content-box">
-            <h2>📺 Let's Watch Together!</h2>
-            <div class="video-container">
-                <iframe id="videoPlayer" width="100%" height="315" 
-                        src="https://www.youtube.com/embed/ScMzIvxBSi4" 
-                        frameborder="0" allowfullscreen></iframe>
-            </div>
-            <div id="pausePrompt" class="pause-prompt" style="display:none;">
-                <h3>✋ Pause Time!</h3>
-                <p id="pauseQuestion">What just happened in the story?</p>
-                <textarea id="storyInput" placeholder="Tell me what you saw..."></textarea>
+        <h2>📺 Let's Watch Together!</h2>
+        <div class="video-container">
+            <iframe id="videoPlayer" width="100%" height="315" 
+                    src="https://www.youtube.com/embed/ScMzIvxBSi4" 
+                    frameborder="0" allowfullscreen></iframe>
+        </div>
+        
+        <div id="pausePrompt" class="pause-prompt">
+            <h3>✋ Pause Time!</h3>
+            <p id="pauseQuestion">What just happened in the story?</p>
+            <textarea id="storyInput" placeholder="Tell me what you saw..."></textarea>
+            <div class="center">
                 <button id="continueButton">Continue Watching ▶️</button>
                 <button id="finishButton">I'm Done Writing! ✅</button>
             </div>
         </div>
     </div>
 
-    <!-- Story Review Screen -->
-    <div class="screen" id="reviewScreen">
-        <div class="content-box">
-            <h2>📖 Your Amazing Story!</h2>
-            <div id="fullStory" class="story-display"></div>
+    <!-- Story Review Page -->
+    <div class="page" id="reviewPage">
+        <h2>📖 Your Amazing Story!</h2>
+        <div id="fullStory" class="story-display"></div>
+        <div class="center">
             <p>Ready to send your story to our magical editor?</p>
             <button id="sendEditorButton">Send to Editor 📮</button>
         </div>
     </div>
 
-    <!-- Waiting for Editor Screen -->
-    <div class="screen" id="waitingScreen">
-        <div class="content-box">
-            <h2>🧙‍♂️ Editor is Working Magic...</h2>
+    <!-- Waiting Page -->
+    <div class="page" id="waitingPage">
+        <h2>🧙‍♂️ Editor is Working Magic...</h2>
+        <div class="center">
             <p>Grammaticus is reading your story and preparing helpful suggestions!</p>
             <div style="font-size: 3em; animation: spin 2s linear infinite;">⏳</div>
             <p><small>This usually takes a few moments...</small></p>
         </div>
     </div>
 
-    <!-- Editor Response Screen -->
-    <div class="screen" id="editorScreen">
-        <div class="content-box">
-            <h2>📬 Message from Your Editor!</h2>
-            <div id="editorResponse" class="editor-response"></div>
-            <h3>Your Story (you can edit it):</h3>
-            <textarea id="editStory" placeholder="Edit your story here..."></textarea>
+    <!-- Editor Response Page -->
+    <div class="page" id="editorPage">
+        <h2>📬 Message from Your Editor!</h2>
+        <div id="editorResponse" class="editor-response"></div>
+        <h3>Your Story (you can edit it):</h3>
+        <textarea id="editStory" placeholder="Edit your story here..."></textarea>
+        <div class="center">
             <button id="submitRevisionButton">Send Back to Editor 📝</button>
             <button id="finalizeButton">My Story is Perfect! ⭐</button>
         </div>
     </div>
 
-    <!-- Final Success Screen -->
-    <div class="screen" id="successScreen">
-        <div class="content-box">
-            <h1>🎉 Congratulations!</h1>
+    <!-- Success Page -->
+    <div class="page" id="successPage">
+        <h1>🎉 Congratulations!</h1>
+        <div class="center">
             <p>You've created an amazing story! Your writing skills are getting stronger every day.</p>
             <div id="finalStory" class="story-display"></div>
             <button id="newStoryButton">Create Another Story! 🔄</button>
@@ -260,22 +228,27 @@
     <script>
         // Story session data
         let storyParts = [];
-        let currentVideoTime = 0;
-        let pauseTimes = [15, 45, 75, 105]; // YOU CAN CHANGE THESE PAUSE TIMES
+        let pauseTimes = [15, 45, 75, 105]; // Change these pause times as needed
         let currentPauseIndex = 0;
         let sessionStartTime = Date.now();
         let timerInterval;
         
-        // Screen management
-        function showScreen(screenId) {
-            document.querySelectorAll('.screen').forEach(screen => {
-                screen.classList.remove('active');
+        // Simple page management - no fading, just show/hide
+        function showPage(pageId) {
+            console.log("Switching to page:", pageId);
+            
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
             });
-            document.getElementById(screenId).classList.add('active');
+            
+            // Show the requested page
+            document.getElementById(pageId).classList.add('active');
         }
         
-        // Timer
+        // Timer functions
         function startTimer() {
+            document.getElementById('timer').style.display = 'block';
             timerInterval = setInterval(() => {
                 const elapsed = Math.floor((Date.now() - sessionStartTime) / 1000);
                 const minutes = Math.floor(elapsed / 60);
@@ -287,48 +260,20 @@
         
         function stopTimer() {
             clearInterval(timerInterval);
+            document.getElementById('timer').style.display = 'none';
         }
         
-        // Story session flow
+        // Story flow functions
         function startStorySession() {
             console.log("Starting story session...");
-            showScreen('videoScreen');
+            showPage('videoPage');
             startTimer();
-            
-            // Fix interaction issues
-            fixInteractionIssues();
-            
-            // Simulate video pause points
+            // Auto-pause after first interval
             setTimeout(() => pauseVideo(), pauseTimes[0] * 1000);
         }
         
-        // Fix for interaction blocking issues
-        function fixInteractionIssues() {
-            // Fix iframe pointer events
-            document.querySelectorAll('iframe').forEach(iframe => {
-                iframe.style.pointerEvents = 'auto';
-                iframe.style.zIndex = '1';
-            });
-            
-            // Ensure pause prompt is interactive
-            const pausePrompt = document.getElementById('pausePrompt');
-            if (pausePrompt) {
-                pausePrompt.style.pointerEvents = 'auto';
-                pausePrompt.style.zIndex = '999';
-                pausePrompt.style.position = 'relative';
-            }
-            
-            // Fix all buttons and textareas
-            document.querySelectorAll('button, textarea').forEach(element => {
-                element.style.pointerEvents = 'auto';
-                element.style.zIndex = '100';
-                element.style.position = 'relative';
-            });
-        }
-        
         function pauseVideo() {
-            console.log("Pausing video...");
-            
+            console.log("Pausing video for input...");
             const questions = [
                 "What happened in the beginning of the story?",
                 "Who are the main characters and what are they doing?",
@@ -338,14 +283,9 @@
             
             document.getElementById('pauseQuestion').textContent = 
                 questions[currentPauseIndex] || "What just happened?";
+            document.getElementById('pausePrompt').style.display = 'block';
             
-            const pausePrompt = document.getElementById('pausePrompt');
-            pausePrompt.style.display = 'block';
-            
-            // Re-apply fixes when showing pause prompt
-            fixInteractionIssues();
-            
-            // Focus on textarea to ensure it's interactive
+            // Focus on textarea
             setTimeout(() => {
                 document.getElementById('storyInput').focus();
             }, 100);
@@ -353,24 +293,25 @@
         
         function continueVideo() {
             const storyPart = document.getElementById('storyInput').value.trim();
-            if (storyPart) {
-                storyParts.push(storyPart);
-                document.getElementById('storyInput').value = '';
-                document.getElementById('pausePrompt').style.display = 'none';
-                
-                currentPauseIndex++;
-                if (currentPauseIndex < pauseTimes.length) {
-                    const nextPause = pauseTimes[currentPauseIndex] - pauseTimes[currentPauseIndex - 1];
-                    setTimeout(() => pauseVideo(), nextPause * 1000);
-                } else {
-                    // Video finished
-                    setTimeout(() => {
-                        pauseVideo();
-                        document.getElementById('pauseQuestion').textContent = "How did the story end?";
-                    }, 30000); // 30 seconds to finish video
-                }
-            } else {
+            if (!storyPart) {
                 alert('Please write something about what happened!');
+                return;
+            }
+            
+            storyParts.push(storyPart);
+            document.getElementById('storyInput').value = '';
+            document.getElementById('pausePrompt').style.display = 'none';
+            
+            currentPauseIndex++;
+            if (currentPauseIndex < pauseTimes.length) {
+                const nextPause = pauseTimes[currentPauseIndex] - pauseTimes[currentPauseIndex - 1];
+                setTimeout(() => pauseVideo(), nextPause * 1000);
+            } else {
+                // Video finished, final pause
+                setTimeout(() => {
+                    document.getElementById('pauseQuestion').textContent = "How did the story end?";
+                    document.getElementById('pausePrompt').style.display = 'block';
+                }, 30000);
             }
         }
         
@@ -387,7 +328,7 @@
             
             stopTimer();
             displayFullStory();
-            showScreen('reviewScreen');
+            showPage('reviewPage');
         }
         
         function displayFullStory() {
@@ -398,11 +339,11 @@
         }
         
         async function sendToEditor() {
-            const sendButton = document.getElementById('sendButton');
+            const sendButton = document.getElementById('sendEditorButton');
             sendButton.disabled = true;
             sendButton.textContent = 'Sending...';
             
-            showScreen('waitingScreen');
+            showPage('waitingPage');
             
             try {
                 const fullStory = storyParts.join(' ');
@@ -413,15 +354,13 @@
                     <p>${editorResponse}</p>
                 `;
                 
-                // Show notification
                 showNotification('📬 You have a message from your editor!');
-                
-                setTimeout(() => showScreen('editorScreen'), 2000);
+                setTimeout(() => showPage('editorPage'), 2000);
                 
             } catch (error) {
                 console.error('Editor API Error:', error);
-                showError(`Editor is busy right now: ${error.message}`);
-                showScreen('reviewScreen');
+                alert(`Editor is busy right now: ${error.message}`);
+                showPage('reviewPage');
             } finally {
                 sendButton.disabled = false;
                 sendButton.textContent = 'Send to Editor 📮';
@@ -436,7 +375,7 @@
                 return;
             }
             
-            showScreen('waitingScreen');
+            showPage('waitingPage');
             
             try {
                 const feedback = await callGeminiAPI(revisedStory, 'revision');
@@ -447,19 +386,19 @@
                 `;
                 
                 showNotification('📬 Your editor responded!');
-                setTimeout(() => showScreen('editorScreen'), 2000);
+                setTimeout(() => showPage('editorPage'), 2000);
                 
             } catch (error) {
                 console.error('Revision API Error:', error);
-                showError(`Editor is busy: ${error.message}`);
-                showScreen('editorScreen');
+                alert(`Editor is busy: ${error.message}`);
+                showPage('editorPage');
             }
         }
         
         function finalizeStory() {
             const finalStory = document.getElementById('editStory').value;
             document.getElementById('finalStory').textContent = finalStory;
-            showScreen('successScreen');
+            showPage('successPage');
         }
         
         function startNewStory() {
@@ -470,7 +409,7 @@
             document.getElementById('storyInput').value = '';
             document.getElementById('editStory').value = '';
             document.getElementById('pausePrompt').style.display = 'none';
-            showScreen('welcomeScreen');
+            showPage('welcomePage');
         }
         
         function showNotification(message) {
@@ -483,25 +422,7 @@
             setTimeout(() => notification.remove(), 5000);
         }
         
-        function showError(message) {
-            const errorDiv = document.createElement('div');
-            errorDiv.className = 'error-message';
-            errorDiv.innerHTML = `<strong>Oops!</strong> ${message}`;
-            document.querySelector('.content-box').appendChild(errorDiv);
-            
-            setTimeout(() => errorDiv.remove(), 5000);
-        }
-        
-        function showSuccess(message) {
-            const successDiv = document.createElement('div');
-            successDiv.className = 'success-message';
-            successDiv.innerHTML = `<strong>Success!</strong> ${message}`;
-            document.querySelector('.content-box').appendChild(successDiv);
-            
-            setTimeout(() => successDiv.remove(), 5000);
-        }
-        
-        // SECURE API CALL TO YOUR SERVER
+        // API call function
         async function callGeminiAPI(storyText, mode) {
             let prompt;
             if (mode === 'editor') {
@@ -536,8 +457,6 @@ Keep it brief, magical, and supportive (under 60 words).`;
                 }
             };
             
-            console.log('Calling API with:', requestBody);
-            
             const response = await fetch('/api/editor', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -550,7 +469,6 @@ Keep it brief, magical, and supportive (under 60 words).`;
             }
             
             const data = await response.json();
-            console.log('API response:', data);
             
             if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
                 throw new Error('Invalid response from AI service');
@@ -559,135 +477,35 @@ Keep it brief, magical, and supportive (under 60 words).`;
             return data.candidates[0].content.parts[0].text;
         }
         
-        // Test server connection on load
+        // Setup event listeners when page loads
         window.addEventListener('load', async () => {
-            const statusElement = document.getElementById('connectionStatus');
+            console.log("Setting up event listeners...");
             
+            // Test server connection
+            const statusElement = document.getElementById('connectionStatus');
             try {
-                console.log('Testing server connection...');
                 const response = await fetch('/health');
                 const data = await response.json();
                 console.log('✅ Server connection OK:', data);
-                
                 statusElement.innerHTML = `<span style="color: #28a745;">✅ Server Ready</span>`;
-                statusElement.classList.add('success-message');
-                
             } catch (error) {
                 console.error('❌ Server connection failed:', error);
-                statusElement.innerHTML = `<span style="color: #dc3545;">❌ Server connection issue</span>`;
-                statusElement.classList.add('error-message');
+                statusElement.innerHTML = `<span style="color: #dc3545;">❌ Server Issue</span>`;
             }
             
-            // Add proper event listeners to fix button issues
-            setupEventListeners();
+            // Add all button event listeners
+            document.getElementById('startButton').addEventListener('click', startStorySession);
+            document.getElementById('continueButton').addEventListener('click', continueVideo);
+            document.getElementById('finishButton').addEventListener('click', finishStory);
+            document.getElementById('sendEditorButton').addEventListener('click', sendToEditor);
+            document.getElementById('submitRevisionButton').addEventListener('click', submitRevision);
+            document.getElementById('finalizeButton').addEventListener('click', finalizeStory);
+            document.getElementById('newStoryButton').addEventListener('click', startNewStory);
+            
+            console.log("✅ All event listeners ready!");
         });
         
-        // Setup proper event listeners
-        function setupEventListeners() {
-            console.log("Setting up event listeners...");
-            
-            // Main start button
-            const startButton = document.getElementById('startButton');
-            if (startButton) {
-                startButton.addEventListener('click', function(e) {
-                    console.log("Start button clicked!");
-                    e.preventDefault();
-                    startStorySession();
-                });
-                console.log("Start button listener added");
-            }
-            
-            // Continue and finish buttons
-            const continueButton = document.getElementById('continueButton');
-            const finishButton = document.getElementById('finishButton');
-            
-            if (continueButton) {
-                continueButton.addEventListener('click', function(e) {
-                    console.log("Continue button clicked!");
-                    e.preventDefault();
-                    continueVideo();
-                });
-            }
-            
-            if (finishButton) {
-                finishButton.addEventListener('click', function(e) {
-                    console.log("Finish button clicked!");
-                    e.preventDefault();
-                    finishStory();
-                });
-            }
-            
-            // Send to editor button
-            const sendEditorButton = document.getElementById('sendEditorButton');
-            if (sendEditorButton) {
-                sendEditorButton.addEventListener('click', function(e) {
-                    console.log("Send to editor clicked!");
-                    e.preventDefault();
-                    sendToEditor();
-                });
-            }
-            
-            // Submit revision button
-            const submitRevisionButton = document.getElementById('submitRevisionButton');
-            if (submitRevisionButton) {
-                submitRevisionButton.addEventListener('click', function(e) {
-                    console.log("Submit revision clicked!");
-                    e.preventDefault();
-                    submitRevision();
-                });
-            }
-            
-            // Finalize button
-            const finalizeButton = document.getElementById('finalizeButton');
-            if (finalizeButton) {
-                finalizeButton.addEventListener('click', function(e) {
-                    console.log("Finalize clicked!");
-                    e.preventDefault();
-                    finalizeStory();
-                });
-            }
-            
-            // New story button
-            const newStoryButton = document.getElementById('newStoryButton');
-            if (newStoryButton) {
-                newStoryButton.addEventListener('click', function(e) {
-                    console.log("New story clicked!");
-                    e.preventDefault();
-                    startNewStory();
-                });
-            }
-            
-            // Make all buttons visually clickable
-            document.querySelectorAll('button').forEach(button => {
-                button.style.pointerEvents = 'auto';
-                button.style.zIndex = '999';
-                button.style.position = 'relative';
-                button.style.cursor = 'pointer';
-                
-                // Add hover effect
-                button.addEventListener('mouseenter', function() {
-                    this.style.transform = 'translateY(-2px)';
-                    this.style.backgroundColor = '#ffed4e';
-                });
-                
-                button.addEventListener('mouseleave', function() {
-                    this.style.transform = 'translateY(0)';
-                    this.style.backgroundColor = '#ffd700';
-                });
-            });
-            
-            // Fix textareas
-            document.querySelectorAll('textarea').forEach(textarea => {
-                textarea.style.pointerEvents = 'auto';
-                textarea.style.zIndex = '100';
-                textarea.style.position = 'relative';
-            });
-            
-            console.log("All event listeners set up!");
-        }
-        
-        // Debug log
-        console.log('🎬 Story Creator app loaded successfully!');
+        console.log("🎬 Story Creator loaded!");
     </script>
 </body>
 </html>
