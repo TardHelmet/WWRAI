@@ -4,4 +4,8 @@ builder = "nixpacks"
 [deploy]
 healthcheckPath = "/health"
 healthcheckTimeout = 300
-restartPolicyType = "on_failure"
+restartPolicyType = "ON_FAILURE"
+startCommand = "npm start"
+
+[[services]]
+name = "web"
