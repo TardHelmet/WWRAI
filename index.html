@@ -204,13 +204,6 @@
             text-align: center;
         }
 
-        .auth-buttons {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
@@ -455,16 +448,6 @@
                 document.getElementById('loginButton').disabled = true;
                 document.getElementById('loginButton').textContent = 'Logging in...';
                 
-        async function loginUser() {
-            try {
-                if (!window.PublicKeyCredential) {
-                    alert('Passkeys are not supported on this device');
-                    return;
-                }
-                
-                document.getElementById('loginButton').disabled = true;
-                document.getElementById('loginButton').textContent = 'Logging in...';
-                
                 // Start authentication
                 const beginResponse = await fetch('/api/auth/login/begin', {
                     method: 'POST',
@@ -574,7 +557,7 @@
                         title: title || 'My Story',
                         originalStory,
                         aiEditedStory: aiStory,
-                        videoUrl: 'https://www.youtube.com/embed/ScMzIvxBSi4'
+                        videoUrl: 'https://www.youtube.com/embed/OvOrbWggMTs'
                     })
                 });
                 
