@@ -4,7 +4,11 @@ const port = process.env.PORT || 3000;
 
 // Middleware
 app.use(express.json());
+<<<<<<< HEAD
 app.use(express.static('.'));
+=======
+app.use(express.static('public'));
+>>>>>>> 90fc1cc6eddfb67a104dfe524b24f78de908fa09
 
 // Get API key from environment variable (secure!)
 const GEMINI_KEY = process.env.GEMINI_API_KEY;
@@ -70,4 +74,8 @@ app.listen(port, () => {
     console.log(`🚀 Watch.Right.Android POC Server running on port ${port}`);
     console.log(`📝 Visit your app at: http://localhost:${port}`);
     console.log(`🔑 API Key configured: ${GEMINI_KEY ? 'YES' : 'NO'}`);
+<<<<<<< HEAD
 });
+=======
+});
+>>>>>>> 90fc1cc6eddfb67a104dfe524b24f78de908fa09
