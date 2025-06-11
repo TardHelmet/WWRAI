@@ -1,21 +1,25 @@
 const express = require('express');
+const path = require('path');
 const app = express();
 const port = process.env.PORT || 3000;
 
 // Middleware
 app.use(express.json());
-<<<<<<< HEAD
-app.use(express.static('.'));
-=======
-app.use(express.static('public'));
->>>>>>> 90fc1cc6eddfb67a104dfe524b24f78de908fa09
+
+// Serve static files from current directory (where index.html is)
+app.use(express.static(__dirname));
 
 // Get API key from environment variable (secure!)
 const GEMINI_KEY = process.env.GEMINI_API_KEY;
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-    res.json({ status: 'OK', message: 'Watch.Right.Android POC Server Running!' });
+    res.json({ 
+        status: 'OK', 
+        message: 'Watch.Right.Android POC Server Running!',
+        timestamp: new Date().toISOString(),
+        apiKeyConfigured: !!GEMINI_KEY
+    });
 });
 
 // Secure API endpoint for Gemini calls
@@ -23,12 +27,14 @@ app.post('/api/editor', async (req, res) => {
     try {
         // Check if API key is configured
         if (!GEMINI_KEY) {
+            console.error('API key not configured');
             return res.status(500).json({ 
                 error: 'API key not configured. Please set GEMINI_API_KEY environment variable.' 
             });
         }
 
         console.log('Making Gemini API call...');
+        console.log('Request body:', JSON.stringify(req.body, null, 2));
         
         const response = await fetch(
             `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_KEY}`,
@@ -53,6 +59,7 @@ app.post('/api/editor', async (req, res) => {
 
         const data = await response.json();
         console.log('Gemini API call successful');
+        console.log('Response:', JSON.stringify(data, null, 2));
         
         res.json(data);
         
@@ -65,17 +72,14 @@ app.post('/api/editor', async (req, res) => {
     }
 });
 
-// Catch-all handler for SPA
+// Serve index.html for all other routes (SPA)
 app.get('*', (req, res) => {
-    res.sendFile(__dirname + '/public/index.html');
+    res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 app.listen(port, () => {
     console.log(`🚀 Watch.Right.Android POC Server running on port ${port}`);
     console.log(`📝 Visit your app at: http://localhost:${port}`);
     console.log(`🔑 API Key configured: ${GEMINI_KEY ? 'YES' : 'NO'}`);
-<<<<<<< HEAD
+    console.log(`📁 Serving files from: ${__dirname}`);
 });
-=======
-});
->>>>>>> 90fc1cc6eddfb67a104dfe524b24f78de908fa09

@@ -167,6 +167,15 @@
             color: #fff;
         }
 
+        .success-message {
+            background: rgba(40, 167, 69, 0.3);
+            border: 2px solid #28a745;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            color: #fff;
+        }
+
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
@@ -180,6 +189,9 @@
             <h1>✨ Story Creator ✨</h1>
             <p>Watch a magical video and help create an amazing story!</p>
             <button onclick="startStorySession()">Start Your Story Adventure! 🚀</button>
+            
+            <!-- Connection status indicator -->
+            <div id="connectionStatus" style="margin-top: 20px; font-size: 14px; opacity: 0.7;"></div>
         </div>
     </div>
 
@@ -279,6 +291,7 @@
         
         // Story session flow
         function startStorySession() {
+            console.log("Starting story session...");
             showScreen('videoScreen');
             startTimer();
             // Simulate video pause points
@@ -367,7 +380,7 @@
                 
             } catch (error) {
                 console.error('Editor API Error:', error);
-                showError('Editor is busy right now. Try again in a moment!');
+                showError(`Editor is busy right now: ${error.message}`);
                 showScreen('reviewScreen');
             } finally {
                 sendButton.disabled = false;
@@ -398,7 +411,7 @@
                 
             } catch (error) {
                 console.error('Revision API Error:', error);
-                showError('Editor is busy. Try again soon!');
+                showError(`Editor is busy: ${error.message}`);
                 showScreen('editorScreen');
             }
         }
@@ -439,6 +452,15 @@
             setTimeout(() => errorDiv.remove(), 5000);
         }
         
+        function showSuccess(message) {
+            const successDiv = document.createElement('div');
+            successDiv.className = 'success-message';
+            successDiv.innerHTML = `<strong>Success!</strong> ${message}`;
+            document.querySelector('.content-box').appendChild(successDiv);
+            
+            setTimeout(() => successDiv.remove(), 5000);
+        }
+        
         // SECURE API CALL TO YOUR SERVER
         async function callGeminiAPI(storyText, mode) {
             let prompt;
@@ -474,6 +496,8 @@ Keep it brief, magical, and supportive (under 60 words).`;
                 }
             };
             
+            console.log('Calling API with:', requestBody);
+            
             const response = await fetch('/api/editor', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -481,11 +505,12 @@ Keep it brief, magical, and supportive (under 60 words).`;
             });
             
             if (!response.ok) {
-                const errorData = await response.json();
+                const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
                 throw new Error(errorData.error || `Server error: ${response.status}`);
             }
             
             const data = await response.json();
+            console.log('API response:', data);
             
             if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
                 throw new Error('Invalid response from AI service');
@@ -496,15 +521,26 @@ Keep it brief, magical, and supportive (under 60 words).`;
         
         // Test server connection on load
         window.addEventListener('load', async () => {
+            const statusElement = document.getElementById('connectionStatus');
+            
             try {
+                console.log('Testing server connection...');
                 const response = await fetch('/health');
                 const data = await response.json();
-                console.log('✅ Server connection OK:', data.message);
+                console.log('✅ Server connection OK:', data);
+                
+                statusElement.innerHTML = `<span style="color: #28a745;">✅ Server Ready</span>`;
+                statusElement.classList.add('success-message');
+                
             } catch (error) {
                 console.error('❌ Server connection failed:', error);
-                showError('Server connection issue. Please refresh the page.');
+                statusElement.innerHTML = `<span style="color: #dc3545;">❌ Server connection issue</span>`;
+                statusElement.classList.add('error-message');
             }
         });
+        
+        // Debug log
+        console.log('🎬 Story Creator app loaded successfully!');
     </script>
 </body>
 </html>

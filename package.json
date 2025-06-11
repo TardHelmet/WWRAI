@@ -12,13 +12,8 @@
   },
   "engines": {
     "node": ">=18.0.0"
-<<<<<<< HEAD
-  }
-}
-=======
   },
   "keywords": ["education", "ai", "story", "writing"],
   "author": "Your Name",
   "license": "MIT"
 }
->>>>>>> 90fc1cc6eddfb67a104dfe524b24f78de908fa09
