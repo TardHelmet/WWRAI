@@ -311,9 +311,13 @@
         </div>
     </div>
 <!-- Editor Response Page -->
+<!-- Editor Response Page -->
 <div class="page" id="editorPage">
     <h2>📡 Message from Kepler-442b!</h2>
     <div id="editorResponse" class="editor-response"></div>
+    
+    <h3>Your Explanation (you can edit it):</h3>
+    <textarea id="editStory" placeholder="Edit your explanation to the aliens..."></textarea>
     
     <div class="center">
         <button id="generateAlienStoryButton" style="background: #00ff00; color: #333;">
@@ -680,12 +684,12 @@
         }
         
         function displayFullStory() {
-    document.getElementById('fullStory').textContent = currentOriginalStory;
-    // Don't overwrite editStory here - let generateAlienStory handle it
-    document.getElementById('finalStory').textContent = currentAIStory || currentOriginalStory;
-}
+            document.getElementById('fullStory').textContent = currentOriginalStory;
+            document.getElementById('editStory').value = currentOriginalStory;
+            document.getElementById('finalStory').textContent = currentAIStory || currentOriginalStory;
+        }
         
-     async function sendToEditor() {
+    async function sendToEditor() {
     const sendButton = document.getElementById('sendEditorButton');
     sendButton.disabled = true;
     sendButton.textContent = 'Sending to Zyx-9...';
@@ -703,6 +707,14 @@
             <div class="character-name">👽 Zyx-9 from Kepler-442b says:</div>
             <p>${editorResponse}</p>
         `;
+        
+        // Show the child's explanation in the textarea for editing
+        document.getElementById('editStory').value = currentOriginalStory;
+        document.getElementById('editStory').placeholder = 'Edit your explanation to the aliens...';
+        
+        // Make sure the green button is visible and alien section is hidden
+        document.getElementById('generateAlienStoryButton').style.display = 'block';
+        document.getElementById('alienStorySection').style.display = 'none';
         
         showNotification('📡 Message from the aliens!');
         setTimeout(() => showPage('editorPage'), 2000);
