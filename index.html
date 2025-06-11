@@ -360,6 +360,7 @@
 
     <script src="https://unpkg.com/@simplewebauthn/browser/dist/bundle/index.umd.min.js"></script>
     <script>
+        console.log('🎬 Script starting to load...');
         // Global variables
         let currentUser = null;
         let storyParts = [];
@@ -406,65 +407,94 @@
         
         // Authentication functions
         async function registerUser() {
-            const firstName = document.getElementById('firstNameInput').value.trim();
-            
-            if (!firstName) {
-                alert('Please enter your first name');
-                return;
-            }
-            
-            if (firstName.length > 50) {
-                alert('First name is too long');
-                return;
-            }
-            
-            try {
-                // Check if WebAuthn is supported
-                if (!window.PublicKeyCredential) {
-                    alert('Passkeys are not supported on this device');
-                    return;
-                }
-                
-                document.getElementById('registerButton').disabled = true;
-                document.getElementById('registerButton').textContent = 'Creating Account...';
-                
-                // Start registration
-                const beginResponse = await fetch('/api/auth/register/begin', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ firstName })
-                });
-                
-                const { options, userId } = await beginResponse.json();
-                
-                // Create credential
-                const credential = await SimpleWebAuthnBrowser.startRegistration(options);
-                
-                // Complete registration
-                const completeResponse = await fetch('/api/auth/register/complete', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ userId, firstName, credential })
-                });
-                
-                const result = await completeResponse.json();
-                
-                if (result.verified) {
-                    currentUser = result.user;
-                    showNotification('Account created successfully! 🎉');
-                    await loadDashboard();
-                } else {
-                    alert('Account creation failed. Please try again.');
-                }
-                
-            } catch (error) {
-                console.error('Registration error:', error);
-                alert('Account creation failed. Please try again.');
-            } finally {
-                document.getElementById('registerButton').disabled = false;
-                document.getElementById('registerButton').textContent = '🚀 Create Account with Passkey';
-            }
+    console.log('🚀 Register button clicked!');
+    
+    const firstName = document.getElementById('firstNameInput').value.trim();
+    console.log('📝 First name entered:', firstName);
+    
+    if (!firstName) {
+        console.log('❌ No first name provided');
+        alert('Please enter your first name');
+        return;
+    }
+    
+    if (firstName.length > 50) {
+        console.log('❌ First name too long');
+        alert('First name is too long');
+        return;
+    }
+    
+    try {
+        console.log('🔍 Checking WebAuthn support...');
+        // Check if WebAuthn is supported
+        if (!window.PublicKeyCredential) {
+            console.log('❌ WebAuthn not supported');
+            alert('Passkeys are not supported on this device');
+            return;
         }
+        console.log('✅ WebAuthn supported');
+        
+        console.log('🔄 Disabling button...');
+        document.getElementById('registerButton').disabled = true;
+        document.getElementById('registerButton').textContent = 'Creating Account...';
+        
+        console.log('📡 Making request to /api/auth/register/begin...');
+        
+        // Start registration
+        const beginResponse = await fetch('/api/auth/register/begin', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ firstName })
+        });
+        
+        console.log('📡 Begin response status:', beginResponse.status);
+        
+        if (!beginResponse.ok) {
+            const errorText = await beginResponse.text();
+            console.log('❌ Begin response error:', errorText);
+            throw new Error(`Server error: ${beginResponse.status}`);
+        }
+        
+        const { options, userId } = await beginResponse.json();
+        console.log('✅ Begin response received, userId:', userId);
+        
+        console.log('🔐 Starting passkey creation...');
+        // Create credential
+        const credential = await SimpleWebAuthnBrowser.startRegistration(options);
+        console.log('✅ Passkey created successfully');
+        
+        console.log('📡 Completing registration...');
+        // Complete registration
+        const completeResponse = await fetch('/api/auth/register/complete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId, firstName, credential })
+        });
+        
+        console.log('📡 Complete response status:', completeResponse.status);
+        
+        const result = await completeResponse.json();
+        console.log('📡 Complete response:', result);
+        
+        if (result.verified) {
+            console.log('🎉 Registration successful!');
+            currentUser = result.user;
+            showNotification('Account created successfully! 🎉');
+            await loadDashboard();
+        } else {
+            console.log('❌ Registration verification failed');
+            alert('Account creation failed. Please try again.');
+        }
+        
+    } catch (error) {
+        console.error('💥 Registration error:', error);
+        alert(`Account creation failed: ${error.message}`);
+    } finally {
+        console.log('🔄 Re-enabling button...');
+        document.getElementById('registerButton').disabled = false;
+        document.getElementById('registerButton').textContent = '🚀 Create Account with Passkey';
+    }
+}
         
         async function loginUser() {
             try {
@@ -1066,6 +1096,7 @@ document.getElementById('approveResearchButton').addEventListener('click', () =>
         });
         
         console.log("🎬 Story Creator with Authentication loaded!");
+        console.log('✅ Script loaded completely!');
     </script>
 </body>
 </html>
