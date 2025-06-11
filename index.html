@@ -56,6 +56,16 @@
             cursor: not-allowed;
         }
         
+        input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            margin: 10px 0;
+            box-sizing: border-box;
+        }
+        
         .video-container {
             width: 100%;
             max-width: 500px;
@@ -122,6 +132,38 @@
             overflow-y: auto;
         }
         
+        .story-item {
+            background: rgba(255,255,255,0.9);
+            color: #333;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .story-item:hover {
+            background: rgba(255,255,255,1);
+            transform: translateY(-2px);
+        }
+        
+        .story-title {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+        
+        .story-preview {
+            font-size: 14px;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+        
+        .story-date {
+            font-size: 12px;
+            opacity: 0.6;
+        }
+        
         .timer {
             position: fixed;
             top: 20px;
@@ -131,6 +173,17 @@
             border-radius: 25px;
             font-family: monospace;
             font-size: 18px;
+            display: none;
+        }
+
+        .user-info {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.5);
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 14px;
             display: none;
         }
 
@@ -145,6 +198,19 @@
             text-align: center;
         }
 
+        .login-form {
+            max-width: 400px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
@@ -152,19 +218,65 @@
     </style>
 </head>
 <body>
-    <!-- Welcome Page -->
-    <div class="page active" id="welcomePage">
+    <!-- Login Page -->
+    <div class="page active" id="loginPage">
+        <h1>✨ Welcome to Story Creator ✨</h1>
+        <div class="login-form">
+            <p>Create amazing stories with AI help!</p>
+            
+            <div id="loginSection">
+                <h3>Already have an account?</h3>
+                <button id="loginButton">🔐 Login with Passkey</button>
+            </div>
+            
+            <div id="registerSection">
+                <h3>New here? Create an account!</h3>
+                <input type="text" id="firstNameInput" placeholder="What's your first name?" maxlength="50">
+                <br>
+                <button id="registerButton">🚀 Create Account with Passkey</button>
+            </div>
+            
+            <div id="connectionStatus" class="status"></div>
+            <p style="font-size: 12px; opacity: 0.7; margin-top: 30px;">
+                🔒 Your data stays private and secure on your device
+            </p>
+        </div>
+    </div>
+
+    <!-- Dashboard Page -->
+    <div class="page" id="dashboardPage">
+        <div class="user-info" id="userInfo"></div>
+        <h1>📚 Your Story Library</h1>
+        
+        <div class="center">
+            <button id="newStoryButton">✨ Create New Story</button>
+            <button id="logoutButton">🚪 Logout</button>
+        </div>
+        
+        <div id="storiesContainer">
+            <div id="loadingStories" class="center">Loading your stories...</div>
+            <div id="noStories" class="center" style="display: none;">
+                <p>No stories yet! Create your first masterpiece.</p>
+            </div>
+            <div id="storiesList"></div>
+        </div>
+    </div>
+
+    <!-- Welcome Page (after login) -->
+    <div class="page" id="welcomePage">
+        <div class="user-info" id="userInfoWelcome"></div>
         <h1>✨ Story Creator ✨</h1>
         <div class="center">
             <p>Watch a magical video and help create an amazing story!</p>
             <button id="startButton">Start Your Story Adventure! 🚀</button>
-            <div id="connectionStatus" class="status"></div>
+            <button id="backToDashboardButton">📚 Back to Library</button>
         </div>
     </div>
 
     <!-- Video Page -->
     <div class="page" id="videoPage">
         <div class="timer" id="timer">00:00</div>
+        <div class="user-info" id="userInfoVideo"></div>
         <h2>📺 Let's Watch Together!</h2>
         <div class="video-container">
             <iframe id="videoPlayer" width="100%" height="315" 
@@ -190,6 +302,7 @@
         <div class="center">
             <p>Ready to send your story to our magical editor?</p>
             <button id="sendEditorButton">Send to Editor 📮</button>
+            <button id="saveStoryButton">💾 Save Story As-Is</button>
         </div>
     </div>
 
@@ -221,19 +334,27 @@
         <div class="center">
             <p>You've created an amazing story! Your writing skills are getting stronger every day.</p>
             <div id="finalStory" class="story-display"></div>
-            <button id="newStoryButton">Create Another Story! 🔄</button>
+            <input type="text" id="storyTitle" placeholder="Give your story a title..." style="margin: 20px 0;">
+            <br>
+            <button id="saveFinishedStoryButton">💾 Save to Library</button>
+            <button id="createAnotherButton">🔄 Create Another Story</button>
+            <button id="viewLibraryButton">📚 View Library</button>
         </div>
     </div>
 
+    <script src="https://unpkg.com/@simplewebauthn/browser/dist/bundle/index.umd.min.js"></script>
     <script>
-        // Story session data
+        // Global variables
+        let currentUser = null;
         let storyParts = [];
         let pauseTimes = [15, 45, 75, 105]; // Change these pause times as needed
         let currentPauseIndex = 0;
         let sessionStartTime = Date.now();
         let timerInterval;
+        let currentOriginalStory = '';
+        let currentAIStory = '';
         
-        // Simple page management - no fading, just show/hide
+        // Simple page management
         function showPage(pageId) {
             console.log("Switching to page:", pageId);
             
@@ -244,6 +365,234 @@
             
             // Show the requested page
             document.getElementById(pageId).classList.add('active');
+            
+            // Update user info displays
+            updateUserInfo();
+        }
+        
+        function updateUserInfo() {
+            if (currentUser) {
+                const userDisplay = `👋 Hi ${currentUser.firstName}!`;
+                document.getElementById('userInfo').textContent = userDisplay;
+                document.getElementById('userInfoWelcome').textContent = userDisplay;
+                document.getElementById('userInfoVideo').textContent = userDisplay;
+                
+                document.getElementById('userInfo').style.display = 'block';
+                document.getElementById('userInfoWelcome').style.display = 'block';
+                document.getElementById('userInfoVideo').style.display = 'block';
+            }
+        }
+        
+        // Authentication functions
+        async function registerUser() {
+            const firstName = document.getElementById('firstNameInput').value.trim();
+            
+            if (!firstName) {
+                alert('Please enter your first name');
+                return;
+            }
+            
+            if (firstName.length > 50) {
+                alert('First name is too long');
+                return;
+            }
+            
+            try {
+                // Check if WebAuthn is supported
+                if (!window.PublicKeyCredential) {
+                    alert('Passkeys are not supported on this device');
+                    return;
+                }
+                
+                document.getElementById('registerButton').disabled = true;
+                document.getElementById('registerButton').textContent = 'Creating Account...';
+                
+                // Start registration
+                const beginResponse = await fetch('/api/auth/register/begin', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ firstName })
+                });
+                
+                const { options, userId } = await beginResponse.json();
+                
+                // Create credential
+                const credential = await SimpleWebAuthnBrowser.startRegistration(options);
+                
+                // Complete registration
+                const completeResponse = await fetch('/api/auth/register/complete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId, firstName, credential })
+                });
+                
+                const result = await completeResponse.json();
+                
+                if (result.verified) {
+                    currentUser = result.user;
+                    showNotification('Account created successfully! 🎉');
+                    await loadDashboard();
+                } else {
+                    alert('Account creation failed. Please try again.');
+                }
+                
+            } catch (error) {
+                console.error('Registration error:', error);
+                alert('Account creation failed. Please try again.');
+            } finally {
+                document.getElementById('registerButton').disabled = false;
+                document.getElementById('registerButton').textContent = '🚀 Create Account with Passkey';
+            }
+        }
+        
+        async function loginUser() {
+            try {
+                if (!window.PublicKeyCredential) {
+                    alert('Passkeys are not supported on this device');
+                    return;
+                }
+                
+                document.getElementById('loginButton').disabled = true;
+                document.getElementById('loginButton').textContent = 'Logging in...';
+                
+        async function loginUser() {
+            try {
+                if (!window.PublicKeyCredential) {
+                    alert('Passkeys are not supported on this device');
+                    return;
+                }
+                
+                document.getElementById('loginButton').disabled = true;
+                document.getElementById('loginButton').textContent = 'Logging in...';
+                
+                // Start authentication
+                const beginResponse = await fetch('/api/auth/login/begin', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const options = await beginResponse.json();
+                
+                // Authenticate with passkey
+                const credential = await SimpleWebAuthnBrowser.startAuthentication(options);
+                
+                // Complete authentication
+                const completeResponse = await fetch('/api/auth/login/complete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ credential })
+                });
+                
+                const result = await completeResponse.json();
+                
+                if (result.verified) {
+                    currentUser = result.user;
+                    showNotification(`Welcome back, ${currentUser.firstName}! 👋`);
+                    await loadDashboard();
+                } else {
+                    alert('Login failed. Please try again.');
+                }
+                
+            } catch (error) {
+                console.error('Login error:', error);
+                if (error.name === 'NotAllowedError') {
+                    alert('Login was cancelled or failed. Please try again.');
+                } else {
+                    alert('Login failed. Please try again.');
+                }
+            } finally {
+                document.getElementById('loginButton').disabled = false;
+                document.getElementById('loginButton').textContent = '🔐 Login with Passkey';
+            }
+        }
+        
+        function logout() {
+            currentUser = null;
+            showPage('loginPage');
+            showNotification('Logged out successfully! 👋');
+        }
+        
+        // Dashboard functions
+        async function loadDashboard() {
+            showPage('dashboardPage');
+            
+            try {
+                const response = await fetch(`/api/stories/${currentUser.id}`);
+                const data = await response.json();
+                
+                displayStories(data.stories);
+                
+            } catch (error) {
+                console.error('Error loading stories:', error);
+                document.getElementById('loadingStories').textContent = 'Error loading stories';
+            }
+        }
+        
+        function displayStories(stories) {
+            const container = document.getElementById('storiesList');
+            const loading = document.getElementById('loadingStories');
+            const noStories = document.getElementById('noStories');
+            
+            loading.style.display = 'none';
+            
+            if (!stories || stories.length === 0) {
+                noStories.style.display = 'block';
+                container.innerHTML = '';
+                return;
+            }
+            
+            noStories.style.display = 'none';
+            
+            container.innerHTML = stories.map(story => {
+                const preview = (story.ai_edited_story || story.original_story).substring(0, 100) + '...';
+                const date = new Date(story.created_at).toLocaleDateString();
+                
+                return `
+                    <div class="story-item" onclick="viewStory('${story.id}', '${story.title}', '${story.original_story}', '${story.ai_edited_story || ''}')">
+                        <div class="story-title">${story.title}</div>
+                        <div class="story-preview">${preview}</div>
+                        <div class="story-date">Created: ${date}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function viewStory(id, title, originalStory, aiStory) {
+            // Show story in a simple view
+            const storyContent = aiStory || originalStory;
+            alert(`${title}\n\n${storyContent}`);
+        }
+        
+        // Story saving functions
+        async function saveStory(title, originalStory, aiStory = '') {
+            try {
+                const response = await fetch('/api/stories', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userId: currentUser.id,
+                        title: title || 'My Story',
+                        originalStory,
+                        aiEditedStory: aiStory,
+                        videoUrl: 'https://www.youtube.com/embed/ScMzIvxBSi4'
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showNotification('Story saved to your library! 📚');
+                    return true;
+                } else {
+                    alert('Failed to save story. Please try again.');
+                    return false;
+                }
+                
+            } catch (error) {
+                console.error('Error saving story:', error);
+                alert('Failed to save story. Please try again.');
+                return false;
+            }
         }
         
         // Timer functions
@@ -266,9 +615,11 @@
         // Story flow functions
         function startStorySession() {
             console.log("Starting story session...");
+            storyParts = [];
+            currentPauseIndex = 0;
+            sessionStartTime = Date.now();
             showPage('videoPage');
             startTimer();
-            // Auto-pause after first interval
             setTimeout(() => pauseVideo(), pauseTimes[0] * 1000);
         }
         
@@ -285,7 +636,6 @@
                 questions[currentPauseIndex] || "What just happened?";
             document.getElementById('pausePrompt').style.display = 'block';
             
-            // Focus on textarea
             setTimeout(() => {
                 document.getElementById('storyInput').focus();
             }, 100);
@@ -307,7 +657,6 @@
                 const nextPause = pauseTimes[currentPauseIndex] - pauseTimes[currentPauseIndex - 1];
                 setTimeout(() => pauseVideo(), nextPause * 1000);
             } else {
-                // Video finished, final pause
                 setTimeout(() => {
                     document.getElementById('pauseQuestion').textContent = "How did the story end?";
                     document.getElementById('pausePrompt').style.display = 'block';
@@ -327,15 +676,15 @@
             }
             
             stopTimer();
+            currentOriginalStory = storyParts.join(' ');
             displayFullStory();
             showPage('reviewPage');
         }
         
         function displayFullStory() {
-            const fullStory = storyParts.join(' ');
-            document.getElementById('fullStory').textContent = fullStory;
-            document.getElementById('editStory').value = fullStory;
-            document.getElementById('finalStory').textContent = fullStory;
+            document.getElementById('fullStory').textContent = currentOriginalStory;
+            document.getElementById('editStory').value = currentOriginalStory;
+            document.getElementById('finalStory').textContent = currentAIStory || currentOriginalStory;
         }
         
         async function sendToEditor() {
@@ -346,8 +695,8 @@
             showPage('waitingPage');
             
             try {
-                const fullStory = storyParts.join(' ');
-                const editorResponse = await callGeminiAPI(fullStory, 'editor');
+                const editorResponse = await callGeminiAPI(currentOriginalStory, 'editor');
+                currentAIStory = editorResponse;
                 
                 document.getElementById('editorResponse').innerHTML = `
                     <div class="character-name">🧙‍♂️ Grammaticus says:</div>
@@ -375,6 +724,7 @@
                 return;
             }
             
+            currentAIStory = revisedStory;
             showPage('waitingPage');
             
             try {
@@ -396,20 +746,26 @@
         }
         
         function finalizeStory() {
-            const finalStory = document.getElementById('editStory').value;
-            document.getElementById('finalStory').textContent = finalStory;
+            currentAIStory = document.getElementById('editStory').value;
+            document.getElementById('finalStory').textContent = currentAIStory;
             showPage('successPage');
         }
         
-        function startNewStory() {
-            // Reset everything
-            storyParts = [];
-            currentPauseIndex = 0;
-            sessionStartTime = Date.now();
-            document.getElementById('storyInput').value = '';
-            document.getElementById('editStory').value = '';
-            document.getElementById('pausePrompt').style.display = 'none';
-            showPage('welcomePage');
+        async function saveStoryAsIs() {
+            const saved = await saveStory('My Story', currentOriginalStory, '');
+            if (saved) {
+                showPage('dashboardPage');
+                loadDashboard();
+            }
+        }
+        
+        async function saveFinishedStory() {
+            const title = document.getElementById('storyTitle').value.trim() || 'My Story';
+            const saved = await saveStory(title, currentOriginalStory, currentAIStory);
+            if (saved) {
+                showPage('dashboardPage');
+                loadDashboard();
+            }
         }
         
         function showNotification(message) {
@@ -437,7 +793,7 @@ Respond as a friendly editor with:
 
 Be like a wise, kind teacher who makes writing fun!`;
             } else {
-                prompt = `You are Grammaticus responding to a child's revised story. Original story: "${storyParts.join(' ')}" 
+                prompt = `You are Grammaticus responding to a child's revised story. Original story: "${currentOriginalStory}" 
 Revised version: "${storyText}"
 
 Give encouraging feedback on their improvements and either:
@@ -493,19 +849,36 @@ Keep it brief, magical, and supportive (under 60 words).`;
                 statusElement.innerHTML = `<span style="color: #dc3545;">❌ Server Issue</span>`;
             }
             
-            // Add all button event listeners
+            // Authentication event listeners
+            document.getElementById('registerButton').addEventListener('click', registerUser);
+            document.getElementById('loginButton').addEventListener('click', loginUser);
+            document.getElementById('logoutButton').addEventListener('click', logout);
+            
+            // Navigation event listeners
+            document.getElementById('newStoryButton').addEventListener('click', () => showPage('welcomePage'));
             document.getElementById('startButton').addEventListener('click', startStorySession);
+            document.getElementById('backToDashboardButton').addEventListener('click', () => loadDashboard());
+            document.getElementById('viewLibraryButton').addEventListener('click', () => loadDashboard());
+            document.getElementById('createAnotherButton').addEventListener('click', () => showPage('welcomePage'));
+            
+            // Story flow event listeners
             document.getElementById('continueButton').addEventListener('click', continueVideo);
             document.getElementById('finishButton').addEventListener('click', finishStory);
             document.getElementById('sendEditorButton').addEventListener('click', sendToEditor);
+            document.getElementById('saveStoryButton').addEventListener('click', saveStoryAsIs);
             document.getElementById('submitRevisionButton').addEventListener('click', submitRevision);
             document.getElementById('finalizeButton').addEventListener('click', finalizeStory);
-            document.getElementById('newStoryButton').addEventListener('click', startNewStory);
+            document.getElementById('saveFinishedStoryButton').addEventListener('click', saveFinishedStory);
+            
+            // Allow Enter key to submit first name
+            document.getElementById('firstNameInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') registerUser();
+            });
             
             console.log("✅ All event listeners ready!");
         });
         
-        console.log("🎬 Story Creator loaded!");
+        console.log("🎬 Story Creator with Authentication loaded!");
     </script>
 </body>
 </html>
