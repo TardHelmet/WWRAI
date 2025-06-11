@@ -310,27 +310,36 @@
             <p><small>This usually takes a few moments...</small></p>
         </div>
     </div>
-<!-- Editor Response Page -->
+
 <!-- Editor Response Page -->
 <div class="page" id="editorPage">
     <h2>📡 Message from Kepler-442b!</h2>
     <div id="editorResponse" class="editor-response"></div>
     
-    <h3>Your Explanation (you can edit it):</h3>
-    <textarea id="editStory" placeholder="Edit your explanation to the aliens..."></textarea>
+    <h3>Your Explanation:</h3>
+    <textarea id="editStory" placeholder="Improve your explanation..."></textarea>
     
-    <div class="center">
-        <button id="generateAlienStoryButton" style="background: #00ff00; color: #333;">
-            👽 Ask Zyx-9 to Write Complete Story
+    <!-- Buttons for improving the kid's explanation -->
+    <div id="revisionButtons" class="center" style="display: none;">
+        <button id="submitRevisionButton">Send Updated Explanation 📡</button>
+        <button id="finalizeButton">My Explanation is Perfect! ⭐</button>
+    </div>
+    
+    <!-- Buttons for sending to top researcher -->
+    <div id="researcherButtons" class="center" style="display: none;">
+        <button id="sendToResearcherButton" style="background: #00ff00; color: #333;">
+            👽 Send to Dr. Qorinth (Top Researcher)
+        </button>
+        <button id="declineResearcherButton" style="background: #ff6b6b; color: white;">
+            📚 Keep My Explanation As-Is
         </button>
     </div>
     
-    <div id="alienStorySection" style="display: none;">
-        <h3>Give Feedback to Zyx-9:</h3>
-        <textarea id="editStory" placeholder="Tell Zyx-9 what you think of their story..."></textarea>
+    <!-- Section for researcher feedback -->
+    <div id="researcherSection" style="display: none;">
         <div class="center">
-            <button id="submitRevisionButton">Send Feedback to Aliens 📡</button>
-            <button id="finalizeButton">Story is Perfect! 🌟</button>
+            <button id="submitResearcherFeedbackButton">Send Feedback to Dr. Qorinth 📡</button>
+            <button id="approveResearchButton">Research Report is Perfect! 🌟</button>
         </div>
     </div>
 </div>
@@ -565,6 +574,81 @@
             alert(`${title}\n\n${storyContent}`);
         }
         
+async function sendToResearcher() {
+    showPage('waitingPage');
+    
+    document.querySelector('#waitingPage h2').textContent = '👽 Dr. Qorinth Writing Research Report...';
+    document.querySelector('#waitingPage p').textContent = 'The top alien researcher is creating a detailed report about Earth!';
+    
+    try {
+        const researchReport = await callGeminiAPI(currentOriginalStory, 'researcher_story');
+        currentAIStory = researchReport;
+        
+        document.getElementById('editorResponse').innerHTML = `
+            <div class="character-name">👽 Dr. Qorinth's Research Report:</div>
+            <div class="story-display" style="background: rgba(100, 255, 100, 0.1); border-left: 5px solid #00ff00;">
+                <p>${researchReport}</p>
+            </div>
+            <p><strong>What do you think of Dr. Qorinth's research report? Your feedback will help improve alien understanding of Earth!</strong></p>
+        `;
+        
+        // Show the research report for feedback
+        document.getElementById('editStory').value = '';
+        document.getElementById('editStory').placeholder = 'Give feedback to Dr. Qorinth about the research report...';
+        
+        // Show researcher feedback section
+        document.getElementById('revisionButtons').style.display = 'none';
+        document.getElementById('researcherButtons').style.display = 'none';
+        document.getElementById('researcherSection').style.display = 'block';
+        
+        showNotification('👽 Dr. Qorinth completed the research report!');
+        setTimeout(() => showPage('editorPage'), 2000);
+        
+    } catch (error) {
+        console.error('Researcher Error:', error);
+        alert(`Dr. Qorinth had trouble writing the report: ${error.message}`);
+        showPage('editorPage');
+    }
+}
+
+// New function - Submit feedback to researcher
+async function submitResearcherFeedback() {
+    const feedback = document.getElementById('editStory').value.trim();
+    
+    if (!feedback) {
+        alert('Please give feedback to Dr. Qorinth about the research report!');
+        return;
+    }
+    
+    showPage('waitingPage');
+    document.querySelector('#waitingPage h2').textContent = '👽 Dr. Qorinth Processing Feedback...';
+    document.querySelector('#waitingPage p').textContent = 'The researcher is considering your suggestions!';
+    
+    try {
+        const researcherResponse = await callGeminiAPI(feedback, 'researcher_revision');
+        
+        document.getElementById('editorResponse').innerHTML = `
+            <div class="character-name">👽 Dr. Qorinth responds:</div>
+            <p>${researcherResponse}</p>
+        `;
+        
+        // Update the AI story if the researcher revised it
+        // For this demo, we'll keep the original report
+        
+        showNotification('📡 Dr. Qorinth appreciated your feedback!');
+        setTimeout(() => showPage('editorPage'), 2000);
+        
+    } catch (error) {
+        console.error('Researcher Feedback Error:', error);
+        alert(`Communication error with Dr. Qorinth: ${error.message}`);
+        showPage('editorPage');
+    }
+}
+
+function declineResearcher() {
+    alert('No problem! You can always ask Zyx-9 to send your explanation to Dr. Qorinth later.');
+    showPage('successPage');
+}
         // Story saving functions
         async function saveStory(title, originalStory, aiStory = '') {
             try {
@@ -697,8 +781,8 @@
     showPage('waitingPage');
     
     // Update waiting page text
-    document.querySelector('#waitingPage h2').textContent = '👽 Alien Researcher Analyzing...';
-    document.querySelector('#waitingPage p').textContent = 'Zyx-9 is studying your explanation of Earth customs!';
+    document.querySelector('#waitingPage h2').textContent = '👽 Zyx-9 Reviewing Your Explanation...';
+    document.querySelector('#waitingPage p').textContent = 'The alien researcher is helping you improve your explanation!';
     
     try {
         const editorResponse = await callGeminiAPI(currentOriginalStory, 'editor');
@@ -708,15 +792,16 @@
             <p>${editorResponse}</p>
         `;
         
-        // Show the child's explanation in the textarea for editing
+        // Show the kid's explanation for editing
         document.getElementById('editStory').value = currentOriginalStory;
-        document.getElementById('editStory').placeholder = 'Edit your explanation to the aliens...';
+        document.getElementById('editStory').placeholder = 'Improve your explanation based on Zyx-9\'s suggestions...';
         
-        // Make sure the green button is visible and alien section is hidden
-        document.getElementById('generateAlienStoryButton').style.display = 'block';
-        document.getElementById('alienStorySection').style.display = 'none';
+        // Show revision buttons, hide researcher button
+        document.getElementById('revisionButtons').style.display = 'block';
+        document.getElementById('researcherButtons').style.display = 'none';
+        document.getElementById('researcherSection').style.display = 'none';
         
-        showNotification('📡 Message from the aliens!');
+        showNotification('📡 Zyx-9 wants to help improve your explanation!');
         setTimeout(() => showPage('editorPage'), 2000);
         
     } catch (error) {
@@ -729,27 +814,49 @@
     }
 }
         
-        async function submitRevision() {
-    const revisedStory = document.getElementById('editStory').value;
+       async function submitRevision() {
+    const revisedStory = document.getElementById('editStory').value.trim();
     
-    if (!revisedStory.trim()) {
-        alert('Please give feedback to help the aliens understand!');
+    if (!revisedStory) {
+        alert('Please improve your explanation based on Zyx-9\'s suggestions!');
         return;
     }
     
+    // Update the current story with the revision
+    currentOriginalStory = revisedStory;
+    
     showPage('waitingPage');
-    document.querySelector('#waitingPage h2').textContent = '👽 Processing Your Feedback...';
-    document.querySelector('#waitingPage p').textContent = 'Zyx-9 is learning from your suggestions!';
+    document.querySelector('#waitingPage h2').textContent = '👽 Zyx-9 Reviewing Your Updates...';
+    document.querySelector('#waitingPage p').textContent = 'Checking if your explanation is ready for the top researcher!';
     
     try {
         const feedback = await callGeminiAPI(revisedStory, 'revision');
         
-        document.getElementById('editorResponse').innerHTML = `
-            <div class="character-name">👽 Zyx-9 responds:</div>
-            <p>${feedback}</p>
-        `;
+        // Check if Zyx-9 thinks it's ready for the researcher
+        if (feedback.toLowerCase().includes('excellent') || feedback.toLowerCase().includes('ready') || feedback.toLowerCase().includes('top researcher')) {
+            // Ask for permission to send to researcher
+            const approvalResponse = await callGeminiAPI(revisedStory, 'approve_for_researcher');
+            
+            document.getElementById('editorResponse').innerHTML = `
+                <div class="character-name">👽 Zyx-9 says:</div>
+                <p>${approvalResponse}</p>
+            `;
+            
+            // Show the researcher approval buttons
+            document.getElementById('revisionButtons').style.display = 'none';
+            document.getElementById('researcherButtons').style.display = 'block';
+            
+        } else {
+            // Continue improving the explanation
+            document.getElementById('editorResponse').innerHTML = `
+                <div class="character-name">👽 Zyx-9 responds:</div>
+                <p>${feedback}</p>
+            `;
+            
+            document.getElementById('editStory').value = revisedStory;
+        }
         
-        showNotification('📡 Zyx-9 responded to your feedback!');
+        showNotification('📡 Zyx-9 responded!');
         setTimeout(() => showPage('editorPage'), 2000);
         
     } catch (error) {
@@ -757,21 +864,6 @@
         alert(`Communication error with aliens: ${error.message}`);
         showPage('editorPage');
     }
-}
-        
-        function finalizeStory() {
-            currentAIStory = document.getElementById('editStory').value;
-            document.getElementById('finalStory').textContent = currentAIStory;
-            showPage('successPage');
-        }
-        
-        async function saveStoryAsIs() {
-            const saved = await saveStory('My Story', currentOriginalStory, '');
-            if (saved) {
-                showPage('dashboardPage');
-                loadDashboard();
-            }
-        }
         
         // Add this new function for generating the alien story
 async function generateAlienStory() {
@@ -830,44 +922,67 @@ async function generateAlienStory() {
             setTimeout(() => notification.remove(), 5000);
         }
         
-// API call function
+// Updated API call function
 async function callGeminiAPI(storyText, mode) {
     let prompt;
     if (mode === 'editor') {
-        prompt = `You are Zyx-9, a friendly alien researcher from the planet Kepler-442b. You and your fellow aliens are studying Earth by watching human "YouTube videos" but you need help understanding what you're seeing.
-
-A human child just helped you understand this video by writing: "${storyText}"
+        prompt = `You are Zyx-9, a friendly alien researcher from planet Kepler-442b. A human child is helping you understand Earth by explaining a video. Here's their explanation: "${storyText}"
 
 Respond as Zyx-9 with:
-1. Thank them for helping you understand Earth
-2. Ask 2-3 curious alien questions about what they observed
-3. Offer to write a full story about what you learned for their Earth friends
+1. Thank them for their explanation
+2. Give 2-3 specific suggestions to make their explanation better/clearer
+3. Ask 1-2 curious questions to help them add more detail
 4. Keep it encouraging and under 80 words
-5. Use slightly alien but friendly language
+5. Use friendly alien language
 
-Example: "Fascinating! Your explanation helps us understand human [behavior/customs/etc]. We are curious - why do humans [question]? Would you like me to write a complete story about this for other Earth children to read?"`;
-    } else if (mode === 'alien_story') {
-        prompt = `You are Zyx-9, an alien researcher writing a complete story for Earth children based on what you learned from a human child's explanation: "${storyText}"
+Focus on helping them improve THEIR explanation, not writing your own story yet.`;
 
-Write a longer, detailed story (200-400 words) that:
-1. Tells the story from an alien perspective trying to understand Earth
-2. Includes what you learned from the child's explanation
-3. Makes it educational and entertaining for children
-4. Shows how aliens might misunderstand but then learn about human life
-5. Ends with appreciation for human culture
+    } else if (mode === 'approve_for_researcher') {
+        prompt = `You are Zyx-9. The human child has written this excellent explanation: "${storyText}"
 
-Write in a storytelling voice, not as a response to the child.`;
-    } else {
-        prompt = `You are Zyx-9, an alien researcher responding to a child's feedback on your story. 
+Respond as Zyx-9 with:
+1. Praise their final explanation
+2. Ask if you can send it to your top researcher, Dr. Qorinth, who writes detailed reports for the Galactic Earth Studies Department
+3. Explain that Dr. Qorinth will write a complete research report based on their explanation
+4. Keep it under 60 words and friendly`;
+
+    } else if (mode === 'researcher_story') {
+        prompt = `You are Dr. Qorinth, the top alien researcher at the Galactic Earth Studies Department. You've received this explanation about Earth from a human child: "${storyText}"
+
+Write a detailed research report (300-500 words) that:
+1. Analyzes what you learned about Earth culture/behavior from the child's explanation
+2. Written in a formal but accessible research style for other aliens
+3. Shows your alien perspective trying to understand human customs
+4. Includes scientific observations about human behavior
+5. Ends with conclusions about Earth society
+
+Write as a complete research document, not a response to the child.`;
+
+    } else if (mode === 'researcher_revision') {
+        prompt = `You are Dr. Qorinth responding to feedback on your research report. 
 
 Original human explanation: "${currentOriginalStory}"
-Your alien story: "${storyText}"
+Your research report: "${currentAIStory}"
+Human child's feedback: "${storyText}"
 
-Give encouraging feedback on their suggestions and either:
-- Thank them for helping you understand Earth better, OR
-- Ask if they'd like you to revise the story based on their feedback
+Respond as Dr. Qorinth with:
+1. Thank them for their valuable feedback
+2. Explain how you'll revise the report based on their suggestions
+3. Ask if they have any other insights about Earth customs
+4. Keep it brief and professional but friendly (under 80 words)`;
 
-Keep it brief, alien-friendly, and supportive (under 60 words).`;
+    } else {
+        // This is the regular revision mode for the kid's explanation
+        prompt = `You are Zyx-9 responding to the human child's revised explanation: "${storyText}"
+
+Original explanation: "${currentOriginalStory}"
+Their revision: "${storyText}"
+
+Give encouraging feedback on their improvements and either:
+- Suggest one more small improvement, OR
+- Say their explanation is excellent and ready for the top researcher
+
+Keep it brief, encouraging, and under 60 words.`;
     }
     
     const requestBody = {
@@ -876,7 +991,7 @@ Keep it brief, alien-friendly, and supportive (under 60 words).`;
         }],
         generationConfig: {
             temperature: 0.8,
-            maxOutputTokens: 400
+            maxOutputTokens: 500
         }
     };
     
@@ -931,12 +1046,16 @@ Keep it brief, alien-friendly, and supportive (under 60 words).`;
             // Story flow event listeners
             document.getElementById('continueButton').addEventListener('click', continueVideo);
             document.getElementById('finishButton').addEventListener('click', finishStory);
+            document.getElementById('sendToResearcherButton').addEventListener('click', sendToResearcher);
+document.getElementById('declineResearcherButton').addEventListener('click', declineResearcher);
+document.getElementById('submitResearcherFeedbackButton').addEventListener('click', submitResearcherFeedback);
+document.getElementById('approveResearchButton').addEventListener('click', () => showPage('successPage'));
             document.getElementById('sendEditorButton').addEventListener('click', sendToEditor);
             document.getElementById('saveStoryButton').addEventListener('click', saveStoryAsIs);
             document.getElementById('submitRevisionButton').addEventListener('click', submitRevision);
             document.getElementById('finalizeButton').addEventListener('click', finalizeStory);
             document.getElementById('saveFinishedStoryButton').addEventListener('click', saveFinishedStory);
-            document.getElementById('generateAlienStoryButton').addEventListener('click', generateAlienStory);
+
             
             // Allow Enter key to submit first name
             document.getElementById('firstNameInput').addEventListener('keypress', (e) => {
