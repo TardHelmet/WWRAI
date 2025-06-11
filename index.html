@@ -294,11 +294,41 @@
             console.log("Starting story session...");
             showScreen('videoScreen');
             startTimer();
+            
+            // Fix interaction issues
+            fixInteractionIssues();
+            
             // Simulate video pause points
             setTimeout(() => pauseVideo(), pauseTimes[0] * 1000);
         }
         
+        // Fix for interaction blocking issues
+        function fixInteractionIssues() {
+            // Fix iframe pointer events
+            document.querySelectorAll('iframe').forEach(iframe => {
+                iframe.style.pointerEvents = 'auto';
+                iframe.style.zIndex = '1';
+            });
+            
+            // Ensure pause prompt is interactive
+            const pausePrompt = document.getElementById('pausePrompt');
+            if (pausePrompt) {
+                pausePrompt.style.pointerEvents = 'auto';
+                pausePrompt.style.zIndex = '999';
+                pausePrompt.style.position = 'relative';
+            }
+            
+            // Fix all buttons and textareas
+            document.querySelectorAll('button, textarea').forEach(element => {
+                element.style.pointerEvents = 'auto';
+                element.style.zIndex = '100';
+                element.style.position = 'relative';
+            });
+        }
+        
         function pauseVideo() {
+            console.log("Pausing video...");
+            
             const questions = [
                 "What happened in the beginning of the story?",
                 "Who are the main characters and what are they doing?",
@@ -308,7 +338,17 @@
             
             document.getElementById('pauseQuestion').textContent = 
                 questions[currentPauseIndex] || "What just happened?";
-            document.getElementById('pausePrompt').style.display = 'block';
+            
+            const pausePrompt = document.getElementById('pausePrompt');
+            pausePrompt.style.display = 'block';
+            
+            // Re-apply fixes when showing pause prompt
+            fixInteractionIssues();
+            
+            // Focus on textarea to ensure it's interactive
+            setTimeout(() => {
+                document.getElementById('storyInput').focus();
+            }, 100);
         }
         
         function continueVideo() {
@@ -537,7 +577,45 @@ Keep it brief, magical, and supportive (under 60 words).`;
                 statusElement.innerHTML = `<span style="color: #dc3545;">❌ Server connection issue</span>`;
                 statusElement.classList.add('error-message');
             }
+            
+            // Add proper event listeners to fix button issues
+            setupEventListeners();
         });
+        
+        // Setup proper event listeners
+        function setupEventListeners() {
+            // Find all buttons and add click handlers
+            const buttons = document.querySelectorAll('button');
+            buttons.forEach(button => {
+                // Make sure buttons are clickable
+                button.style.pointerEvents = 'auto';
+                button.style.zIndex = '999';
+                button.style.position = 'relative';
+                
+                // Re-add click handler if it has onclick
+                const onclickAttr = button.getAttribute('onclick');
+                if (onclickAttr) {
+                    button.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        // Execute the onclick function
+                        try {
+                            eval(onclickAttr);
+                        } catch (error) {
+                            console.error('Button click error:', error);
+                        }
+                    });
+                }
+            });
+            
+            // Fix textareas
+            document.querySelectorAll('textarea').forEach(textarea => {
+                textarea.style.pointerEvents = 'auto';
+                textarea.style.zIndex = '100';
+                textarea.style.position = 'relative';
+            });
+        }
         
         // Debug log
         console.log('🎬 Story Creator app loaded successfully!');
