@@ -256,48 +256,50 @@
     </div>
 
     <!-- Welcome Page (after login) -->
-    <div class="page" id="welcomePage">
-        <div class="user-info" id="userInfoWelcome"></div>
-        <h1>✨ Story Creator ✨</h1>
-        <div class="center">
-            <p>Watch a magical video and help create an amazing story!</p>
-            <button id="startButton">Start Your Story Adventure! 🚀</button>
-            <button id="backToDashboardButton">📚 Back to Library</button>
-        </div>
+<div class="page" id="welcomePage">
+    <div class="user-info" id="userInfoWelcome"></div>
+    <h1>👽 Alien Research Station ✨</h1>
+    <div class="center">
+        <p>Help aliens from Kepler-442b understand Earth by explaining YouTube videos!</p>
+        <p><small>The aliens will then write their own story about what they learned.</small></p>
+        <button id="startButton">Help the Aliens! 🛸</button>
+        <button id="backToDashboardButton">📚 Back to Library</button>
     </div>
+</div>
 
-    <!-- Video Page -->
-    <div class="page" id="videoPage">
-        <div class="timer" id="timer">00:00</div>
-        <div class="user-info" id="userInfoVideo"></div>
-        <h2>📺 Let's Watch Together!</h2>
-        <div class="video-container">
-            <iframe id="videoPlayer" width="100%" height="500" 
-                    src="https://www.youtube.com/embed/OvOrbWggMTs" 
-                    frameborder="0" allowfullscreen></iframe>
-        </div>
-        
-        <div id="pausePrompt" class="pause-prompt">
-            <h3>✋ Pause Time!</h3>
-            <p id="pauseQuestion">What just happened in the story?</p>
-            <textarea id="storyInput" placeholder="Tell me what you saw..."></textarea>
-            <div class="center">
-                <button id="continueButton">Continue Watching ▶️</button>
-                <button id="finishButton">I'm Done Writing! ✅</button>
-            </div>
-        </div>
+  <!-- Video Page -->
+<div class="page" id="videoPage">
+    <div class="timer" id="timer">00:00</div>
+    <div class="user-info" id="userInfoVideo"></div>
+    <h2>📺 Aliens Sent This Video From Earth!</h2>
+    <p style="text-align: center; opacity: 0.9;">They need your help understanding what's happening...</p>
+    <div class="video-container">
+        <iframe id="videoPlayer" width="100%" height="500" 
+                src="https://www.youtube.com/embed/OvOrbWggMTs" 
+                frameborder="0" allowfullscreen></iframe>
     </div>
-
-    <!-- Story Review Page -->
-    <div class="page" id="reviewPage">
-        <h2>📖 Your Amazing Story!</h2>
-        <div id="fullStory" class="story-display"></div>
+    
+    <div id="pausePrompt" class="pause-prompt">
+        <h3>🛸 Alien Research Pause!</h3>
+        <p id="pauseQuestion">Help the aliens understand: What just happened?</p>
+        <textarea id="storyInput" placeholder="Explain to the aliens what you saw..."></textarea>
         <div class="center">
-            <p>Ready to send your story to our magical editor?</p>
-            <button id="sendEditorButton">Send to Editor 📮</button>
-            <button id="saveStoryButton">💾 Save Story As-Is</button>
+            <button id="continueButton">Continue Helping ▶️</button>
+            <button id="finishButton">Send Explanation to Aliens! 📡</button>
         </div>
     </div>
+</div>
+
+   <!-- Story Review Page -->
+<div class="page" id="reviewPage">
+    <h2>📖 Your Earth Explanation!</h2>
+    <div id="fullStory" class="story-display"></div>
+    <div class="center">
+        <p>Ready to send your explanation to the alien researchers?</p>
+        <button id="sendEditorButton">Send to Alien Researcher 👽</button>
+        <button id="saveStoryButton">💾 Save Explanation As-Is</button>
+    </div>
+</div>
 
     <!-- Waiting Page -->
     <div class="page" id="waitingPage">
@@ -308,18 +310,26 @@
             <p><small>This usually takes a few moments...</small></p>
         </div>
     </div>
-
-    <!-- Editor Response Page -->
-    <div class="page" id="editorPage">
-        <h2>📬 Message from Your Editor!</h2>
-        <div id="editorResponse" class="editor-response"></div>
-        <h3>Your Story (you can edit it):</h3>
-        <textarea id="editStory" placeholder="Edit your story here..."></textarea>
+<!-- Editor Response Page -->
+<div class="page" id="editorPage">
+    <h2>📡 Message from Kepler-442b!</h2>
+    <div id="editorResponse" class="editor-response"></div>
+    
+    <div class="center">
+        <button id="generateAlienStoryButton" style="background: #00ff00; color: #333;">
+            👽 Ask Zyx-9 to Write Complete Story
+        </button>
+    </div>
+    
+    <div id="alienStorySection" style="display: none;">
+        <h3>Give Feedback to Zyx-9:</h3>
+        <textarea id="editStory" placeholder="Tell Zyx-9 what you think of their story..."></textarea>
         <div class="center">
-            <button id="submitRevisionButton">Send Back to Editor 📝</button>
-            <button id="finalizeButton">My Story is Perfect! ⭐</button>
+            <button id="submitRevisionButton">Send Feedback to Aliens 📡</button>
+            <button id="finalizeButton">Story is Perfect! 🌟</button>
         </div>
     </div>
+</div>
 
     <!-- Success Page -->
     <div class="page" id="successPage">
@@ -363,6 +373,11 @@
             updateUserInfo();
         }
         
+        function showAlienStorySection() {
+                document.getElementById('generateAlienStoryButton').style.display = 'none';
+                document.getElementById('alienStorySection').style.display = 'block';
+        }
+
         function updateUserInfo() {
             if (currentUser) {
                 const userDisplay = `👋 Hi ${currentUser.firstName}!`;
@@ -670,63 +685,67 @@
             document.getElementById('finalStory').textContent = currentAIStory || currentOriginalStory;
         }
         
-        async function sendToEditor() {
-            const sendButton = document.getElementById('sendEditorButton');
-            sendButton.disabled = true;
-            sendButton.textContent = 'Sending...';
-            
-            showPage('waitingPage');
-            
-            try {
-                const editorResponse = await callGeminiAPI(currentOriginalStory, 'editor');
-                currentAIStory = editorResponse;
-                
-                document.getElementById('editorResponse').innerHTML = `
-                    <div class="character-name">🧙‍♂️ Grammaticus says:</div>
-                    <p>${editorResponse}</p>
-                `;
-                
-                showNotification('📬 You have a message from your editor!');
-                setTimeout(() => showPage('editorPage'), 2000);
-                
-            } catch (error) {
-                console.error('Editor API Error:', error);
-                alert(`Editor is busy right now: ${error.message}`);
-                showPage('reviewPage');
-            } finally {
-                sendButton.disabled = false;
-                sendButton.textContent = 'Send to Editor 📮';
-            }
-        }
+     async function sendToEditor() {
+    const sendButton = document.getElementById('sendEditorButton');
+    sendButton.disabled = true;
+    sendButton.textContent = 'Sending to Zyx-9...';
+    
+    showPage('waitingPage');
+    
+    // Update waiting page text
+    document.querySelector('#waitingPage h2').textContent = '👽 Alien Researcher Analyzing...';
+    document.querySelector('#waitingPage p').textContent = 'Zyx-9 is studying your explanation of Earth customs!';
+    
+    try {
+        const editorResponse = await callGeminiAPI(currentOriginalStory, 'editor');
+        
+        document.getElementById('editorResponse').innerHTML = `
+            <div class="character-name">👽 Zyx-9 from Kepler-442b says:</div>
+            <p>${editorResponse}</p>
+        `;
+        
+        showNotification('📡 Message from the aliens!');
+        setTimeout(() => showPage('editorPage'), 2000);
+        
+    } catch (error) {
+        console.error('Alien API Error:', error);
+        alert(`The aliens are having communication issues: ${error.message}`);
+        showPage('reviewPage');
+    } finally {
+        sendButton.disabled = false;
+        sendButton.textContent = 'Send to Alien Researcher 👽';
+    }
+}
         
         async function submitRevision() {
-            const revisedStory = document.getElementById('editStory').value;
-            
-            if (!revisedStory.trim()) {
-                alert('Please write your story before sending it back!');
-                return;
-            }
-            
-            currentAIStory = revisedStory;
-            showPage('waitingPage');
-            
-            try {
-                const feedback = await callGeminiAPI(revisedStory, 'revision');
-                
-                document.getElementById('editorResponse').innerHTML = `
-                    <div class="character-name">🧙‍♂️ Grammaticus says:</div>
-                    <p>${feedback}</p>
-                `;
-                
-                showNotification('📬 Your editor responded!');
-                setTimeout(() => showPage('editorPage'), 2000);
-                
-            } catch (error) {
-                console.error('Revision API Error:', error);
-                alert(`Editor is busy: ${error.message}`);
-                showPage('editorPage');
-            }
-        }
+    const revisedStory = document.getElementById('editStory').value;
+    
+    if (!revisedStory.trim()) {
+        alert('Please give feedback to help the aliens understand!');
+        return;
+    }
+    
+    showPage('waitingPage');
+    document.querySelector('#waitingPage h2').textContent = '👽 Processing Your Feedback...';
+    document.querySelector('#waitingPage p').textContent = 'Zyx-9 is learning from your suggestions!';
+    
+    try {
+        const feedback = await callGeminiAPI(revisedStory, 'revision');
+        
+        document.getElementById('editorResponse').innerHTML = `
+            <div class="character-name">👽 Zyx-9 responds:</div>
+            <p>${feedback}</p>
+        `;
+        
+        showNotification('📡 Zyx-9 responded to your feedback!');
+        setTimeout(() => showPage('editorPage'), 2000);
+        
+    } catch (error) {
+        console.error('Revision API Error:', error);
+        alert(`Communication error with aliens: ${error.message}`);
+        showPage('editorPage');
+    }
+}
         
         function finalizeStory() {
             currentAIStory = document.getElementById('editStory').value;
@@ -742,6 +761,44 @@
             }
         }
         
+        // Add this new function for generating the alien story
+async function generateAlienStory() {
+    showPage('waitingPage');
+    
+    // Update waiting page for story generation
+    document.querySelector('#waitingPage h2').textContent = '👽 Zyx-9 Writing Earth Story...';
+    document.querySelector('#waitingPage p').textContent = 'The alien researcher is writing a complete story about what they learned!';
+    
+    try {
+        const alienStoryResponse = await callGeminiAPI(currentOriginalStory, 'alien_story');
+        currentAIStory = alienStoryResponse;
+        
+        // Update the editor page to show the alien story
+        document.getElementById('editorResponse').innerHTML = `
+            <div class="character-name">👽 Zyx-9's Complete Earth Story:</div>
+            <div class="story-display" style="background: rgba(100, 255, 100, 0.1); border-left: 5px solid #00ff00;">
+                <p>${alienStoryResponse}</p>
+            </div>
+            <p><strong>What do you think of Zyx-9's story? You can give feedback to help the aliens understand Earth better!</strong></p>
+        `;
+        
+        // Update the textarea with the alien story for editing
+        document.getElementById('editStory').value = alienStoryResponse;
+        document.getElementById('editStory').placeholder = 'Give feedback to Zyx-9 about their Earth story...';
+        
+        // Show the feedback section
+        showAlienStorySection();
+        
+        showNotification('👽 Zyx-9 wrote a complete story!');
+        setTimeout(() => showPage('editorPage'), 2000);
+        
+    } catch (error) {
+        console.error('Alien Story Error:', error);
+        alert(`The aliens had trouble writing the story: ${error.message}`);
+        showPage('editorPage');
+    }
+}
+
         async function saveFinishedStory() {
             const title = document.getElementById('storyTitle').value.trim() || 'My Story';
             const saved = await saveStory(title, currentOriginalStory, currentAIStory);
@@ -761,60 +818,75 @@
             setTimeout(() => notification.remove(), 5000);
         }
         
-        // API call function
-        async function callGeminiAPI(storyText, mode) {
-            let prompt;
-            if (mode === 'editor') {
-                prompt = `You are Grammaticus, a magical writing editor who helps children improve their stories. A child just wrote this story after watching a video: "${storyText}"
+// API call function
+async function callGeminiAPI(storyText, mode) {
+    let prompt;
+    if (mode === 'editor') {
+        prompt = `You are Zyx-9, a friendly alien researcher from the planet Kepler-442b. You and your fellow aliens are studying Earth by watching human "YouTube videos" but you need help understanding what you're seeing.
 
-Respond as a friendly editor with:
-1. Specific praise for what they did well
-2. 2-3 gentle suggestions to make it even better
-3. Ask one question to help them think deeper
+A human child just helped you understand this video by writing: "${storyText}"
+
+Respond as Zyx-9 with:
+1. Thank them for helping you understand Earth
+2. Ask 2-3 curious alien questions about what they observed
+3. Offer to write a full story about what you learned for their Earth friends
 4. Keep it encouraging and under 80 words
-5. Use magical, playful language
+5. Use slightly alien but friendly language
 
-Be like a wise, kind teacher who makes writing fun!`;
-            } else {
-                prompt = `You are Grammaticus responding to a child's revised story. Original story: "${currentOriginalStory}" 
-Revised version: "${storyText}"
+Example: "Fascinating! Your explanation helps us understand human [behavior/customs/etc]. We are curious - why do humans [question]? Would you like me to write a complete story about this for other Earth children to read?"`;
+    } else if (mode === 'alien_story') {
+        prompt = `You are Zyx-9, an alien researcher writing a complete story for Earth children based on what you learned from a human child's explanation: "${storyText}"
 
-Give encouraging feedback on their improvements and either:
-- Suggest one final small enhancement, OR
-- Congratulate them on their excellent work if it's ready
+Write a longer, detailed story (200-400 words) that:
+1. Tells the story from an alien perspective trying to understand Earth
+2. Includes what you learned from the child's explanation
+3. Makes it educational and entertaining for children
+4. Shows how aliens might misunderstand but then learn about human life
+5. Ends with appreciation for human culture
 
-Keep it brief, magical, and supportive (under 60 words).`;
-            }
-            
-            const requestBody = {
-                contents: [{
-                    parts: [{ text: prompt }]
-                }],
-                generationConfig: {
-                    temperature: 0.8,
-                    maxOutputTokens: 150
-                }
-            };
-            
-            const response = await fetch('/api/editor', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(requestBody)
-            });
-            
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-                throw new Error(errorData.error || `Server error: ${response.status}`);
-            }
-            
-            const data = await response.json();
-            
-            if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
-                throw new Error('Invalid response from AI service');
-            }
-            
-            return data.candidates[0].content.parts[0].text;
+Write in a storytelling voice, not as a response to the child.`;
+    } else {
+        prompt = `You are Zyx-9, an alien researcher responding to a child's feedback on your story. 
+
+Original human explanation: "${currentOriginalStory}"
+Your alien story: "${storyText}"
+
+Give encouraging feedback on their suggestions and either:
+- Thank them for helping you understand Earth better, OR
+- Ask if they'd like you to revise the story based on their feedback
+
+Keep it brief, alien-friendly, and supportive (under 60 words).`;
+    }
+    
+    const requestBody = {
+        contents: [{
+            parts: [{ text: prompt }]
+        }],
+        generationConfig: {
+            temperature: 0.8,
+            maxOutputTokens: 400
         }
+    };
+    
+    const response = await fetch('/api/editor', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody)
+    });
+    
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        throw new Error(errorData.error || `Server error: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    
+    if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
+        throw new Error('Invalid response from AI service');
+    }
+    
+    return data.candidates[0].content.parts[0].text;
+}
         
         // Setup event listeners when page loads
         window.addEventListener('load', async () => {
@@ -852,6 +924,7 @@ Keep it brief, magical, and supportive (under 60 words).`;
             document.getElementById('submitRevisionButton').addEventListener('click', submitRevision);
             document.getElementById('finalizeButton').addEventListener('click', finalizeStory);
             document.getElementById('saveFinishedStoryButton').addEventListener('click', saveFinishedStory);
+            document.getElementById('generateAlienStoryButton').addEventListener('click', generateAlienStory);
             
             // Allow Enter key to submit first name
             document.getElementById('firstNameInput').addEventListener('keypress', (e) => {
