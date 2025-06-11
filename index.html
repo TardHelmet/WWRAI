@@ -392,6 +392,19 @@
                 document.getElementById('alienStorySection').style.display = 'block';
         }
 
+async function saveStoryAsIs() {
+    const title = 'My Earth Explanation';
+    const saved = await saveStory(title, currentOriginalStory, '');
+    if (saved) {
+        showPage('dashboardPage');
+        loadDashboard();
+    }
+}
+
+function finalizeStory() {
+    // User is happy with their explanation, go to success page
+    showPage('successPage');
+}
         function updateUserInfo() {
             if (currentUser) {
                 const userDisplay = `👋 Hi ${currentUser.firstName}!`;
@@ -932,7 +945,18 @@ async function generateAlienStory() {
         showPage('editorPage');
     }
 }
+async function saveStoryAsIs() {
+    const title = 'My Earth Explanation';
+    const saved = await saveStory(title, currentOriginalStory, '');
+    if (saved) {
+        showPage('dashboardPage');
+        loadDashboard();
+    }
+}
 
+function finalizeStory() {
+    showPage('successPage');
+}
         async function saveFinishedStory() {
             const title = document.getElementById('storyTitle').value.trim() || 'My Story';
             const saved = await saveStory(title, currentOriginalStory, currentAIStory);
