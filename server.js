@@ -78,7 +78,7 @@ app.get('/test-gemini', async (req, res) => {
         }
         
         const testResponse = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_KEY}`,
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`,
             {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -350,7 +350,7 @@ app.post('/api/editor', async (req, res) => {
         console.log('Request body received:', JSON.stringify(req.body, null, 2));
         
         const response = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_KEY}`,
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`,
             {
                 method: 'POST',
                 headers: { 
