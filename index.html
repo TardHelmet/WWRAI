@@ -430,41 +430,96 @@
         </div>
     </div>
 
-    <!-- Video Page -->
+    <!-- Video Page with Integrated Writing -->
     <div class="page" id="videoPage">
         <div class="timer" id="timer">00:00</div>
         <div class="user-info" id="userInfoVideo"></div>
         
         <div class="card">
-            <h2>🎬 Story Inspiration</h2>
+            <h2>🎬 Story Forge Workshop</h2>
             
             <div class="step-indicator">
-                <div class="step active">Watch</div>
-                <div class="step">Create</div>
+                <div class="step active">Watch & Write</div>
+                <div class="step">Review</div>
                 <div class="step">Refine</div>
                 <div class="step">Complete</div>
             </div>
             
             <p style="text-align: center; margin-bottom: 24px; color: #6b7280;">
-                Watch this video and let it spark your imagination. Every 30 seconds, we'll pause so you can build your story piece by piece.
+                Watch this video and build your story piece by piece. We'll pause every 30 seconds for you to write!
             </p>
             
-            <div class="video-container">
-                <iframe id="videoPlayer" width="100%" height="360" 
-                        src="https://www.youtube.com/embed/OvOrbWggMTs" 
-                        frameborder="0" allowfullscreen></iframe>
+            <!-- Video and Writing Combined Interface -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;" id="videoWritingContainer">
+                <!-- Video Side -->
+                <div>
+                    <div class="video-container">
+                        <iframe id="videoPlayer" width="100%" height="300" 
+                                src="https://www.youtube.com/embed/OvOrbWggMTs" 
+                                frameborder="0" allowfullscreen></iframe>
+                    </div>
+                    <div style="text-align: center; margin-top: 12px;">
+                        <div id="videoStatus" style="color: #10b981; font-weight: 600;">▶️ Video Playing</div>
+                        <div id="nextPauseInfo" style="font-size: 0.9rem; color: #6b7280; margin-top: 4px;">Next pause in <span id="countdown">30</span> seconds</div>
+                    </div>
+                </div>
+                
+                <!-- Writing Side -->
+                <div>
+                    <div style="background: #f0f9ff; padding: 16px; border-radius: 12px; border: 2px solid #0ea5e9; margin-bottom: 16px;">
+                        <h3 style="margin: 0 0 12px 0; color: #0ea5e9;">✍️ <span id="currentPrompt">Start your story with what you see...</span></h3>
+                        <textarea id="storyInput" placeholder="Write about what you're seeing..." style="min-height: 120px; margin-bottom: 12px;"></textarea>
+                        <button id="savePartButton" style="width: 100%; background: #10b981;">💾 Save This Part</button>
+                    </div>
+                    
+                    <!-- Story Parts Display -->
+                    <div id="storyPartsDisplay" style="max-height: 200px; overflow-y: auto;">
+                        <div style="font-weight: 600; margin-bottom: 8px; color: #374151;">📖 Your Story So Far:</div>
+                        <div id="storyPartsList"></div>
+                    </div>
+                </div>
             </div>
             
-            <div id="pausePrompt" class="writing-prompt">
-                <h3>✍️ Story Building Time!</h3>
-                <p id="pauseQuestion">What story does this inspire? Let your imagination flow...</p>
-                <textarea id="storyInput" placeholder="Write about what you've seen so far..."></textarea>
-                <div class="center">
-                    <button id="continueButton">Continue Video ▶️</button>
-                    <button id="finishButton" style="display: none;">Send to Writing Mentor 📝</button>
+            <!-- Mobile Layout (Stack Vertically) -->
+            <div style="display: none;" id="mobileVideoWriting">
+                <div class="video-container" style="margin-bottom: 16px;">
+                    <iframe id="videoPlayerMobile" width="100%" height="250" 
+                            src="https://www.youtube.com/embed/OvOrbWggMTs" 
+                            frameborder="0" allowfullscreen></iframe>
                 </div>
-                <div style="margin-top: 16px; padding: 12px; background: #e0f2fe; border-radius: 8px; font-size: 0.9rem; color: #0277bd;">
-                    💡 <strong>Tip:</strong> Write about what you've seen so far. You can build your story piece by piece as the video continues!
+                
+                <div id="videoStatusMobile" style="text-align: center; margin-bottom: 16px;">
+                    <div style="color: #10b981; font-weight: 600;">▶️ Video Playing</div>
+                    <div style="font-size: 0.9rem; color: #6b7280;">Next pause in <span id="countdownMobile">30</span> seconds</div>
+                </div>
+                
+                <div style="background: #f0f9ff; padding: 16px; border-radius: 12px; border: 2px solid #0ea5e9; margin-bottom: 16px;">
+                    <h3 style="margin: 0 0 12px 0; color: #0ea5e9;">✍️ <span id="currentPromptMobile">Start your story with what you see...</span></h3>
+                    <textarea id="storyInputMobile" placeholder="Write about what you're seeing..." style="min-height: 100px; margin-bottom: 12px;"></textarea>
+                    <button id="savePartButtonMobile" style="width: 100%; background: #10b981;">💾 Save This Part</button>
+                </div>
+                
+                <div id="storyPartsDisplayMobile" style="margin-bottom: 16px;">
+                    <div style="font-weight: 600; margin-bottom: 8px; color: #374151;">📖 Your Story So Far:</div>
+                    <div id="storyPartsListMobile"></div>
+                </div>
+            </div>
+            
+            <!-- Control Buttons -->
+            <div class="center" style="margin-top: 24px;">
+                <button id="pauseVideoButton" style="background: #f59e0b;">⏸️ Pause Video</button>
+                <button id="resumeVideoButton" style="background: #10b981; display: none;">▶️ Resume Video</button>
+                <button id="finishVideoButton" style="background: #7c3aed; display: none;">✨ Finish & Review Story</button>
+            </div>
+            
+            <!-- Progress Indicator -->
+            <div style="margin-top: 24px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <span style="font-size: 0.9rem; color: #6b7280;">Story Progress</span>
+                    <span style="font-size: 0.9rem; color: #6b7280;"><span id="partsCount">0</span> parts written</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="storyProgress" style="width: 0%;"></div>
                 </div>
             </div>
         </div>
@@ -588,8 +643,15 @@
         let currentPauseIndex = 0;
         let sessionStartTime = Date.now();
         let timerInterval;
+        let videoTimer = null;
+        let countdownTimer = null;
+        let videoFinished = false;
         let currentOriginalStory = '';
         let currentAIStory = '';
+        
+        // Video and writing state
+        let videoPaused = false;
+        let currentVideoTime = 0;
         
         // Page management
         function showPage(pageId) {
@@ -790,85 +852,252 @@
             storyParts = [];
             currentPauseIndex = 0;
             sessionStartTime = Date.now();
+            videoFinished = false;
+            videoPaused = false;
+            currentVideoTime = 0;
+            
             showPage('videoPage');
             startTimer();
-            setTimeout(() => pauseVideoForWriting(), pauseTimes[0] * 1000);
+            updateStoryDisplay();
+            setupVideoInterface();
+            
+            // Start the first countdown
+            startCountdown();
         }
         
-        function pauseVideoForWriting() {
-            console.log(`Pausing video at ${pauseTimes[currentPauseIndex]} seconds for writing...`);
+        function setupVideoInterface() {
+            // Set up responsive layout
+            checkMobileLayout();
+            window.addEventListener('resize', checkMobileLayout);
             
+            // Update initial prompt
+            updateCurrentPrompt();
+            
+            // Set up video controls
+            document.getElementById('videoStatus').textContent = '▶️ Video Playing';
+            document.getElementById('finishVideoButton').style.display = 'none';
+        }
+        
+        function checkMobileLayout() {
+            const isMobile = window.innerWidth < 768;
+            document.getElementById('videoWritingContainer').style.display = isMobile ? 'none' : 'grid';
+            document.getElementById('mobileVideoWriting').style.display = isMobile ? 'block' : 'none';
+        }
+        
+        function updateCurrentPrompt() {
             const prompts = [
-                "What's happening so far? Start your story with what you've seen.",
-                "Continue your story! What happens next based on what you just watched?",
-                "Keep building your story! Add more details about the characters or action.",
-                "Your story is growing! What new developments do you see?",
-                "Add to your story! How is everything coming together?",
-                "Finish your story! How does everything end?"
+                "Start your story with what you see...",
+                "Continue your story! What happens next?",
+                "Keep building! Add more details...",
+                "Your story is growing! What develops?",
+                "Add more! How is it coming together?",
+                "Finish strong! How does it end?"
             ];
             
-            // Pause the video by switching to writing mode
-            document.getElementById('pauseQuestion').textContent = 
-                prompts[currentPauseIndex] || "Continue building your story based on what you've seen...";
-            document.getElementById('pausePrompt').classList.add('active');
+            const prompt = prompts[currentPauseIndex] || "Continue building your story...";
+            document.getElementById('currentPrompt').textContent = prompt;
             
-            // Focus on the writing area
+            // Update mobile version too
+            const mobilePrompt = document.getElementById('currentPromptMobile');
+            if (mobilePrompt) {
+                mobilePrompt.textContent = prompt;
+            }
+        }
+        
+        function startCountdown() {
+            if (videoFinished) return;
+            
+            const nextPauseTime = pauseTimes[currentPauseIndex] || videoDuration;
+            let timeRemaining = nextPauseTime - currentVideoTime;
+            
+            // Clear any existing countdown
+            if (countdownTimer) {
+                clearInterval(countdownTimer);
+            }
+            
+            countdownTimer = setInterval(() => {
+                timeRemaining--;
+                currentVideoTime++;
+                
+                // Update countdown displays
+                document.getElementById('countdown').textContent = Math.max(0, timeRemaining);
+                const mobileCountdown = document.getElementById('countdownMobile');
+                if (mobileCountdown) {
+                    mobileCountdown.textContent = Math.max(0, timeRemaining);
+                }
+                
+                // Check if it's time to pause or if video is finished
+                if (timeRemaining <= 0) {
+                    if (currentVideoTime >= videoDuration) {
+                        finishVideo();
+                    } else {
+                        pauseForWriting();
+                    }
+                    clearInterval(countdownTimer);
+                }
+            }, 1000);
+        }
+        
+        function pauseForWriting() {
+            videoPaused = true;
+            document.getElementById('videoStatus').textContent = '⏸️ Paused for Writing';
+            document.getElementById('nextPauseInfo').textContent = 'Write about what you just saw!';
+            
+            // Update mobile status
+            const mobileStatus = document.getElementById('videoStatusMobile');
+            if (mobileStatus) {
+                mobileStatus.textContent = '⏸️ Paused for Writing';
+            }
+            
+            updateCurrentPrompt();
+            
+            // Show resume button, hide pause button
+            document.getElementById('pauseVideoButton').style.display = 'none';
+            document.getElementById('resumeVideoButton').style.display = 'inline-block';
+            
+            // Focus on writing area
             setTimeout(() => {
-                document.getElementById('storyInput').focus();
+                const storyInput = document.getElementById('storyInput') || document.getElementById('storyInputMobile');
+                if (storyInput) {
+                    storyInput.focus();
+                }
             }, 100);
         }
         
-        function continueVideo() {
-            const storyPart = document.getElementById('storyInput').value.trim();
+        function saveStoryPart() {
+            const storyInput = document.getElementById('storyInput') || document.getElementById('storyInputMobile');
+            const storyPart = storyInput.value.trim();
+            
             if (!storyPart) {
-                alert('Please write something for your story before continuing!');
+                alert('Please write something before saving this part!');
                 return;
             }
             
-            storyParts.push(storyPart);
-            document.getElementById('storyInput').value = '';
-            document.getElementById('pausePrompt').classList.remove('active');
+            // Save the story part
+            storyParts.push({
+                part: currentPauseIndex + 1,
+                content: storyPart,
+                timestamp: currentVideoTime
+            });
             
+            // Clear the input
+            storyInput.value = '';
+            
+            // Update the display
+            updateStoryDisplay();
+            
+            // Move to next section
             currentPauseIndex++;
             
-            // Check if we have more pauses or if video is complete
-            if (currentPauseIndex < pauseTimes.length && pauseTimes[currentPauseIndex] <= videoDuration) {
-                // Resume video and set next pause
-                const nextPauseDelay = (pauseTimes[currentPauseIndex] - pauseTimes[currentPauseIndex - 1]) * 1000;
-                console.log(`Resuming video, next pause in ${nextPauseDelay/1000} seconds`);
-                setTimeout(() => pauseVideoForWriting(), nextPauseDelay);
+            // Resume video or finish
+            if (currentVideoTime >= videoDuration || currentPauseIndex >= pauseTimes.length) {
+                finishVideo();
             } else {
-                // Video is complete, do final writing prompt
-                console.log("Video complete, final writing prompt");
-                setTimeout(() => {
-                    document.getElementById('pauseQuestion').textContent = "The video is finished! Add any final thoughts to complete your story.";
-                    document.getElementById('pausePrompt').classList.add('active');
-                    // Change the continue button to finish for the last prompt
-                    document.getElementById('continueButton').style.display = 'none';
-                    document.getElementById('finishButton').textContent = 'Complete My Story 📖';
-                }, 2000);
+                resumeVideo();
             }
         }
         
-        function finishStory() {
-            const finalPart = document.getElementById('storyInput').value.trim();
-            if (finalPart) {
-                storyParts.push(finalPart);
+        function resumeVideo() {
+            videoPaused = false;
+            document.getElementById('videoStatus').textContent = '▶️ Video Playing';
+            
+            // Update mobile status
+            const mobileStatus = document.getElementById('videoStatusMobile');
+            if (mobileStatus) {
+                mobileStatus.textContent = '▶️ Video Playing';
             }
             
+            // Show pause button, hide resume button
+            document.getElementById('pauseVideoButton').style.display = 'inline-block';
+            document.getElementById('resumeVideoButton').style.display = 'none';
+            
+            // Start countdown to next pause
+            if (currentPauseIndex < pauseTimes.length) {
+                const nextPauseTime = pauseTimes[currentPauseIndex];
+                const timeUntilPause = nextPauseTime - currentVideoTime;
+                document.getElementById('nextPauseInfo').textContent = `Next pause in ${timeUntilPause} seconds`;
+                startCountdown();
+            }
+        }
+        
+        function pauseVideo() {
+            pauseForWriting();
+        }
+        
+        function finishVideo() {
+            videoFinished = true;
+            clearInterval(countdownTimer);
+            
+            document.getElementById('videoStatus').textContent = '✅ Video Complete';
+            document.getElementById('nextPauseInfo').textContent = 'Ready to review your story!';
+            
+            // Update mobile status
+            const mobileStatus = document.getElementById('videoStatusMobile');
+            if (mobileStatus) {
+                mobileStatus.textContent = '✅ Video Complete';
+            }
+            
+            // Show finish button
+            document.getElementById('pauseVideoButton').style.display = 'none';
+            document.getElementById('resumeVideoButton').style.display = 'none';
+            document.getElementById('finishVideoButton').style.display = 'inline-block';
+            
+            // If user has content in the input, save it
+            const storyInput = document.getElementById('storyInput') || document.getElementById('storyInputMobile');
+            if (storyInput && storyInput.value.trim()) {
+                storyParts.push({
+                    part: currentPauseIndex + 1,
+                    content: storyInput.value.trim(),
+                    timestamp: currentVideoTime
+                });
+                updateStoryDisplay();
+            }
+        }
+        
+        function updateStoryDisplay() {
+            const partsContainer = document.getElementById('storyPartsList');
+            const mobilePartsContainer = document.getElementById('storyPartsListMobile');
+            
+            const partsHTML = storyParts.map((part, index) => `
+                <div style="background: white; padding: 12px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid #10b981;">
+                    <div style="font-weight: 600; font-size: 0.9rem; color: #10b981; margin-bottom: 4px;">
+                        Part ${part.part} (${Math.floor(part.timestamp/60)}:${(part.timestamp%60).toString().padStart(2, '0')})
+                    </div>
+                    <div style="font-size: 0.9rem; line-height: 1.4;">${part.content}</div>
+                </div>
+            `).join('');
+            
+            if (partsContainer) {
+                partsContainer.innerHTML = partsHTML || '<div style="color: #9ca3af; font-style: italic;">No parts written yet...</div>';
+            }
+            
+            if (mobilePartsContainer) {
+                mobilePartsContainer.innerHTML = partsHTML || '<div style="color: #9ca3af; font-style: italic;">No parts written yet...</div>';
+            }
+            
+            // Update progress
+            document.getElementById('partsCount').textContent = storyParts.length;
+            const progress = Math.min((storyParts.length / 6) * 100, 100);
+            document.getElementById('storyProgress').style.width = `${progress}%`;
+        }
+        
+        function reviewStory() {
             if (storyParts.length === 0) {
                 alert('Please write at least one part of your story!');
                 return;
             }
             
             stopTimer();
-            // Join story parts with paragraph breaks to show the progression
-            currentOriginalStory = storyParts.map((part, index) => {
-                return `**Part ${index + 1}:** ${part}`;
-            }).join('\n\n');
+            
+            // Combine all story parts into one narrative
+            currentOriginalStory = storyParts.map(part => part.content).join('\n\n');
             
             displayFullStory();
             showPage('reviewPage');
+        }
+        
+        function finishStory() {
+            reviewStory();
         }
         
         function displayFullStory() {
@@ -1232,8 +1461,11 @@ Keep it brief, positive, and under 70 words.`;
             document.getElementById('createAnotherButton').addEventListener('click', () => showPage('welcomePage'));
             
             // Story flow event listeners
-            document.getElementById('continueButton').addEventListener('click', continueVideo);
-            document.getElementById('finishButton').addEventListener('click', finishStory);
+            document.getElementById('savePartButton').addEventListener('click', saveStoryPart);
+            document.getElementById('savePartButtonMobile').addEventListener('click', saveStoryPart);
+            document.getElementById('pauseVideoButton').addEventListener('click', pauseVideo);
+            document.getElementById('resumeVideoButton').addEventListener('click', resumeVideo);
+            document.getElementById('finishVideoButton').addEventListener('click', reviewStory);
             document.getElementById('sendToGuildButton').addEventListener('click', sendToGuild);
             document.getElementById('keepStoryButton').addEventListener('click', keepStory);
             document.getElementById('submitGuildFeedbackButton').addEventListener('click', submitGuildFeedback);
