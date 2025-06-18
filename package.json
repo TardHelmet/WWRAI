@@ -1,12 +1,13 @@
 {
-  "name": "watchright-poc",
+  "name": "storyforge-guild",
   "version": "1.0.0",
-  "description": "Watch.Right.Android - Story Creation POC",
+  "description": "StoryForge - Forge Your Own Epic. Learn to Write, One Story at a Time.",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
-    "build": "echo 'No build step required'"
+    "build": "echo 'No build step required - StoryForge ready to deploy'",
+    "test": "echo 'StoryForge Guild tests not implemented yet'"
   },
   "dependencies": {
     "express": "^4.18.2",
@@ -18,7 +19,35 @@
     "node": ">=18.0.0",
     "npm": ">=8.0.0"
   },
-  "keywords": ["education", "ai", "story", "writing"],
-  "author": "Your Name",
-  "license": "MIT"
+  "keywords": [
+    "education", 
+    "creative-writing", 
+    "storytelling", 
+    "ai-powered", 
+    "children", 
+    "narrative-education",
+    "storyforge",
+    "writing-mentor"
+  ],
+  "author": "StoryForge Guild",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/storyforge/guild-platform"
+  },
+  "bugs": {
+    "url": "https://github.com/storyforge/guild-platform/issues"
+  },
+  "homepage": "https://storyforge.com",
+  "config": {
+    "app_name": "StoryForge Guild Platform",
+    "tagline": "Forge Your Own Epic. Learn to Write, One Story at a Time.",
+    "target_audience": "Ages 8-16",
+    "guild_services": [
+      "AI Writing Mentor",
+      "Story Library", 
+      "Guild Collaboration",
+      "Creative Writing Education"
+    ]
+  }
 }

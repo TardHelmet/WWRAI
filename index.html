@@ -3,174 +3,249 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Watch.Right.Android - Story Creator</title>
+    <title>StoryForge - Forge Your Own Epic</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
+        * {
             margin: 0;
-            padding: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #2563eb 0%, #1e40af 50%, #1e3a8a 100%);
+            color: #1f2937;
             min-height: 100vh;
         }
         
         .page {
             display: none;
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
-            padding: 40px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 20px;
-            backdrop-filter: blur(10px);
+            padding: 20px;
+            min-height: 100vh;
         }
         
         .page.active {
             display: block;
         }
-        
-        h1, h2 {
-            color: #ffd700;
-            text-align: center;
-            margin-bottom: 30px;
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
         }
         
+        h1 {
+            color: #1e40af;
+            text-align: center;
+            margin-bottom: 24px;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+
+        h2 {
+            color: #1e40af;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        h3 {
+            color: #374151;
+            margin-bottom: 16px;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        
+        .tagline {
+            text-align: center;
+            color: #6b7280;
+            font-size: 1.1rem;
+            margin-bottom: 32px;
+            font-style: italic;
+        }
+
         button {
-            background: #ffd700;
-            color: #333;
-            padding: 15px 30px;
+            background: #10b981;
+            color: white;
+            padding: 14px 28px;
             border: none;
-            border-radius: 10px;
+            border-radius: 8px;
             cursor: pointer;
-            font-weight: bold;
+            font-weight: 600;
             font-size: 16px;
-            margin: 10px;
+            margin: 8px;
+            transition: all 0.2s;
         }
         
         button:hover {
-            background: #ffed4e;
+            background: #059669;
+            transform: translateY(-1px);
         }
         
         button:disabled {
-            background: #ccc;
-            color: #666;
+            background: #d1d5db;
+            color: #9ca3af;
             cursor: not-allowed;
+            transform: none;
+        }
+
+        .button-secondary {
+            background: #6b7280;
+        }
+
+        .button-secondary:hover {
+            background: #4b5563;
+        }
+
+        .button-warning {
+            background: #f59e0b;
+        }
+
+        .button-warning:hover {
+            background: #d97706;
         }
         
         input[type="text"] {
             width: 100%;
-            padding: 15px;
-            border: none;
-            border-radius: 10px;
+            padding: 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
             font-size: 16px;
-            margin: 10px 0;
-            box-sizing: border-box;
+            margin: 12px 0;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #10b981;
         }
         
         .video-container {
             width: 100%;
-            max-width: 500px;
-            margin: 20px auto;
+            max-width: 640px;
+            margin: 24px auto;
             text-align: center;
+        }
+
+        .video-container iframe {
+            border-radius: 12px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
         }
         
         textarea {
             width: 100%;
-            height: 150px;
-            padding: 15px;
-            border: none;
-            border-radius: 10px;
+            min-height: 120px;
+            padding: 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
             font-size: 16px;
-            background: rgba(255,255,255,0.9);
-            color: #333;
-            resize: none;
-            margin: 20px 0;
-            box-sizing: border-box;
+            font-family: inherit;
+            resize: vertical;
+            margin: 16px 0;
+            transition: border-color 0.2s;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #10b981;
         }
         
-        .pause-prompt {
-            background: rgba(255, 215, 0, 0.2);
-            padding: 20px;
-            border-radius: 15px;
-            border: 2px solid #ffd700;
-            margin: 20px 0;
+        .writing-prompt {
+            background: #f0f9ff;
+            border: 2px solid #0ea5e9;
+            padding: 24px;
+            border-radius: 12px;
+            margin: 24px 0;
             display: none;
+        }
+
+        .writing-prompt.active {
+            display: block;
         }
         
         .notification {
             position: fixed;
             top: 20px;
             right: 20px;
-            background: #28a745;
+            background: #10b981;
             color: white;
-            padding: 15px 25px;
-            border-radius: 10px;
+            padding: 16px 24px;
+            border-radius: 8px;
             z-index: 1000;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
         }
         
         .editor-response {
-            background: rgba(147, 51, 234, 0.3);
-            padding: 20px;
-            border-radius: 15px;
-            margin: 20px 0;
-            border-left: 5px solid #ffd700;
+            background: #fef3c7;
+            border: 2px solid #f59e0b;
+            padding: 24px;
+            border-radius: 12px;
+            margin: 24px 0;
         }
         
         .character-name {
-            font-weight: bold;
-            color: #ffd700;
-            font-size: 18px;
+            font-weight: 700;
+            color: #1e40af;
+            font-size: 1.1rem;
+            margin-bottom: 12px;
         }
         
         .story-display {
-            background: rgba(255,255,255,0.9);
-            color: #333;
-            padding: 20px;
-            border-radius: 10px;
+            background: #f9fafb;
+            padding: 24px;
+            border-radius: 12px;
             margin: 20px 0;
             line-height: 1.6;
-            max-height: 300px;
+            max-height: 400px;
             overflow-y: auto;
+            border: 1px solid #e5e7eb;
         }
         
         .story-item {
-            background: rgba(255,255,255,0.9);
-            color: #333;
-            padding: 15px;
-            border-radius: 10px;
-            margin: 15px 0;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 16px 0;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.2s;
+            border: 1px solid #e5e7eb;
         }
         
         .story-item:hover {
-            background: rgba(255,255,255,1);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
             transform: translateY(-2px);
         }
         
         .story-title {
-            font-weight: bold;
-            color: #667eea;
-            margin-bottom: 5px;
+            font-weight: 600;
+            color: #1e40af;
+            margin-bottom: 8px;
+            font-size: 1.1rem;
         }
         
         .story-preview {
-            font-size: 14px;
-            opacity: 0.8;
-            margin-bottom: 5px;
+            color: #6b7280;
+            margin-bottom: 8px;
         }
         
         .story-date {
-            font-size: 12px;
-            opacity: 0.6;
+            font-size: 0.9rem;
+            color: #9ca3af;
         }
         
         .timer {
             position: fixed;
             top: 20px;
             left: 20px;
-            background: rgba(0,0,0,0.5);
-            padding: 10px 20px;
-            border-radius: 25px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 24px;
             font-family: monospace;
             font-size: 18px;
             display: none;
@@ -180,9 +255,10 @@
             position: fixed;
             top: 20px;
             right: 20px;
-            background: rgba(0,0,0,0.5);
-            padding: 10px 20px;
-            border-radius: 25px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 24px;
             font-size: 14px;
             display: none;
         }
@@ -190,8 +266,7 @@
         .status {
             text-align: center;
             margin: 20px 0;
-            font-size: 14px;
-            opacity: 0.8;
+            color: #6b7280;
         }
 
         .center {
@@ -201,213 +276,332 @@
         .login-form {
             max-width: 400px;
             margin: 0 auto;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #10b981;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px 0;
+        }
+
+        .step {
+            flex: 1;
             text-align: center;
+            padding: 8px;
+            color: #9ca3af;
+            font-size: 0.9rem;
+        }
+
+        .step.active {
+            color: #10b981;
+            font-weight: 600;
+        }
+
+        .step.completed {
+            color: #6b7280;
         }
 
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        .loading-spinner {
+            animation: spin 2s linear infinite;
+            font-size: 2rem;
+            margin: 20px 0;
+        }
+
+        .guild-badge {
+            background: #7c3aed;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 8px;
+        }
+
+        .privacy-note {
+            font-size: 0.9rem;
+            color: #6b7280;
+            text-align: center;
+            margin-top: 24px;
+            padding: 16px;
+            background: #f9fafb;
+            border-radius: 8px;
+        }
     </style>
 </head>
 <body>
     <!-- Login Page -->
     <div class="page active" id="loginPage">
-        <h1>✨ Welcome to Story Creator ✨</h1>
-        <div class="login-form">
-            <p>Create amazing stories with AI help!</p>
+        <div class="card">
+            <h1>⚒️ StoryForge</h1>
+            <div class="tagline">Forge Your Own Epic. Learn to Write, One Story at a Time.</div>
             
-            <div id="loginSection">
-                <h3>Already have an account?</h3>
-                <button id="loginButton">🔐 Login with Passkey</button>
+            <div class="login-form">
+                <p style="text-align: center; margin-bottom: 32px; color: #6b7280;">Welcome to the Storymakers Guild! Create amazing stories with help from our AI writing mentors.</p>
+                
+                <div id="loginSection">
+                    <h3>Already a Storymaker?</h3>
+                    <div class="center">
+                        <button id="loginButton">🔐 Continue Your Journey</button>
+                    </div>
+                </div>
+                
+                <div id="registerSection">
+                    <h3>Join the Guild</h3>
+                    <input type="text" id="firstNameInput" placeholder="What should we call you?" maxlength="50">
+                    <div class="center">
+                        <button id="registerButton">⚒️ Become a Storymaker</button>
+                    </div>
+                </div>
+                
+                <div id="connectionStatus" class="status"></div>
+                
+                <div class="privacy-note">
+                    🔒 Your stories and data stay private and secure on your device
+                </div>
             </div>
-            
-            <div id="registerSection">
-                <h3>New here? Create an account!</h3>
-                <input type="text" id="firstNameInput" placeholder="What's your first name?" maxlength="50">
-                <br>
-                <button id="registerButton">🚀 Create Account with Passkey</button>
-            </div>
-            
-            <div id="connectionStatus" class="status"></div>
-            <p style="font-size: 12px; opacity: 0.7; margin-top: 30px;">
-                🔒 Your data stays private and secure on your device
-            </p>
         </div>
     </div>
 
     <!-- Dashboard Page -->
     <div class="page" id="dashboardPage">
         <div class="user-info" id="userInfo"></div>
-        <h1>📚 Your Story Library</h1>
         
-        <div class="center">
-            <button id="newStoryButton">✨ Create New Story</button>
-            <button id="logoutButton">🚪 Logout</button>
-        </div>
-        
-        <div id="storiesContainer">
-            <div id="loadingStories" class="center">Loading your stories...</div>
-            <div id="noStories" class="center" style="display: none;">
-                <p>No stories yet! Create your first masterpiece.</p>
+        <div class="card">
+            <h1>📚 Your Story Library</h1>
+            <div class="guild-badge">Storymaker Intern</div>
+            
+            <div class="center">
+                <button id="newStoryButton">✨ Forge a New Story</button>
+                <button id="logoutButton" class="button-secondary">🚪 Leave Guild</button>
             </div>
-            <div id="storiesList"></div>
+            
+            <div id="storiesContainer" style="margin-top: 32px;">
+                <div id="loadingStories" class="center">Loading your stories...</div>
+                <div id="noStories" class="center" style="display: none;">
+                    <p>No stories forged yet! Create your first masterpiece.</p>
+                </div>
+                <div id="storiesList"></div>
+            </div>
         </div>
     </div>
 
-    <!-- Welcome Page (after login) -->
-<div class="page" id="welcomePage">
-    <div class="user-info" id="userInfoWelcome"></div>
-    <h1>👽 Alien Research Station ✨</h1>
-    <div class="center">
-        <p>Help aliens from Kepler-442b understand Earth by explaining YouTube videos!</p>
-        <p><small>The aliens will then write their own story about what they learned.</small></p>
-        <button id="startButton">Help the Aliens! 🛸</button>
-        <button id="backToDashboardButton">📚 Back to Library</button>
-    </div>
-</div>
-
-  <!-- Video Page -->
-<div class="page" id="videoPage">
-    <div class="timer" id="timer">00:00</div>
-    <div class="user-info" id="userInfoVideo"></div>
-    <h2>📺 Aliens Sent This Video From Earth!</h2>
-    <p style="text-align: center; opacity: 0.9;">They need your help understanding what's happening...</p>
-    <div class="video-container">
-        <iframe id="videoPlayer" width="100%" height="500" 
-                src="https://www.youtube.com/embed/OvOrbWggMTs" 
-                frameborder="0" allowfullscreen></iframe>
-    </div>
-    
-    <div id="pausePrompt" class="pause-prompt">
-        <h3>🛸 Alien Research Pause!</h3>
-        <p id="pauseQuestion">Help the aliens understand: What just happened?</p>
-        <textarea id="storyInput" placeholder="Explain to the aliens what you saw..."></textarea>
-        <div class="center">
-            <button id="continueButton">Continue Helping ▶️</button>
-            <button id="finishButton">Send Explanation to Aliens! 📡</button>
+    <!-- Welcome Page -->
+    <div class="page" id="welcomePage">
+        <div class="user-info" id="userInfoWelcome"></div>
+        
+        <div class="card">
+            <h1>⚒️ Welcome to the Storymakers Guild</h1>
+            <div class="guild-badge">Writing Assignment Available</div>
+            
+            <div class="center">
+                <p style="margin-bottom: 24px; font-size: 1.1rem;">As a new Intern, you'll learn to craft stories by watching inspiring videos and letting your imagination run wild. Your writing mentor will guide you through each step.</p>
+                
+                <div style="background: #f0f9ff; padding: 24px; border-radius: 12px; margin: 24px 0;">
+                    <h3>🎬 Your First Assignment</h3>
+                    <p>Watch a short video and create an original story inspired by what you see. Don't worry about being perfect - we're here to help you improve!</p>
+                </div>
+                
+                <button id="startButton">Begin Your Story Journey ⚒️</button>
+                <button id="backToDashboardButton" class="button-secondary">📚 Back to Library</button>
+            </div>
         </div>
     </div>
-</div>
 
-   <!-- Story Review Page -->
-<div class="page" id="reviewPage">
-    <h2>📖 Your Earth Explanation!</h2>
-    <div id="fullStory" class="story-display"></div>
-    <div class="center">
-        <p>Ready to send your explanation to the alien researchers?</p>
-        <button id="sendEditorButton">Send to Alien Researcher 👽</button>
-        <button id="saveStoryButton">💾 Save Explanation As-Is</button>
+    <!-- Video Page -->
+    <div class="page" id="videoPage">
+        <div class="timer" id="timer">00:00</div>
+        <div class="user-info" id="userInfoVideo"></div>
+        
+        <div class="card">
+            <h2>🎬 Story Inspiration</h2>
+            
+            <div class="step-indicator">
+                <div class="step active">Watch</div>
+                <div class="step">Create</div>
+                <div class="step">Refine</div>
+                <div class="step">Complete</div>
+            </div>
+            
+            <p style="text-align: center; margin-bottom: 24px; color: #6b7280;">
+                Watch this video and let it spark your imagination. When prompted, write what story comes to mind.
+            </p>
+            
+            <div class="video-container">
+                <iframe id="videoPlayer" width="100%" height="360" 
+                        src="https://www.youtube.com/embed/OvOrbWggMTs" 
+                        frameborder="0" allowfullscreen></iframe>
+            </div>
+            
+            <div id="pausePrompt" class="writing-prompt">
+                <h3>✍️ Story Time!</h3>
+                <p id="pauseQuestion">What story does this inspire? Let your imagination flow...</p>
+                <textarea id="storyInput" placeholder="Start writing your story here..."></textarea>
+                <div class="center">
+                    <button id="continueButton">Continue Watching ▶️</button>
+                    <button id="finishButton">Send to Writing Mentor 📝</button>
+                </div>
+            </div>
+        </div>
     </div>
-</div>
+
+    <!-- Story Review Page -->
+    <div class="page" id="reviewPage">
+        <div class="card">
+            <h2>📖 Your Story Draft</h2>
+            
+            <div class="step-indicator">
+                <div class="step completed">Watch</div>
+                <div class="step active">Create</div>
+                <div class="step">Refine</div>
+                <div class="step">Complete</div>
+            </div>
+            
+            <div id="fullStory" class="story-display"></div>
+            
+            <div class="center">
+                <p style="margin-bottom: 20px;">Ready to get feedback from your Writing Mentor?</p>
+                <button id="sendEditorButton">📝 Send to Writing Mentor</button>
+                <button id="saveStoryButton" class="button-secondary">💾 Save As-Is</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Waiting Page -->
     <div class="page" id="waitingPage">
-        <h2>🧙‍♂️ Editor is Working Magic...</h2>
-        <div class="center">
-            <p>Grammaticus is reading your story and preparing helpful suggestions!</p>
-            <div style="font-size: 3em; animation: spin 2s linear infinite;">⏳</div>
-            <p><small>This usually takes a few moments...</small></p>
+        <div class="card">
+            <h2>⚒️ Your Mentor is Reading...</h2>
+            <div class="center">
+                <p>The Writing Mentor is carefully reading your story and preparing helpful suggestions!</p>
+                <div class="loading-spinner">⏳</div>
+                <p><small>This usually takes just a moment...</small></p>
+            </div>
         </div>
     </div>
 
-<!-- Editor Response Page -->
-<div class="page" id="editorPage">
-    <h2>📡 Message from Kepler-442b!</h2>
-    <div id="editorResponse" class="editor-response"></div>
-    
-    <h3>Your Explanation:</h3>
-    <textarea id="editStory" placeholder="Improve your explanation..."></textarea>
-    
-    <!-- Buttons for improving the kid's explanation -->
-    <div id="revisionButtons" class="center" style="display: none;">
-        <button id="submitRevisionButton">Send Updated Explanation 📡</button>
-        <button id="finalizeButton">My Explanation is Perfect! ⭐</button>
-    </div>
-    
-    <!-- Buttons for sending to top researcher -->
-    <div id="researcherButtons" class="center" style="display: none;">
-        <button id="sendToResearcherButton" style="background: #00ff00; color: #333;">
-            👽 Send to Dr. Qorinth (Top Researcher)
-        </button>
-        <button id="declineResearcherButton" style="background: #ff6b6b; color: white;">
-            📚 Keep My Explanation As-Is
-        </button>
-    </div>
-    
-    <!-- Section for researcher feedback -->
-    <div id="researcherSection" style="display: none;">
-        <div class="center">
-            <button id="submitResearcherFeedbackButton">Send Feedback to Dr. Qorinth 📡</button>
-            <button id="approveResearchButton">Research Report is Perfect! 🌟</button>
+    <!-- Editor Response Page -->
+    <div class="page" id="editorPage">
+        <div class="card">
+            <h2>📝 Mentor Feedback</h2>
+            
+            <div class="step-indicator">
+                <div class="step completed">Watch</div>
+                <div class="step completed">Create</div>
+                <div class="step active">Refine</div>
+                <div class="step">Complete</div>
+            </div>
+            
+            <div id="editorResponse" class="editor-response"></div>
+            
+            <h3>Improve Your Story:</h3>
+            <textarea id="editStory" placeholder="Revise your story based on the feedback..."></textarea>
+            
+            <!-- Revision buttons -->
+            <div id="revisionButtons" class="center" style="display: none;">
+                <button id="submitRevisionButton">📝 Send Updated Story</button>
+                <button id="finalizeButton">✨ My Story is Ready!</button>
+            </div>
+            
+            <!-- Guild collaboration buttons -->
+            <div id="guildButtons" class="center" style="display: none;">
+                <button id="sendToGuildButton" style="background: #7c3aed;">
+                    ⚒️ Send to Storymakers Guild
+                </button>
+                <button id="keepStoryButton" class="button-secondary">
+                    📚 Keep My Version
+                </button>
+            </div>
+            
+            <!-- Guild feedback section -->
+            <div id="guildSection" style="display: none;">
+                <div class="center">
+                    <button id="submitGuildFeedbackButton">📝 Send Feedback to Guild</button>
+                    <button id="approveGuildButton">🌟 Guild Story is Perfect!</button>
+                </div>
+            </div>
         </div>
     </div>
-</div>
 
     <!-- Success Page -->
     <div class="page" id="successPage">
-        <h1>🎉 Congratulations!</h1>
-        <div class="center">
-            <p>You've created an amazing story! Your writing skills are getting stronger every day.</p>
-            <div id="finalStory" class="story-display"></div>
-            <input type="text" id="storyTitle" placeholder="Give your story a title..." style="margin: 20px 0;">
-            <br>
-            <button id="saveFinishedStoryButton">💾 Save to Library</button>
-            <button id="createAnotherButton">🔄 Create Another Story</button>
-            <button id="viewLibraryButton">📚 View Library</button>
+        <div class="card">
+            <h1>🎉 Story Complete!</h1>
+            
+            <div class="step-indicator">
+                <div class="step completed">Watch</div>
+                <div class="step completed">Create</div>
+                <div class="step completed">Refine</div>
+                <div class="step completed">Complete</div>
+            </div>
+            
+            <div class="center">
+                <div class="guild-badge">Story Forged Successfully!</div>
+                <p style="margin: 20px 0;">Congratulations! You've created an amazing story. Your writing skills are getting stronger with every tale you forge.</p>
+                
+                <div id="finalStory" class="story-display"></div>
+                
+                <input type="text" id="storyTitle" placeholder="Give your story a title..." style="margin: 20px 0;">
+                
+                <div>
+                    <button id="saveFinishedStoryButton">💾 Save to Library</button>
+                    <button id="createAnotherButton">🔄 Forge Another Story</button>
+                    <button id="viewLibraryButton" class="button-secondary">📚 View Library</button>
+                </div>
+            </div>
         </div>
     </div>
 
     <script src="https://unpkg.com/@simplewebauthn/browser/dist/bundle/index.umd.min.js"></script>
     <script>
-        console.log('🎬 Script starting to load...');
+        console.log('🎬 StoryForge loading...');
+        
         // Global variables
         let currentUser = null;
         let storyParts = [];
-        let pauseTimes = [15, 45, 75, 105]; // Change these pause times as needed
+        let pauseTimes = [20, 50, 80, 110]; // Adjusted for story creation
         let currentPauseIndex = 0;
         let sessionStartTime = Date.now();
         let timerInterval;
         let currentOriginalStory = '';
         let currentAIStory = '';
         
-        // Simple page management
+        // Page management
         function showPage(pageId) {
             console.log("Switching to page:", pageId);
             
-            // Hide all pages
             document.querySelectorAll('.page').forEach(page => {
                 page.classList.remove('active');
             });
             
-            // Show the requested page
             document.getElementById(pageId).classList.add('active');
-            
-            // Update user info displays
             updateUserInfo();
         }
         
-        function showAlienStorySection() {
-                document.getElementById('generateAlienStoryButton').style.display = 'none';
-                document.getElementById('alienStorySection').style.display = 'block';
-        }
-
-async function saveStoryAsIs() {
-    const title = 'My Earth Explanation';
-    const saved = await saveStory(title, currentOriginalStory, '');
-    if (saved) {
-        showPage('dashboardPage');
-        loadDashboard();
-    }
-}
-
-function finalizeStory() {
-    // User is happy with their explanation, go to success page
-    showPage('successPage');
-}
         function updateUserInfo() {
             if (currentUser) {
-                const userDisplay = `👋 Hi ${currentUser.firstName}!`;
+                const userDisplay = `👋 ${currentUser.firstName}`;
                 document.getElementById('userInfo').textContent = userDisplay;
                 document.getElementById('userInfoWelcome').textContent = userDisplay;
                 document.getElementById('userInfoVideo').textContent = userDisplay;
@@ -420,117 +614,89 @@ function finalizeStory() {
         
         // Authentication functions
         async function registerUser() {
-    console.log('🚀 Register button clicked!');
-    
-    const firstName = document.getElementById('firstNameInput').value.trim();
-    console.log('📝 First name entered:', firstName);
-    
-    if (!firstName) {
-        console.log('❌ No first name provided');
-        alert('Please enter your first name');
-        return;
-    }
-    
-    if (firstName.length > 50) {
-        console.log('❌ First name too long');
-        alert('First name is too long');
-        return;
-    }
-    
-    try {
-        console.log('🔍 Checking WebAuthn support...');
-        // Check if WebAuthn is supported
-        if (!window.PublicKeyCredential) {
-            console.log('❌ WebAuthn not supported');
-            alert('Passkeys are not supported on this device');
-            return;
+            console.log('🚀 Register button clicked!');
+            
+            const firstName = document.getElementById('firstNameInput').value.trim();
+            
+            if (!firstName) {
+                alert('Please enter your name');
+                return;
+            }
+            
+            if (firstName.length > 50) {
+                alert('Name is too long');
+                return;
+            }
+            
+            try {
+                if (!window.PublicKeyCredential) {
+                    alert('Secure login is not supported on this device');
+                    return;
+                }
+                
+                document.getElementById('registerButton').disabled = true;
+                document.getElementById('registerButton').textContent = 'Joining Guild...';
+                
+                // Start registration
+                const beginResponse = await fetch('/api/auth/register/begin', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ firstName })
+                });
+                
+                if (!beginResponse.ok) {
+                    throw new Error(`Server error: ${beginResponse.status}`);
+                }
+                
+                const { options, userId } = await beginResponse.json();
+                
+                // Create credential
+                const credential = await SimpleWebAuthnBrowser.startRegistration(options);
+                
+                // Complete registration
+                const completeResponse = await fetch('/api/auth/register/complete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId, firstName, credential })
+                });
+                
+                const result = await completeResponse.json();
+                
+                if (result.verified) {
+                    currentUser = result.user;
+                    showNotification('Welcome to the Storymakers Guild! 🎉');
+                    await loadDashboard();
+                } else {
+                    alert('Account creation failed. Please try again.');
+                }
+                
+            } catch (error) {
+                console.error('Registration error:', error);
+                alert(`Account creation failed: ${error.message}`);
+            } finally {
+                document.getElementById('registerButton').disabled = false;
+                document.getElementById('registerButton').textContent = '⚒️ Become a Storymaker';
+            }
         }
-        console.log('✅ WebAuthn supported');
-        
-        console.log('🔄 Disabling button...');
-        document.getElementById('registerButton').disabled = true;
-        document.getElementById('registerButton').textContent = 'Creating Account...';
-        
-        console.log('📡 Making request to /api/auth/register/begin...');
-        
-        // Start registration
-        const beginResponse = await fetch('/api/auth/register/begin', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ firstName })
-        });
-        
-        console.log('📡 Begin response status:', beginResponse.status);
-        
-        if (!beginResponse.ok) {
-            const errorText = await beginResponse.text();
-            console.log('❌ Begin response error:', errorText);
-            throw new Error(`Server error: ${beginResponse.status}`);
-        }
-        
-        const { options, userId } = await beginResponse.json();
-        console.log('✅ Begin response received, userId:', userId);
-        
-        console.log('🔐 Starting passkey creation...');
-        // Create credential
-        const credential = await SimpleWebAuthnBrowser.startRegistration(options);
-        console.log('✅ Passkey created successfully');
-        
-        console.log('📡 Completing registration...');
-        // Complete registration
-        const completeResponse = await fetch('/api/auth/register/complete', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId, firstName, credential })
-        });
-        
-        console.log('📡 Complete response status:', completeResponse.status);
-        
-        const result = await completeResponse.json();
-        console.log('📡 Complete response:', result);
-        
-        if (result.verified) {
-            console.log('🎉 Registration successful!');
-            currentUser = result.user;
-            showNotification('Account created successfully! 🎉');
-            await loadDashboard();
-        } else {
-            console.log('❌ Registration verification failed');
-            alert('Account creation failed. Please try again.');
-        }
-        
-    } catch (error) {
-        console.error('💥 Registration error:', error);
-        alert(`Account creation failed: ${error.message}`);
-    } finally {
-        console.log('🔄 Re-enabling button...');
-        document.getElementById('registerButton').disabled = false;
-        document.getElementById('registerButton').textContent = '🚀 Create Account with Passkey';
-    }
-}
         
         async function loginUser() {
             try {
                 if (!window.PublicKeyCredential) {
-                    alert('Passkeys are not supported on this device');
+                    alert('Secure login is not supported on this device');
                     return;
                 }
                 
                 document.getElementById('loginButton').disabled = true;
-                document.getElementById('loginButton').textContent = 'Logging in...';
+                document.getElementById('loginButton').textContent = 'Entering Guild...';
                 
-                // Start authentication
                 const beginResponse = await fetch('/api/auth/login/begin', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' }
                 });
                 
                 const options = await beginResponse.json();
-                
-                // Authenticate with passkey
                 const credential = await SimpleWebAuthnBrowser.startAuthentication(options);
                 
-                // Complete authentication
                 const completeResponse = await fetch('/api/auth/login/complete', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -550,20 +716,20 @@ function finalizeStory() {
             } catch (error) {
                 console.error('Login error:', error);
                 if (error.name === 'NotAllowedError') {
-                    alert('Login was cancelled or failed. Please try again.');
+                    alert('Login was cancelled. Please try again.');
                 } else {
                     alert('Login failed. Please try again.');
                 }
             } finally {
                 document.getElementById('loginButton').disabled = false;
-                document.getElementById('loginButton').textContent = '🔐 Login with Passkey';
+                document.getElementById('loginButton').textContent = '🔐 Continue Your Journey';
             }
         }
         
         function logout() {
             currentUser = null;
             showPage('loginPage');
-            showNotification('Logged out successfully! 👋');
+            showNotification('Until next time, Storymaker! 👋');
         }
         
         // Dashboard functions
@@ -573,9 +739,7 @@ function finalizeStory() {
             try {
                 const response = await fetch(`/api/stories/${currentUser.id}`);
                 const data = await response.json();
-                
                 displayStories(data.stories);
-                
             } catch (error) {
                 console.error('Error loading stories:', error);
                 document.getElementById('loadingStories').textContent = 'Error loading stories';
@@ -598,100 +762,252 @@ function finalizeStory() {
             noStories.style.display = 'none';
             
             container.innerHTML = stories.map(story => {
-                const preview = (story.ai_edited_story || story.original_story).substring(0, 100) + '...';
+                const preview = (story.ai_edited_story || story.original_story).substring(0, 120) + '...';
                 const date = new Date(story.created_at).toLocaleDateString();
                 
                 return `
                     <div class="story-item" onclick="viewStory('${story.id}', '${story.title}', '${story.original_story}', '${story.ai_edited_story || ''}')">
                         <div class="story-title">${story.title}</div>
                         <div class="story-preview">${preview}</div>
-                        <div class="story-date">Created: ${date}</div>
+                        <div class="story-date">Forged: ${date}</div>
                     </div>
                 `;
             }).join('');
         }
         
         function viewStory(id, title, originalStory, aiStory) {
-            // Show story in a simple view
             const storyContent = aiStory || originalStory;
             alert(`${title}\n\n${storyContent}`);
         }
         
-async function sendToResearcher() {
-    showPage('waitingPage');
-    
-    document.querySelector('#waitingPage h2').textContent = '👽 Dr. Qorinth Writing Research Report...';
-    document.querySelector('#waitingPage p').textContent = 'The top alien researcher is creating a detailed report about Earth!';
-    
-    try {
-        const researchReport = await callGeminiAPI(currentOriginalStory, 'researcher_story');
-        currentAIStory = researchReport;
+        // Story creation flow
+        function startStorySession() {
+            console.log("Starting story session...");
+            storyParts = [];
+            currentPauseIndex = 0;
+            sessionStartTime = Date.now();
+            showPage('videoPage');
+            startTimer();
+            setTimeout(() => pauseVideo(), pauseTimes[0] * 1000);
+        }
         
-        document.getElementById('editorResponse').innerHTML = `
-            <div class="character-name">👽 Dr. Qorinth's Research Report:</div>
-            <div class="story-display" style="background: rgba(100, 255, 100, 0.1); border-left: 5px solid #00ff00;">
-                <p>${researchReport}</p>
-            </div>
-            <p><strong>What do you think of Dr. Qorinth's research report? Your feedback will help improve alien understanding of Earth!</strong></p>
-        `;
+        function pauseVideo() {
+            const prompts = [
+                "What story is starting to form in your mind? Write about the characters or setting you imagine.",
+                "What happens next in your story? Add some action or dialogue.",
+                "How does your story develop? Add conflict, emotion, or plot twists.",
+                "How does your story conclude? Write an ending that feels satisfying."
+            ];
+            
+            document.getElementById('pauseQuestion').textContent = 
+                prompts[currentPauseIndex] || "Continue your story...";
+            document.getElementById('pausePrompt').classList.add('active');
+            
+            setTimeout(() => {
+                document.getElementById('storyInput').focus();
+            }, 100);
+        }
         
-        // Show the research report for feedback
-        document.getElementById('editStory').value = '';
-        document.getElementById('editStory').placeholder = 'Give feedback to Dr. Qorinth about the research report...';
+        function continueVideo() {
+            const storyPart = document.getElementById('storyInput').value.trim();
+            if (!storyPart) {
+                alert('Please write something for your story!');
+                return;
+            }
+            
+            storyParts.push(storyPart);
+            document.getElementById('storyInput').value = '';
+            document.getElementById('pausePrompt').classList.remove('active');
+            
+            currentPauseIndex++;
+            if (currentPauseIndex < pauseTimes.length) {
+                const nextPause = pauseTimes[currentPauseIndex] - pauseTimes[currentPauseIndex - 1];
+                setTimeout(() => pauseVideo(), nextPause * 1000);
+            } else {
+                setTimeout(() => {
+                    document.getElementById('pauseQuestion').textContent = "Add your final thoughts to complete your story.";
+                    document.getElementById('pausePrompt').classList.add('active');
+                }, 25000);
+            }
+        }
         
-        // Show researcher feedback section
-        document.getElementById('revisionButtons').style.display = 'none';
-        document.getElementById('researcherButtons').style.display = 'none';
-        document.getElementById('researcherSection').style.display = 'block';
+        function finishStory() {
+            const finalPart = document.getElementById('storyInput').value.trim();
+            if (finalPart) {
+                storyParts.push(finalPart);
+            }
+            
+            if (storyParts.length === 0) {
+                alert('Please write at least one part of your story!');
+                return;
+            }
+            
+            stopTimer();
+            currentOriginalStory = storyParts.join('\n\n');
+            displayFullStory();
+            showPage('reviewPage');
+        }
         
-        showNotification('👽 Dr. Qorinth completed the research report!');
-        setTimeout(() => showPage('editorPage'), 2000);
+        function displayFullStory() {
+            document.getElementById('fullStory').textContent = currentOriginalStory;
+            document.getElementById('editStory').value = currentOriginalStory;
+            document.getElementById('finalStory').textContent = currentAIStory || currentOriginalStory;
+        }
         
-    } catch (error) {
-        console.error('Researcher Error:', error);
-        alert(`Dr. Qorinth had trouble writing the report: ${error.message}`);
-        showPage('editorPage');
-    }
-}
-
-// New function - Submit feedback to researcher
-async function submitResearcherFeedback() {
-    const feedback = document.getElementById('editStory').value.trim();
-    
-    if (!feedback) {
-        alert('Please give feedback to Dr. Qorinth about the research report!');
-        return;
-    }
-    
-    showPage('waitingPage');
-    document.querySelector('#waitingPage h2').textContent = '👽 Dr. Qorinth Processing Feedback...';
-    document.querySelector('#waitingPage p').textContent = 'The researcher is considering your suggestions!';
-    
-    try {
-        const researcherResponse = await callGeminiAPI(feedback, 'researcher_revision');
+        async function sendToEditor() {
+            const sendButton = document.getElementById('sendEditorButton');
+            sendButton.disabled = true;
+            sendButton.textContent = 'Sending to Mentor...';
+            
+            showPage('waitingPage');
+            
+            try {
+                const editorResponse = await callStoryForgeAPI(currentOriginalStory, 'mentor');
+                
+                document.getElementById('editorResponse').innerHTML = `
+                    <div class="character-name">📝 Your Writing Mentor says:</div>
+                    <p>${editorResponse}</p>
+                `;
+                
+                document.getElementById('editStory').value = currentOriginalStory;
+                document.getElementById('revisionButtons').style.display = 'block';
+                document.getElementById('guildButtons').style.display = 'none';
+                document.getElementById('guildSection').style.display = 'none';
+                
+                showNotification('📝 Your mentor has reviewed your story!');
+                setTimeout(() => showPage('editorPage'), 2000);
+                
+            } catch (error) {
+                console.error('Mentor API Error:', error);
+                alert(`Unable to reach your writing mentor: ${error.message}`);
+                showPage('reviewPage');
+            } finally {
+                sendButton.disabled = false;
+                sendButton.textContent = '📝 Send to Writing Mentor';
+            }
+        }
         
-        document.getElementById('editorResponse').innerHTML = `
-            <div class="character-name">👽 Dr. Qorinth responds:</div>
-            <p>${researcherResponse}</p>
-        `;
+        async function submitRevision() {
+            const revisedStory = document.getElementById('editStory').value.trim();
+            
+            if (!revisedStory) {
+                alert('Please improve your story based on the mentor feedback!');
+                return;
+            }
+            
+            currentOriginalStory = revisedStory;
+            
+            showPage('waitingPage');
+            document.querySelector('#waitingPage h2').textContent = '📝 Mentor Reviewing Updates...';
+            document.querySelector('#waitingPage p').textContent = 'Checking if your story is ready for the Guild!';
+            
+            try {
+                const feedback = await callStoryForgeAPI(revisedStory, 'revision');
+                
+                // Check if mentor thinks it's ready for the Guild
+                if (feedback.toLowerCase().includes('excellent') || feedback.toLowerCase().includes('ready') || feedback.toLowerCase().includes('guild')) {
+                    const approvalResponse = await callStoryForgeAPI(revisedStory, 'approve_for_guild');
+                    
+                    document.getElementById('editorResponse').innerHTML = `
+                        <div class="character-name">📝 Your Writing Mentor says:</div>
+                        <p>${approvalResponse}</p>
+                    `;
+                    
+                    document.getElementById('revisionButtons').style.display = 'none';
+                    document.getElementById('guildButtons').style.display = 'block';
+                    
+                } else {
+                    document.getElementById('editorResponse').innerHTML = `
+                        <div class="character-name">📝 Your Writing Mentor responds:</div>
+                        <p>${feedback}</p>
+                    `;
+                    
+                    document.getElementById('editStory').value = revisedStory;
+                }
+                
+                showNotification('📝 Mentor responded!');
+                setTimeout(() => showPage('editorPage'), 2000);
+                
+            } catch (error) {
+                console.error('Revision API Error:', error);
+                alert(`Communication error with mentor: ${error.message}`);
+                showPage('editorPage');
+            }
+        }
         
-        // Update the AI story if the researcher revised it
-        // For this demo, we'll keep the original report
+        async function sendToGuild() {
+            showPage('waitingPage');
+            
+            document.querySelector('#waitingPage h2').textContent = '⚒️ Guild Crafting Enhanced Story...';
+            document.querySelector('#waitingPage p').textContent = 'The Storymakers Guild is expanding your story into something amazing!';
+            
+            try {
+                const guildStory = await callStoryForgeAPI(currentOriginalStory, 'guild_story');
+                currentAIStory = guildStory;
+                
+                document.getElementById('editorResponse').innerHTML = `
+                    <div class="character-name">⚒️ The Storymakers Guild presents:</div>
+                    <div class="story-display" style="background: #f3e8ff; border-left: 5px solid #7c3aed;">
+                        <p>${guildStory}</p>
+                    </div>
+                    <p><strong>What do you think of the Guild's enhanced version? Your feedback helps them improve!</strong></p>
+                `;
+                
+                document.getElementById('editStory').value = '';
+                document.getElementById('editStory').placeholder = 'Share your thoughts on the Guild version...';
+                
+                document.getElementById('revisionButtons').style.display = 'none';
+                document.getElementById('guildButtons').style.display = 'none';
+                document.getElementById('guildSection').style.display = 'block';
+                
+                showNotification('⚒️ The Guild has enhanced your story!');
+                setTimeout(() => showPage('editorPage'), 2000);
+                
+            } catch (error) {
+                console.error('Guild Error:', error);
+                alert(`The Guild is having trouble: ${error.message}`);
+                showPage('editorPage');
+            }
+        }
         
-        showNotification('📡 Dr. Qorinth appreciated your feedback!');
-        setTimeout(() => showPage('editorPage'), 2000);
+        async function submitGuildFeedback() {
+            const feedback = document.getElementById('editStory').value.trim();
+            
+            if (!feedback) {
+                alert('Please share your thoughts on the Guild version!');
+                return;
+            }
+            
+            showPage('waitingPage');
+            document.querySelector('#waitingPage h2').textContent = '⚒️ Guild Considering Feedback...';
+            document.querySelector('#waitingPage p').textContent = 'The Guild masters are reviewing your suggestions!';
+            
+            try {
+                const guildResponse = await callStoryForgeAPI(feedback, 'guild_revision');
+                
+                document.getElementById('editorResponse').innerHTML = `
+                    <div class="character-name">⚒️ The Guild responds:</div>
+                    <p>${guildResponse}</p>
+                `;
+                
+                showNotification('📝 The Guild appreciated your feedback!');
+                setTimeout(() => showPage('editorPage'), 2000);
+                
+            } catch (error) {
+                console.error('Guild Feedback Error:', error);
+                alert(`Communication error with Guild: ${error.message}`);
+                showPage('editorPage');
+            }
+        }
         
-    } catch (error) {
-        console.error('Researcher Feedback Error:', error);
-        alert(`Communication error with Dr. Qorinth: ${error.message}`);
-        showPage('editorPage');
-    }
-}
-
-function declineResearcher() {
-    alert('No problem! You can always ask Zyx-9 to send your explanation to Dr. Qorinth later.');
-    showPage('successPage');
-}
+        function keepStory() {
+            showPage('successPage');
+        }
+        
+        function finalizeStory() {
+            showPage('successPage');
+        }
+        
         // Story saving functions
         async function saveStory(title, originalStory, aiStory = '') {
             try {
@@ -724,6 +1040,24 @@ function declineResearcher() {
             }
         }
         
+        async function saveStoryAsIs() {
+            const title = 'My Story Draft';
+            const saved = await saveStory(title, currentOriginalStory, '');
+            if (saved) {
+                showPage('dashboardPage');
+                loadDashboard();
+            }
+        }
+        
+        async function saveFinishedStory() {
+            const title = document.getElementById('storyTitle').value.trim() || 'My Story';
+            const saved = await saveStory(title, currentOriginalStory, currentAIStory);
+            if (saved) {
+                showPage('dashboardPage');
+                loadDashboard();
+            }
+        }
+        
         // Timer functions
         function startTimer() {
             document.getElementById('timer').style.display = 'block';
@@ -741,232 +1075,6 @@ function declineResearcher() {
             document.getElementById('timer').style.display = 'none';
         }
         
-        // Story flow functions
-        function startStorySession() {
-            console.log("Starting story session...");
-            storyParts = [];
-            currentPauseIndex = 0;
-            sessionStartTime = Date.now();
-            showPage('videoPage');
-            startTimer();
-            setTimeout(() => pauseVideo(), pauseTimes[0] * 1000);
-        }
-        
-        function pauseVideo() {
-            console.log("Pausing video for input...");
-            const questions = [
-                "What happened in the beginning of the story?",
-                "Who are the main characters and what are they doing?",
-                "What problem or challenge appeared?",
-                "How do you think the story will end?"
-            ];
-            
-            document.getElementById('pauseQuestion').textContent = 
-                questions[currentPauseIndex] || "What just happened?";
-            document.getElementById('pausePrompt').style.display = 'block';
-            
-            setTimeout(() => {
-                document.getElementById('storyInput').focus();
-            }, 100);
-        }
-        
-        function continueVideo() {
-            const storyPart = document.getElementById('storyInput').value.trim();
-            if (!storyPart) {
-                alert('Please write something about what happened!');
-                return;
-            }
-            
-            storyParts.push(storyPart);
-            document.getElementById('storyInput').value = '';
-            document.getElementById('pausePrompt').style.display = 'none';
-            
-            currentPauseIndex++;
-            if (currentPauseIndex < pauseTimes.length) {
-                const nextPause = pauseTimes[currentPauseIndex] - pauseTimes[currentPauseIndex - 1];
-                setTimeout(() => pauseVideo(), nextPause * 1000);
-            } else {
-                setTimeout(() => {
-                    document.getElementById('pauseQuestion').textContent = "How did the story end?";
-                    document.getElementById('pausePrompt').style.display = 'block';
-                }, 30000);
-            }
-        }
-        
-        function finishStory() {
-            const finalPart = document.getElementById('storyInput').value.trim();
-            if (finalPart) {
-                storyParts.push(finalPart);
-            }
-            
-            if (storyParts.length === 0) {
-                alert('Please write at least one part of the story!');
-                return;
-            }
-            
-            stopTimer();
-            currentOriginalStory = storyParts.join(' ');
-            displayFullStory();
-            showPage('reviewPage');
-        }
-        
-        function displayFullStory() {
-            document.getElementById('fullStory').textContent = currentOriginalStory;
-            document.getElementById('editStory').value = currentOriginalStory;
-            document.getElementById('finalStory').textContent = currentAIStory || currentOriginalStory;
-        }
-        
-    async function sendToEditor() {
-    const sendButton = document.getElementById('sendEditorButton');
-    sendButton.disabled = true;
-    sendButton.textContent = 'Sending to Zyx-9...';
-    
-    showPage('waitingPage');
-    
-    // Update waiting page text
-    document.querySelector('#waitingPage h2').textContent = '👽 Zyx-9 Reviewing Your Explanation...';
-    document.querySelector('#waitingPage p').textContent = 'The alien researcher is helping you improve your explanation!';
-    
-    try {
-        const editorResponse = await callGeminiAPI(currentOriginalStory, 'editor');
-        
-        document.getElementById('editorResponse').innerHTML = `
-            <div class="character-name">👽 Zyx-9 from Kepler-442b says:</div>
-            <p>${editorResponse}</p>
-        `;
-        
-        // Show the kid's explanation for editing
-        document.getElementById('editStory').value = currentOriginalStory;
-        document.getElementById('editStory').placeholder = 'Improve your explanation based on Zyx-9\'s suggestions...';
-        
-        // Show revision buttons, hide researcher button
-        document.getElementById('revisionButtons').style.display = 'block';
-        document.getElementById('researcherButtons').style.display = 'none';
-        document.getElementById('researcherSection').style.display = 'none';
-        
-        showNotification('📡 Zyx-9 wants to help improve your explanation!');
-        setTimeout(() => showPage('editorPage'), 2000);
-        
-    } catch (error) {
-        console.error('Alien API Error:', error);
-        alert(`The aliens are having communication issues: ${error.message}`);
-        showPage('reviewPage');
-    } finally {
-        sendButton.disabled = false;
-        sendButton.textContent = 'Send to Alien Researcher 👽';
-    }
-}
-        
-       async function submitRevision() {
-    const revisedStory = document.getElementById('editStory').value.trim();
-    
-    if (!revisedStory) {
-        alert('Please improve your explanation based on Zyx-9\'s suggestions!');
-        return;
-    }
-    
-    // Update the current story with the revision
-    currentOriginalStory = revisedStory;
-    
-    showPage('waitingPage');
-    document.querySelector('#waitingPage h2').textContent = '👽 Zyx-9 Reviewing Your Updates...';
-    document.querySelector('#waitingPage p').textContent = 'Checking if your explanation is ready for the top researcher!';
-    
-    try {
-        const feedback = await callGeminiAPI(revisedStory, 'revision');
-        
-        // Check if Zyx-9 thinks it's ready for the researcher
-        if (feedback.toLowerCase().includes('excellent') || feedback.toLowerCase().includes('ready') || feedback.toLowerCase().includes('top researcher')) {
-            // Ask for permission to send to researcher
-            const approvalResponse = await callGeminiAPI(revisedStory, 'approve_for_researcher');
-            
-            document.getElementById('editorResponse').innerHTML = `
-                <div class="character-name">👽 Zyx-9 says:</div>
-                <p>${approvalResponse}</p>
-            `;
-            
-            // Show the researcher approval buttons
-            document.getElementById('revisionButtons').style.display = 'none';
-            document.getElementById('researcherButtons').style.display = 'block';
-            
-        } else {
-            // Continue improving the explanation
-            document.getElementById('editorResponse').innerHTML = `
-                <div class="character-name">👽 Zyx-9 responds:</div>
-                <p>${feedback}</p>
-            `;
-            
-            document.getElementById('editStory').value = revisedStory;
-        }
-        
-        showNotification('📡 Zyx-9 responded!');
-        setTimeout(() => showPage('editorPage'), 2000);
-        
-    } catch (error) {
-        console.error('Revision API Error:', error);
-        alert(`Communication error with aliens: ${error.message}`);
-        showPage('editorPage');
-    }
-} // ADD THIS LINE HERE
-        
-        // Add this new function for generating the alien story
-async function generateAlienStory() {
-    showPage('waitingPage');
-    
-    // Update waiting page for story generation
-    document.querySelector('#waitingPage h2').textContent = '👽 Zyx-9 Writing Earth Story...';
-    document.querySelector('#waitingPage p').textContent = 'The alien researcher is writing a complete story about what they learned!';
-    
-    try {
-        const alienStoryResponse = await callGeminiAPI(currentOriginalStory, 'alien_story');
-        currentAIStory = alienStoryResponse;
-        
-        // Update the editor page to show the alien story
-        document.getElementById('editorResponse').innerHTML = `
-            <div class="character-name">👽 Zyx-9's Complete Earth Story:</div>
-            <div class="story-display" style="background: rgba(100, 255, 100, 0.1); border-left: 5px solid #00ff00;">
-                <p>${alienStoryResponse}</p>
-            </div>
-            <p><strong>What do you think of Zyx-9's story? You can give feedback to help the aliens understand Earth better!</strong></p>
-        `;
-        
-        // Update the textarea with the alien story for editing
-        document.getElementById('editStory').value = alienStoryResponse;
-        document.getElementById('editStory').placeholder = 'Give feedback to Zyx-9 about their Earth story...';
-        
-        // Show the feedback section
-        showAlienStorySection();
-        
-        showNotification('👽 Zyx-9 wrote a complete story!');
-        setTimeout(() => showPage('editorPage'), 2000);
-        
-    } catch (error) {
-        console.error('Alien Story Error:', error);
-        alert(`The aliens had trouble writing the story: ${error.message}`);
-        showPage('editorPage');
-    }
-}
-async function saveStoryAsIs() {
-    const title = 'My Earth Explanation';
-    const saved = await saveStory(title, currentOriginalStory, '');
-    if (saved) {
-        showPage('dashboardPage');
-        loadDashboard();
-    }
-}
-
-function finalizeStory() {
-    showPage('successPage');
-}
-        async function saveFinishedStory() {
-            const title = document.getElementById('storyTitle').value.trim() || 'My Story';
-            const saved = await saveStory(title, currentOriginalStory, currentAIStory);
-            if (saved) {
-                showPage('dashboardPage');
-                loadDashboard();
-            }
-        }
-        
         function showNotification(message) {
             const notification = document.createElement('div');
             notification.className = 'notification';
@@ -977,102 +1085,104 @@ function finalizeStory() {
             setTimeout(() => notification.remove(), 5000);
         }
         
-// Updated API call function
-async function callGeminiAPI(storyText, mode) {
-    let prompt;
-    if (mode === 'editor') {
-        prompt = `You are Zyx-9, a friendly alien researcher from planet Kepler-442b. A human child is helping you understand Earth by explaining a video. Here's their explanation: "${storyText}"
+        // Updated API call function for StoryForge narrative
+        async function callStoryForgeAPI(storyText, mode) {
+            let prompt;
+            
+            if (mode === 'mentor') {
+                prompt = `You are a friendly Writing Mentor at the StoryForge Guild, helping young writers aged 8-16 improve their creative stories. Here's a story draft from one of your students: "${storyText}"
 
-Respond as Zyx-9 with:
-1. Thank them for their explanation
-2. Give 2-3 specific suggestions to make their explanation better/clearer
-3. Ask 1-2 curious questions to help them add more detail
-4. Keep it encouraging and under 80 words
-5. Use friendly alien language
+Respond as a supportive mentor with:
+1. Start with encouragement about what they did well
+2. Give 2-3 specific, gentle suggestions to improve their story (plot, characters, descriptions, dialogue)
+3. Ask 1-2 questions to help them think deeper about their story
+4. Keep it encouraging and age-appropriate (under 100 words)
+5. Use simple, clear language that builds confidence
 
-Focus on helping them improve THEIR explanation, not writing your own story yet.`;
+Focus on helping them improve THEIR story, not rewriting it yourself.`;
 
-    } else if (mode === 'approve_for_researcher') {
-        prompt = `You are Zyx-9. The human child has written this excellent explanation: "${storyText}"
+            } else if (mode === 'approve_for_guild') {
+                prompt = `You are the Writing Mentor. The student has created this improved story: "${storyText}"
 
-Respond as Zyx-9 with:
-1. Praise their final explanation
-2. Ask if you can send it to your top researcher, Dr. Qorinth, who writes detailed reports for the Galactic Earth Studies Department
-3. Explain that Dr. Qorinth will write a complete research report based on their explanation
-4. Keep it under 60 words and friendly`;
+Respond as the mentor with:
+1. Praise their improvements and hard work
+2. Ask if they'd like the Storymakers Guild to create an enhanced version of their story
+3. Explain that the Guild will expand their story into a longer, more detailed version
+4. Keep it encouraging and under 80 words`;
 
-    } else if (mode === 'researcher_story') {
-        prompt = `You are Dr. Qorinth, the top alien researcher at the Galactic Earth Studies Department. You've received this explanation about Earth from a human child: "${storyText}"
+            } else if (mode === 'guild_story') {
+                prompt = `You are the Storymakers Guild, master storytellers who help young writers. A student has written this story: "${storyText}"
 
-Write a detailed research report (300-500 words) that:
-1. Analyzes what you learned about Earth culture/behavior from the child's explanation
-2. Written in a formal but accessible research style for other aliens
-3. Shows your alien perspective trying to understand human customs
-4. Includes scientific observations about human behavior
-5. Ends with conclusions about Earth society
+Create an enhanced version that:
+1. Expands their story to 200-400 words
+2. Keeps their original ideas and characters
+3. Adds more descriptive details, dialogue, and plot development
+4. Maintains their voice but makes it more engaging
+5. Ensures it's age-appropriate and inspiring
+6. Shows good story structure (beginning, middle, end)
 
-Write as a complete research document, not a response to the child.`;
+Write the enhanced story, not a response to the student.`;
 
-    } else if (mode === 'researcher_revision') {
-        prompt = `You are Dr. Qorinth responding to feedback on your research report. 
+            } else if (mode === 'guild_revision') {
+                prompt = `You are the Storymakers Guild responding to student feedback on your enhanced story.
 
-Original human explanation: "${currentOriginalStory}"
-Your research report: "${currentAIStory}"
-Human child's feedback: "${storyText}"
+Original student story: "${currentOriginalStory}"
+Guild enhanced version: "${currentAIStory}"
+Student feedback: "${storyText}"
 
-Respond as Dr. Qorinth with:
+Respond as the Guild with:
 1. Thank them for their valuable feedback
-2. Explain how you'll revise the report based on their suggestions
-3. Ask if they have any other insights about Earth customs
-4. Keep it brief and professional but friendly (under 80 words)`;
+2. Explain what you learned from their suggestions
+3. Mention how you might adjust the story based on their input
+4. Keep it encouraging and collaborative (under 80 words)`;
 
-    } else {
-        // This is the regular revision mode for the kid's explanation
-        prompt = `You are Zyx-9 responding to the human child's revised explanation: "${storyText}"
+            } else {
+                // This is the revision mode for the student's story
+                prompt = `You are the Writing Mentor responding to the student's revised story: "${storyText}"
 
-Original explanation: "${currentOriginalStory}"
+Original story: "${currentOriginalStory}"
 Their revision: "${storyText}"
 
-Give encouraging feedback on their improvements and either:
-- Suggest one more small improvement, OR
-- Say their explanation is excellent and ready for the top researcher
+Give encouraging feedback and either:
+- Suggest one small improvement and encourage another revision, OR
+- Say their story is excellent and ready for the Guild to enhance
 
-Keep it brief, encouraging, and under 60 words.`;
-    }
-    
-    const requestBody = {
-        contents: [{
-            parts: [{ text: prompt }]
-        }],
-        generationConfig: {
-            temperature: 0.8,
-            maxOutputTokens: 500
+Keep it brief, positive, and under 70 words.`;
+            }
+            
+            const requestBody = {
+                contents: [{
+                    parts: [{ text: prompt }]
+                }],
+                generationConfig: {
+                    temperature: 0.8,
+                    maxOutputTokens: 600
+                }
+            };
+            
+            const response = await fetch('/api/editor', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(requestBody)
+            });
+            
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+                throw new Error(errorData.error || `Server error: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            
+            if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
+                throw new Error('Invalid response from AI service');
+            }
+            
+            return data.candidates[0].content.parts[0].text;
         }
-    };
-    
-    const response = await fetch('/api/editor', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestBody)
-    });
-    
-    if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-        throw new Error(errorData.error || `Server error: ${response.status}`);
-    }
-    
-    const data = await response.json();
-    
-    if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
-        throw new Error('Invalid response from AI service');
-    }
-    
-    return data.candidates[0].content.parts[0].text;
-}
         
-        // Setup event listeners when page loads
+        // Setup event listeners
         window.addEventListener('load', async () => {
-            console.log("Setting up event listeners...");
+            console.log("Setting up StoryForge event listeners...");
             
             // Test server connection
             const statusElement = document.getElementById('connectionStatus');
@@ -1080,10 +1190,10 @@ Keep it brief, encouraging, and under 60 words.`;
                 const response = await fetch('/health');
                 const data = await response.json();
                 console.log('✅ Server connection OK:', data);
-                statusElement.innerHTML = `<span style="color: #28a745;">✅ Server Ready</span>`;
+                statusElement.innerHTML = `<span style="color: #10b981;">✅ Guild Ready</span>`;
             } catch (error) {
                 console.error('❌ Server connection failed:', error);
-                statusElement.innerHTML = `<span style="color: #dc3545;">❌ Server Issue</span>`;
+                statusElement.innerHTML = `<span style="color: #dc2626;">❌ Guild Offline</span>`;
             }
             
             // Authentication event listeners
@@ -1101,27 +1211,25 @@ Keep it brief, encouraging, and under 60 words.`;
             // Story flow event listeners
             document.getElementById('continueButton').addEventListener('click', continueVideo);
             document.getElementById('finishButton').addEventListener('click', finishStory);
-            document.getElementById('sendToResearcherButton').addEventListener('click', sendToResearcher);
-document.getElementById('declineResearcherButton').addEventListener('click', declineResearcher);
-document.getElementById('submitResearcherFeedbackButton').addEventListener('click', submitResearcherFeedback);
-document.getElementById('approveResearchButton').addEventListener('click', () => showPage('successPage'));
+            document.getElementById('sendToGuildButton').addEventListener('click', sendToGuild);
+            document.getElementById('keepStoryButton').addEventListener('click', keepStory);
+            document.getElementById('submitGuildFeedbackButton').addEventListener('click', submitGuildFeedback);
+            document.getElementById('approveGuildButton').addEventListener('click', () => showPage('successPage'));
             document.getElementById('sendEditorButton').addEventListener('click', sendToEditor);
             document.getElementById('saveStoryButton').addEventListener('click', saveStoryAsIs);
             document.getElementById('submitRevisionButton').addEventListener('click', submitRevision);
             document.getElementById('finalizeButton').addEventListener('click', finalizeStory);
             document.getElementById('saveFinishedStoryButton').addEventListener('click', saveFinishedStory);
-
             
-            // Allow Enter key to submit first name
+            // Allow Enter key to submit name
             document.getElementById('firstNameInput').addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') registerUser();
             });
             
-            console.log("✅ All event listeners ready!");
+            console.log("✅ StoryForge ready!");
         });
         
-        console.log("🎬 Story Creator with Authentication loaded!");
-        console.log('✅ Script loaded completely!');
+        console.log("🎬 StoryForge loaded successfully!");
     </script>
 </body>
 </html>
