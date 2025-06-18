@@ -19,7 +19,7 @@ const db = new sqlite3.Database('./storyforge.db');
 
 // Create tables
 db.serialize(() => {
-    // Users table (minimal data - just first name and passkey info)
+    // Users table
     db.run(`CREATE TABLE IF NOT EXISTS users (
         id TEXT PRIMARY KEY,
         first_name TEXT NOT NULL,
@@ -55,10 +55,10 @@ db.serialize(() => {
     )`);
 });
 
-// WebAuthn configuration - updated for StoryForge
+// WebAuthn configuration
 const rpName = 'StoryForge';
-const rpID = process.env.NODE_ENV === 'production' ? 'storyforge.onrender.com' : 'localhost';
-const origin = process.env.NODE_ENV === 'production' ? 'https://storyforge.onrender.com' : `http://localhost:${port}`;
+const rpID = process.env.NODE_ENV === 'production' ? 'wwrai.onrender.com' : 'localhost';
+const origin = process.env.NODE_ENV === 'production' ? 'https://wwrai.onrender.com' : `http://localhost:${port}`;
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -77,7 +77,6 @@ app.get('/health', (req, res) => {
 app.get('/test-gemini', async (req, res) => {
     try {
         console.log('Testing StoryForge AI Mentor...');
-        console.log('API Key configured:', !!GEMINI_KEY);
         
         if (!GEMINI_KEY) {
             return res.json({ error: 'No API key configured' });
@@ -96,7 +95,6 @@ app.get('/test-gemini', async (req, res) => {
             }
         );
         
-        console.log('Gemini response status:', testResponse.status);
         const result = await testResponse.text();
         
         res.json({ 
@@ -112,228 +110,13 @@ app.get('/test-gemini', async (req, res) => {
     }
 });
 
-// Authentication Routes
-
 // Start passkey registration
 app.post('/api/auth/register/begin', async (req, res) => {
     try {
         const { firstName } = req.body;
         
         if (!firstName || firstName.trim().length < 1) {
-            return res.status(response.status).json({ 
-                error: `StoryForge AI Mentor unavailable: ${response.status}`,
-                details: errorText,
-                guildMessage: 'The Writing Mentor is temporarily unavailable. Please try again shortly.'
-            });
-        }
-
-        const data = await response.json();
-        console.log('StoryForge AI processing complete');
-        console.log('Response generated:', JSON.stringify(data, null, 2));
-        
-        // Add StoryForge metadata to response
-        const enhancedResponse = {
-            ...data,
-            storyforgeMetadata: {
-                service: 'Writing Mentor',
-                timestamp: new Date().toISOString(),
-                guildActive: true
-            }
-        };
-        
-        res.json(enhancedResponse);
-        
-    } catch (error) {
-        console.error('StoryForge server error:', error);
-        res.status(500).json({ 
-            error: 'Guild services temporarily unavailable',
-            message: error.message,
-            guildSupport: 'Please try again or contact Guild support if the issue persists.'
-        });
-    }
-});
-
-// Guild statistics endpoint (for future dashboard features)
-app.get('/api/guild/stats', (req, res) => {
-    try {
-        db.all(`SELECT 
-            COUNT(*) as totalMembers,
-            COUNT(CASE WHEN guild_level = 'Intern' THEN 1 END) as interns,
-            COUNT(CASE WHEN guild_level = 'Apprentice' THEN 1 END) as apprentices,
-            COUNT(CASE WHEN guild_level = 'Journeyman' THEN 1 END) as journeymen,
-            COUNT(CASE WHEN guild_level = 'Master' THEN 1 END) as masters
-            FROM users`, [], (err, memberStats) => {
-            
-            if (err) {
-                console.error('Guild stats error:', err);
-                return res.status(500).json({ error: 'Unable to access Guild statistics' });
-            }
-            
-            db.all(`SELECT 
-                COUNT(*) as totalStories,
-                COUNT(CASE WHEN guild_enhanced = 1 THEN 1 END) as guildEnhanced,
-                COUNT(CASE WHEN mentor_feedback IS NOT NULL AND mentor_feedback != '' THEN 1 END) as mentorReviewed
-                FROM stories`, [], (err, storyStats) => {
-                
-                if (err) {
-                    console.error('Story stats error:', err);
-                    return res.status(500).json({ error: 'Unable to access story statistics' });
-                }
-                
-                res.json({
-                    guild: {
-                        name: 'StoryForge Guild',
-                        motto: 'Forge Your Own Epic',
-                        status: 'Active'
-                    },
-                    members: memberStats[0] || {},
-                    stories: storyStats[0] || {},
-                    services: {
-                        writingMentor: !!GEMINI_KEY,
-                        guildCollaboration: true,
-                        storyLibrary: true
-                    }
-                });
-            });
-        });
-        
-    } catch (error) {
-        console.error('Guild stats error:', error);
-        res.status(500).json({ error: 'Guild statistics unavailable' });
-    }
-});
-
-// Enhanced story endpoint with Guild metadata
-app.get('/api/stories/:userId/:storyId', (req, res) => {
-    try {
-        const { userId, storyId } = req.params;
-        
-        db.get(`SELECT s.*, u.first_name, u.guild_level 
-                FROM stories s 
-                JOIN users u ON s.user_id = u.id 
-                WHERE s.id = ? AND s.user_id = ?`, 
-                [storyId, userId], (err, story) => {
-            if (err) {
-                console.error('Database error getting story:', err);
-                return res.status(500).json({ error: 'Failed to retrieve story from Guild library' });
-            }
-            
-            if (!story) {
-                return res.status(404).json({ error: 'Story not found in Guild library' });
-            }
-            
-            res.json({
-                story: {
-                    ...story,
-                    guildMetadata: {
-                        authorLevel: story.guild_level,
-                        mentorReviewed: !!story.mentor_feedback,
-                        guildEnhanced: !!story.guild_enhanced,
-                        forgedAt: story.created_at
-                    }
-                }
-            });
-        });
-        
-    } catch (error) {
-        console.error('Get story error:', error);
-        res.status(500).json({ error: 'Failed to access Guild library' });
-    }
-});
-
-// Delete story endpoint
-app.delete('/api/stories/:userId/:storyId', (req, res) => {
-    try {
-        const { userId, storyId } = req.params;
-        
-        db.run(`DELETE FROM stories WHERE id = ? AND user_id = ?`, 
-               [storyId, userId], function(err) {
-            if (err) {
-                console.error('Database error deleting story:', err);
-                return res.status(500).json({ error: 'Failed to remove story from Guild library' });
-            }
-            
-            if (this.changes === 0) {
-                return res.status(404).json({ error: 'Story not found in Guild library' });
-            }
-            
-            res.json({ 
-                success: true, 
-                message: 'Story removed from Guild library',
-                deletedStoryId: storyId
-            });
-        });
-        
-    } catch (error) {
-        console.error('Delete story error:', error);
-        res.status(500).json({ error: 'Failed to remove story from Guild library' });
-    }
-});
-
-// Update user guild level (for future progression system)
-app.patch('/api/users/:userId/guild-level', (req, res) => {
-    try {
-        const { userId } = req.params;
-        const { guildLevel } = req.body;
-        
-        const validLevels = ['Intern', 'Apprentice', 'Journeyman', 'Master'];
-        if (!validLevels.includes(guildLevel)) {
-            return res.status(400).json({ error: 'Invalid Guild level' });
-        }
-        
-        db.run(`UPDATE users SET guild_level = ? WHERE id = ?`, 
-               [guildLevel, userId], function(err) {
-            if (err) {
-                console.error('Database error updating Guild level:', err);
-                return res.status(500).json({ error: 'Failed to update Guild level' });
-            }
-            
-            if (this.changes === 0) {
-                return res.status(404).json({ error: 'Guild member not found' });
-            }
-            
-            res.json({ 
-                success: true, 
-                message: `Guild level updated to ${guildLevel}`,
-                newLevel: guildLevel
-            });
-        });
-        
-    } catch (error) {
-        console.error('Update guild level error:', error);
-        res.status(500).json({ error: 'Failed to update Guild level' });
-    }
-});
-
-// Serve index.html for all other routes (SPA)
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
-});
-
-// Enhanced startup message
-app.listen(port, () => {
-    console.log(`🏰 StoryForge Guild Server is now active on port ${port}`);
-    console.log(`📖 Tagline: "Forge Your Own Epic. Learn to Write, One Story at a Time."`);
-    console.log(`🌐 Guild Portal: http://localhost:${port}`);
-    console.log(`🤖 AI Writing Mentor: ${GEMINI_KEY ? 'ACTIVE' : 'OFFLINE'}`);
-    console.log(`📚 Story Library: CONNECTED`);
-    console.log(`🔐 Guild Security (WebAuthn): ENABLED for ${rpID}`);
-    console.log(`📁 Static files served from: ${__dirname}`);
-    console.log(`⚒️  Welcome to the StoryForge Guild! Ready to help young writers forge their epics.`);
-    
-    // Log database status
-    db.get("SELECT COUNT(*) as count FROM users", (err, result) => {
-        if (!err) {
-            console.log(`👥 Current Guild Members: ${result.count}`);
-        }
-    });
-    
-    db.get("SELECT COUNT(*) as count FROM stories", (err, result) => {
-        if (!err) {
-            console.log(`📚 Stories in Guild Library: ${result.count}`);
-        }
-    });
-});400).json({ error: 'Name is required to join the Guild' });
+            return res.status(400).json({ error: 'Name is required to join the Guild' });
         }
         
         if (firstName.trim().length > 50) {
@@ -356,7 +139,7 @@ app.listen(port, () => {
             },
         });
         
-        // Store challenge temporarily (in production, use Redis or session store)
+        // Store challenge temporarily
         global.challenges = global.challenges || {};
         global.challenges[userId] = options.challenge;
         
@@ -507,8 +290,6 @@ app.post('/api/auth/login/complete', async (req, res) => {
     }
 });
 
-// Story Management Routes
-
 // Save a story
 app.post('/api/stories', (req, res) => {
     try {
@@ -586,21 +367,17 @@ app.post('/api/editor', async (req, res) => {
         }
 
         console.log('StoryForge AI Mentor processing request...');
-        console.log('Request received:', JSON.stringify(req.body, null, 2));
         
-        // Add StoryForge-specific headers and configuration
         const response = await fetch(
             `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`,
             {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
-                    'User-Agent': 'StoryForge-Guild/1.0',
-                    'X-Service': 'StoryForge-AI-Mentor'
+                    'User-Agent': 'StoryForge-Guild/1.0'
                 },
                 body: JSON.stringify({
                     ...req.body,
-                    // Add safety settings for child-appropriate content
                     safetySettings: [
                         {
                             category: "HARM_CATEGORY_HARASSMENT",
@@ -623,9 +400,40 @@ app.post('/api/editor', async (req, res) => {
             }
         );
 
-        console.log('StoryForge AI response status:', response.status);
-
         if (!response.ok) {
             const errorText = await response.text();
             console.error('StoryForge AI Error:', response.status, errorText);
-            return res.status(
+            return res.status(response.status).json({ 
+                error: `StoryForge AI Mentor unavailable: ${response.status}`,
+                guildMessage: 'The Writing Mentor is temporarily unavailable. Please try again shortly.'
+            });
+        }
+
+        const data = await response.json();
+        
+        res.json(data);
+        
+    } catch (error) {
+        console.error('StoryForge server error:', error);
+        res.status(500).json({ 
+            error: 'Guild services temporarily unavailable',
+            message: error.message
+        });
+    }
+});
+
+// Serve index.html for all other routes (SPA)
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+app.listen(port, () => {
+    console.log(`🏰 StoryForge Guild Server is now active on port ${port}`);
+    console.log(`📖 Tagline: "Forge Your Own Epic. Learn to Write, One Story at a Time."`);
+    console.log(`🌐 Guild Portal: http://localhost:${port}`);
+    console.log(`🤖 AI Writing Mentor: ${GEMINI_KEY ? 'ACTIVE' : 'OFFLINE'}`);
+    console.log(`📚 Story Library: CONNECTED`);
+    console.log(`🔐 Guild Security (WebAuthn): ENABLED for ${rpID}`);
+    console.log(`📁 Static files served from: ${__dirname}`);
+    console.log(`⚒️  Welcome to the StoryForge Guild! Ready to help young writers forge their epics.`);
+});
