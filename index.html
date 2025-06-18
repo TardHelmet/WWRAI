@@ -455,27 +455,27 @@
                 <div>
                     <div class="video-container">
                         <iframe id="videoPlayer" width="100%" height="300" 
-                                src="https://www.youtube.com/embed/OvOrbWggMTs" 
-                                frameborder="0" allowfullscreen></iframe>
+                                src="https://www.youtube.com/embed/OvOrbWggMTs?autoplay=1&mute=1" 
+                                frameborder="0" allowfullscreen allow="autoplay; encrypted-media"></iframe>
                     </div>
                     <div style="text-align: center; margin-top: 12px;">
-                        <div id="videoStatus" style="color: #10b981; font-weight: 600;">▶️ Video Playing</div>
-                        <div id="nextPauseInfo" style="font-size: 0.9rem; color: #6b7280; margin-top: 4px;">Next pause in <span id="countdown">30</span> seconds</div>
+                        <div style="color: #10b981; font-weight: 600;">🎬 Watch and Write</div>
+                        <div style="font-size: 0.9rem; color: #6b7280;">Write your story as you watch the video</div>
                     </div>
                 </div>
                 
                 <!-- Writing Side -->
                 <div>
                     <div style="background: #f0f9ff; padding: 16px; border-radius: 12px; border: 2px solid #0ea5e9; margin-bottom: 16px;">
-                        <h3 style="margin: 0 0 12px 0; color: #0ea5e9;">✍️ <span id="currentPrompt">Start your story with what you see...</span></h3>
-                        <textarea id="storyInput" placeholder="Write about what you're seeing..." style="min-height: 120px; margin-bottom: 12px;"></textarea>
-                        <button id="savePartButton" style="width: 100%; background: #10b981;">💾 Save This Part</button>
+                        <h3 style="margin: 0 0 12px 0; color: #0ea5e9;">✍️ Write Your Story</h3>
+                        <p style="margin: 0 0 12px 0; font-size: 0.9rem; color: #6b7280;">Let the video inspire you! Write your story as you watch.</p>
+                        <textarea id="storyInput" placeholder="Start writing your story here..." style="min-height: 200px; margin-bottom: 12px;"></textarea>
                     </div>
                     
-                    <!-- Story Parts Display -->
-                    <div id="storyPartsDisplay" style="max-height: 200px; overflow-y: auto;">
-                        <div style="font-weight: 600; margin-bottom: 8px; color: #374151;">📖 Your Story So Far:</div>
-                        <div id="storyPartsList"></div>
+                    <!-- Story Preview -->
+                    <div id="storyPreview" style="background: #f9fafb; padding: 16px; border-radius: 8px; border: 1px solid #e5e7eb;">
+                        <div style="font-weight: 600; margin-bottom: 8px; color: #374151;">📖 Your Story Preview:</div>
+                        <div id="storyContent" style="font-size: 0.9rem; line-height: 1.5; color: #6b7280; font-style: italic;">Start writing to see your story appear here...</div>
                     </div>
                 </div>
             </div>
@@ -484,43 +484,31 @@
             <div style="display: none;" id="mobileVideoWriting">
                 <div class="video-container" style="margin-bottom: 16px;">
                     <iframe id="videoPlayerMobile" width="100%" height="250" 
-                            src="https://www.youtube.com/embed/OvOrbWggMTs" 
-                            frameborder="0" allowfullscreen></iframe>
+                            src="https://www.youtube.com/embed/OvOrbWggMTs?autoplay=1&mute=1" 
+                            frameborder="0" allowfullscreen allow="autoplay; encrypted-media"></iframe>
                 </div>
                 
-                <div id="videoStatusMobile" style="text-align: center; margin-bottom: 16px;">
-                    <div style="color: #10b981; font-weight: 600;">▶️ Video Playing</div>
-                    <div style="font-size: 0.9rem; color: #6b7280;">Next pause in <span id="countdownMobile">30</span> seconds</div>
+                <div style="text-align: center; margin-bottom: 16px;">
+                    <div style="color: #10b981; font-weight: 600;">🎬 Watch and Write</div>
+                    <div style="font-size: 0.9rem; color: #6b7280;">Write your story as you watch the video</div>
                 </div>
                 
                 <div style="background: #f0f9ff; padding: 16px; border-radius: 12px; border: 2px solid #0ea5e9; margin-bottom: 16px;">
-                    <h3 style="margin: 0 0 12px 0; color: #0ea5e9;">✍️ <span id="currentPromptMobile">Start your story with what you see...</span></h3>
-                    <textarea id="storyInputMobile" placeholder="Write about what you're seeing..." style="min-height: 100px; margin-bottom: 12px;"></textarea>
-                    <button id="savePartButtonMobile" style="width: 100%; background: #10b981;">💾 Save This Part</button>
+                    <h3 style="margin: 0 0 12px 0; color: #0ea5e9;">✍️ Write Your Story</h3>
+                    <p style="margin: 0 0 12px 0; font-size: 0.9rem; color: #6b7280;">Let the video inspire you! Write your story as you watch.</p>
+                    <textarea id="storyInputMobile" placeholder="Start writing your story here..." style="min-height: 120px; margin-bottom: 12px;"></textarea>
                 </div>
                 
-                <div id="storyPartsDisplayMobile" style="margin-bottom: 16px;">
-                    <div style="font-weight: 600; margin-bottom: 8px; color: #374151;">📖 Your Story So Far:</div>
-                    <div id="storyPartsListMobile"></div>
+                <div id="storyPreviewMobile" style="background: #f9fafb; padding: 16px; border-radius: 8px; border: 1px solid #e5e7eb; margin-bottom: 16px;">
+                    <div style="font-weight: 600; margin-bottom: 8px; color: #374151;">📖 Your Story Preview:</div>
+                    <div id="storyContentMobile" style="font-size: 0.9rem; line-height: 1.5; color: #6b7280; font-style: italic;">Start writing to see your story appear here...</div>
                 </div>
             </div>
             
             <!-- Control Buttons -->
             <div class="center" style="margin-top: 24px;">
-                <button id="pauseVideoButton" style="background: #f59e0b;">⏸️ Pause Video</button>
-                <button id="resumeVideoButton" style="background: #10b981; display: none;">▶️ Resume Video</button>
-                <button id="finishVideoButton" style="background: #7c3aed; display: none;">✨ Finish & Review Story</button>
-            </div>
-            
-            <!-- Progress Indicator -->
-            <div style="margin-top: 24px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                    <span style="font-size: 0.9rem; color: #6b7280;">Story Progress</span>
-                    <span style="font-size: 0.9rem; color: #6b7280;"><span id="partsCount">0</span> parts written</span>
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill" id="storyProgress" style="width: 0%;"></div>
-                </div>
+                <button id="finishStoryButton" style="background: #7c3aed;">✨ Finish My Story</button>
+                <button id="backToDashboardFromVideo" style="background: #6b7280;">📚 Back to Library</button>
             </div>
         </div>
     </div>
@@ -637,21 +625,10 @@
         
         // Global variables
         let currentUser = null;
-        let storyParts = [];
-        let pauseTimes = [30, 60, 90, 120, 150]; // Every 30 seconds
-        let videoDuration = 180; // Approximate video duration in seconds
-        let currentPauseIndex = 0;
         let sessionStartTime = Date.now();
         let timerInterval;
-        let videoTimer = null;
-        let countdownTimer = null;
-        let videoFinished = false;
         let currentOriginalStory = '';
         let currentAIStory = '';
-        
-        // Video and writing state
-        let videoPaused = false;
-        let currentVideoTime = 0;
         
         // Page management
         function showPage(pageId) {
@@ -870,12 +847,88 @@
             checkMobileLayout();
             window.addEventListener('resize', checkMobileLayout);
             
+            // Get video element
+            videoElement = document.getElementById('videoPlayer') || document.getElementById('videoPlayerMobile');
+            
+            if (videoElement && videoElement.tagName === 'VIDEO') {
+                // HTML5 video - we can control it
+                videoElement.addEventListener('loadeddata', () => {
+                    console.log('Video loaded, starting autoplay...');
+                    videoDuration = Math.floor(videoElement.duration) || 180;
+                    
+                    // Ensure video starts playing
+                    videoElement.play().then(() => {
+                        console.log('Video playing successfully');
+                        startCountdown();
+                    }).catch(err => {
+                        console.log('Autoplay failed, user interaction required:', err);
+                        // Show play button if autoplay fails
+                        showManualPlayButton();
+                    });
+                });
+                
+                videoElement.addEventListener('timeupdate', () => {
+                    currentVideoTime = Math.floor(videoElement.currentTime);
+                });
+                
+                videoElement.addEventListener('ended', () => {
+                    finishVideo();
+                });
+                
+                // Try to start playing immediately
+                if (videoElement.readyState >= 2) {
+                    videoDuration = Math.floor(videoElement.duration) || 180;
+                    videoElement.play().then(() => {
+                        startCountdown();
+                    }).catch(() => {
+                        showManualPlayButton();
+                    });
+                }
+            } else {
+                // YouTube iframe fallback - use manual timing
+                console.log('Using YouTube iframe, starting manual countdown...');
+                videoDuration = 180; // Default duration
+                startCountdown();
+            }
+            
             // Update initial prompt
             updateCurrentPrompt();
             
             // Set up video controls
-            document.getElementById('videoStatus').textContent = '▶️ Video Playing';
+            document.getElementById('videoStatus').textContent = '▶️ Video Starting...';
             document.getElementById('finishVideoButton').style.display = 'none';
+        }
+        
+        function showManualPlayButton() {
+            const playButton = document.createElement('button');
+            playButton.textContent = '▶️ Start Video & Story';
+            playButton.style.cssText = `
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                z-index: 1000;
+                background: #10b981;
+                color: white;
+                padding: 16px 32px;
+                border: none;
+                border-radius: 8px;
+                font-size: 18px;
+                font-weight: 600;
+                cursor: pointer;
+            `;
+            
+            playButton.onclick = () => {
+                if (videoElement && videoElement.tagName === 'VIDEO') {
+                    videoElement.play();
+                }
+                startCountdown();
+                playButton.remove();
+                document.getElementById('videoStatus').textContent = '▶️ Video Playing';
+            };
+            
+            document.querySelector('.video-container').style.position = 'relative';
+            document.querySelector('.video-container').appendChild(playButton);
         }
         
         function checkMobileLayout() {
@@ -940,6 +993,12 @@
         
         function pauseForWriting() {
             videoPaused = true;
+            
+            // Pause the actual video if it's HTML5
+            if (videoElement && videoElement.tagName === 'VIDEO') {
+                videoElement.pause();
+            }
+            
             document.getElementById('videoStatus').textContent = '⏸️ Paused for Writing';
             document.getElementById('nextPauseInfo').textContent = 'Write about what you just saw!';
             
@@ -999,6 +1058,12 @@
         
         function resumeVideo() {
             videoPaused = false;
+            
+            // Resume the actual video if it's HTML5
+            if (videoElement && videoElement.tagName === 'VIDEO') {
+                videoElement.play();
+            }
+            
             document.getElementById('videoStatus').textContent = '▶️ Video Playing';
             
             // Update mobile status
@@ -1021,6 +1086,10 @@
         }
         
         function pauseVideo() {
+            // Manual pause
+            if (videoElement && videoElement.tagName === 'VIDEO') {
+                videoElement.pause();
+            }
             pauseForWriting();
         }
         
@@ -1097,7 +1166,7 @@
         }
         
         function finishStory() {
-            reviewStory();
+            finishStoryFromVideo();
         }
         
         function displayFullStory() {
@@ -1461,11 +1530,8 @@ Keep it brief, positive, and under 70 words.`;
             document.getElementById('createAnotherButton').addEventListener('click', () => showPage('welcomePage'));
             
             // Story flow event listeners
-            document.getElementById('savePartButton').addEventListener('click', saveStoryPart);
-            document.getElementById('savePartButtonMobile').addEventListener('click', saveStoryPart);
-            document.getElementById('pauseVideoButton').addEventListener('click', pauseVideo);
-            document.getElementById('resumeVideoButton').addEventListener('click', resumeVideo);
-            document.getElementById('finishVideoButton').addEventListener('click', reviewStory);
+            document.getElementById('finishStoryButton').addEventListener('click', finishStoryFromVideo);
+            document.getElementById('backToDashboardFromVideo').addEventListener('click', () => loadDashboard());
             document.getElementById('sendToGuildButton').addEventListener('click', sendToGuild);
             document.getElementById('keepStoryButton').addEventListener('click', keepStory);
             document.getElementById('submitGuildFeedbackButton').addEventListener('click', submitGuildFeedback);
@@ -1475,6 +1541,16 @@ Keep it brief, positive, and under 70 words.`;
             document.getElementById('submitRevisionButton').addEventListener('click', submitRevision);
             document.getElementById('finalizeButton').addEventListener('click', finalizeStory);
             document.getElementById('saveFinishedStoryButton').addEventListener('click', saveFinishedStory);
+            
+            // Allow Enter key to submit name
+            document.getElementById('firstNameInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') registerUser();
+            });
+            
+            console.log("✅ StoryForge ready!");
+        });
+        
+        console.log("🎬 StoryForge loaded successfully!");FinishedStory);FinishedStory);
             
             // Allow Enter key to submit name
             document.getElementById('firstNameInput').addEventListener('keypress', (e) => {
