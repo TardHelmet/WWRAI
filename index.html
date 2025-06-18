@@ -446,7 +446,7 @@
             </div>
             
             <p style="text-align: center; margin-bottom: 24px; color: #6b7280;">
-                Watch this video and let it spark your imagination. When prompted, write what story comes to mind.
+                Watch this video and let it spark your imagination. Every 30 seconds, we'll pause so you can build your story piece by piece.
             </p>
             
             <div class="video-container">
@@ -456,12 +456,15 @@
             </div>
             
             <div id="pausePrompt" class="writing-prompt">
-                <h3>✍️ Story Time!</h3>
+                <h3>✍️ Story Building Time!</h3>
                 <p id="pauseQuestion">What story does this inspire? Let your imagination flow...</p>
-                <textarea id="storyInput" placeholder="Start writing your story here..."></textarea>
+                <textarea id="storyInput" placeholder="Write about what you've seen so far..."></textarea>
                 <div class="center">
-                    <button id="continueButton">Continue Watching ▶️</button>
-                    <button id="finishButton">Send to Writing Mentor 📝</button>
+                    <button id="continueButton">Continue Video ▶️</button>
+                    <button id="finishButton" style="display: none;">Send to Writing Mentor 📝</button>
+                </div>
+                <div style="margin-top: 16px; padding: 12px; background: #e0f2fe; border-radius: 8px; font-size: 0.9rem; color: #0277bd;">
+                    💡 <strong>Tip:</strong> Write about what you've seen so far. You can build your story piece by piece as the video continues!
                 </div>
             </div>
         </div>
@@ -580,7 +583,8 @@
         // Global variables
         let currentUser = null;
         let storyParts = [];
-        let pauseTimes = [20, 50, 80, 110]; // Adjusted for story creation
+        let pauseTimes = [30, 60, 90, 120, 150]; // Every 30 seconds
+        let videoDuration = 180; // Approximate video duration in seconds
         let currentPauseIndex = 0;
         let sessionStartTime = Date.now();
         let timerInterval;
@@ -788,21 +792,27 @@
             sessionStartTime = Date.now();
             showPage('videoPage');
             startTimer();
-            setTimeout(() => pauseVideo(), pauseTimes[0] * 1000);
+            setTimeout(() => pauseVideoForWriting(), pauseTimes[0] * 1000);
         }
         
-        function pauseVideo() {
+        function pauseVideoForWriting() {
+            console.log(`Pausing video at ${pauseTimes[currentPauseIndex]} seconds for writing...`);
+            
             const prompts = [
-                "What story is starting to form in your mind? Write about the characters or setting you imagine.",
-                "What happens next in your story? Add some action or dialogue.",
-                "How does your story develop? Add conflict, emotion, or plot twists.",
-                "How does your story conclude? Write an ending that feels satisfying."
+                "What's happening so far? Start your story with what you've seen.",
+                "Continue your story! What happens next based on what you just watched?",
+                "Keep building your story! Add more details about the characters or action.",
+                "Your story is growing! What new developments do you see?",
+                "Add to your story! How is everything coming together?",
+                "Finish your story! How does everything end?"
             ];
             
+            // Pause the video by switching to writing mode
             document.getElementById('pauseQuestion').textContent = 
-                prompts[currentPauseIndex] || "Continue your story...";
+                prompts[currentPauseIndex] || "Continue building your story based on what you've seen...";
             document.getElementById('pausePrompt').classList.add('active');
             
+            // Focus on the writing area
             setTimeout(() => {
                 document.getElementById('storyInput').focus();
             }, 100);
@@ -811,7 +821,7 @@
         function continueVideo() {
             const storyPart = document.getElementById('storyInput').value.trim();
             if (!storyPart) {
-                alert('Please write something for your story!');
+                alert('Please write something for your story before continuing!');
                 return;
             }
             
@@ -820,14 +830,23 @@
             document.getElementById('pausePrompt').classList.remove('active');
             
             currentPauseIndex++;
-            if (currentPauseIndex < pauseTimes.length) {
-                const nextPause = pauseTimes[currentPauseIndex] - pauseTimes[currentPauseIndex - 1];
-                setTimeout(() => pauseVideo(), nextPause * 1000);
+            
+            // Check if we have more pauses or if video is complete
+            if (currentPauseIndex < pauseTimes.length && pauseTimes[currentPauseIndex] <= videoDuration) {
+                // Resume video and set next pause
+                const nextPauseDelay = (pauseTimes[currentPauseIndex] - pauseTimes[currentPauseIndex - 1]) * 1000;
+                console.log(`Resuming video, next pause in ${nextPauseDelay/1000} seconds`);
+                setTimeout(() => pauseVideoForWriting(), nextPauseDelay);
             } else {
+                // Video is complete, do final writing prompt
+                console.log("Video complete, final writing prompt");
                 setTimeout(() => {
-                    document.getElementById('pauseQuestion').textContent = "Add your final thoughts to complete your story.";
+                    document.getElementById('pauseQuestion').textContent = "The video is finished! Add any final thoughts to complete your story.";
                     document.getElementById('pausePrompt').classList.add('active');
-                }, 25000);
+                    // Change the continue button to finish for the last prompt
+                    document.getElementById('continueButton').style.display = 'none';
+                    document.getElementById('finishButton').textContent = 'Complete My Story 📖';
+                }, 2000);
             }
         }
         
@@ -843,7 +862,11 @@
             }
             
             stopTimer();
-            currentOriginalStory = storyParts.join('\n\n');
+            // Join story parts with paragraph breaks to show the progression
+            currentOriginalStory = storyParts.map((part, index) => {
+                return `**Part ${index + 1}:** ${part}`;
+            }).join('\n\n');
+            
             displayFullStory();
             showPage('reviewPage');
         }
