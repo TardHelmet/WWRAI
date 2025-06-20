@@ -184,10 +184,21 @@
             border-radius: 8px;
             padding: 20px;
             margin: 20px 0;
-            line-height: 1.6;
+            line-height: 1.8;
             font-size: 16px;
             max-height: 400px;
             overflow-y: auto;
+        }
+
+        .story-display p {
+            margin-bottom: 16px;
+            text-indent: 20px;
+        }
+
+        .story-display p:first-child {
+            text-indent: 0;
+            font-weight: bold;
+            color: #1e40af;
         }
 
         .story-library {
@@ -451,7 +462,32 @@
             }
         }
 
-        // Local storage management
+        // Helper function to format story text with proper paragraphs
+        function formatStoryText(text) {
+            // Split by newlines and clean up
+            const paragraphs = text.split('\n').filter(p => p.trim().length > 0);
+            
+            // If no natural breaks, try to split by periods followed by capital letters
+            if (paragraphs.length === 1) {
+                const sentences = text.split(/(?<=\.)\s+(?=[A-Z])/);
+                const groupedParagraphs = [];
+                for (let i = 0; i < sentences.length; i += 2) {
+                    const para = sentences.slice(i, i + 2).join(' ');
+                    if (para.trim()) groupedParagraphs.push(para.trim());
+                }
+                return groupedParagraphs;
+            }
+            
+            return paragraphs.map(p => p.trim());
+        }
+
+        // Helper function to display story with proper formatting
+        function displayFormattedStory(containerId, storyText) {
+            const container = document.getElementById(containerId);
+            const paragraphs = formatStoryText(storyText);
+            
+            container.innerHTML = paragraphs.map(para => `<p>${para}</p>`).join('');
+        }
         function saveToStorage(key, data) {
             localStorage.setItem(`storyforge_${key}`, JSON.stringify(data));
         }
@@ -517,30 +553,48 @@ Respond with:
 
 Their story: "${userText}"
 
-Write a complete children's story (12 paragraphs, simple language for 10-year-olds) that:
-1. Expands their core idea into a full narrative
-2. Keeps their main characters and plot
+Write a complete children's story that:
+1. Expands their core idea into a full narrative with exactly 12 paragraphs
+2. Keeps their main characters and plot elements
 3. Adds adventure, dialogue, and descriptive details
 4. Has a clear beginning, middle, and satisfying ending
-5. Uses simple, engaging language
-6. Each paragraph should be 2-4 sentences
+5. Uses simple, engaging language for 10-year-olds
+6. Each paragraph should be 2-4 sentences long
+
+Format your response with clear paragraph breaks. Start each paragraph on a new line.
 
 Just write the story - no introduction or explanation needed.`;
 
                 } else if (mode === 'guild_feedback') {
-                    prompt = `You are the Guild writer responding to the Intern's feedback on your story.
+                    prompt = `You are the Guild writer rewriting your story based on the Intern's feedback.
 
 Original story: "${context}"
 Their feedback: "${userText}"
 
+Rewrite the complete 12-paragraph children's story incorporating their suggestions:
+1. Keep the same basic plot but improve based on their feedback
+2. Make the changes they suggested while keeping it a complete story
+3. Maintain 12 paragraphs, each 2-4 sentences
+4. Use simple, engaging language for 10-year-olds
+5. Format with clear paragraph breaks
+
+Write the complete revised story - no explanation, just the new story.`;
+
+                } else if (mode === 'guild_feedback_response') {
+                    prompt = `You are the Guild writer responding to the Intern's feedback.
+
+Their feedback: "${userText}"
+
 Respond as the grateful Guild writer:
 1. Thank them for their thoughtful feedback
-2. Mention one specific thing you'll improve based on their suggestion
+2. Mention one specific thing you improved based on their suggestion
 3. ${guildRevisionCount >= maxGuildRevisions - 1 ? 
                         'Say you think the story is now perfect with their help' : 
                         'Ask if they have any other suggestions'}
 4. Keep it warm and appreciative, under 60 words
-5. Sign as "Your Guild Writer"`;
+5. Sign as "Your Guild Writer"
+
+This is just your response to their feedback, not the story itself.`;
                 }
 
                 const response = await fetch('/api/storyforge-ai', {
@@ -717,11 +771,11 @@ Respond as the grateful Guild writer:
 
                 const guildStory = await callStoryForgeAI(currentStory, 'guild_story');
                 currentGuildStory = guildStory;
-                guildStoryDiv.textContent = guildStory;
+                displayFormattedStory('guildStory', guildStory);
             });
 
             document.getElementById('declineCollaboration').addEventListener('click', () => {
-                document.getElementById('finalStory').textContent = currentStory;
+                displayFormattedStory('finalStory', currentStory);
                 showPage('successPage');
             });
 
@@ -733,14 +787,25 @@ Respond as the grateful Guild writer:
                 }
 
                 guildRevisionCount++;
-                const response = await callStoryForgeAI(feedback, 'guild_feedback', currentGuildStory);
                 
-                // Show the feedback response
+                // Show loading for both response and new story
+                const guildStoryDiv = document.getElementById('guildStory');
+                guildStoryDiv.innerHTML = '<div class="loading">The Guild writer is revising the story based on your feedback...</div>';
+
+                // Get both the response AND the revised story
+                const revisedStory = await callStoryForgeAI(feedback, 'guild_feedback', currentGuildStory);
+                const writerResponse = await callStoryForgeAI(feedback, 'guild_feedback_response');
+                
+                // Update the current story
+                currentGuildStory = revisedStory;
+                displayFormattedStory('guildStory', revisedStory);
+                
+                // Show the writer's response
                 const responseDiv = document.createElement('div');
                 responseDiv.className = 'ai-response';
                 responseDiv.innerHTML = `
                     <div class="character-badge">Guild Writer Response</div>
-                    <p>${response}</p>
+                    <p>${writerResponse}</p>
                 `;
                 document.getElementById('guildStorySection').appendChild(responseDiv);
 
@@ -752,14 +817,15 @@ Respond as the grateful Guild writer:
             });
 
             document.getElementById('approveFinalStory').addEventListener('click', () => {
-                document.getElementById('finalStory').textContent = currentGuildStory;
+                displayFormattedStory('finalStory', currentGuildStory);
                 showPage('successPage');
             });
 
             // Success page
             document.getElementById('saveStory').addEventListener('click', () => {
                 const title = document.getElementById('storyTitle').value.trim();
-                const finalStory = document.getElementById('finalStory').textContent;
+                const finalStoryDiv = document.getElementById('finalStory');
+                const finalStory = finalStoryDiv.innerHTML; // Get formatted HTML
                 
                 saveStoryToLibrary(title, currentStory, finalStory);
                 alert('Story saved to your library!');
