@@ -8,4 +8,17 @@ restartPolicyType = "ON_FAILURE"
 startCommand = "npm start"
 
 [[services]]
-name = "web"
+name = "storyforge-web"
+
+[env]
+# StoryForge environment configuration
+NODE_ENV = "production"
+APP_NAME = "StoryForge"
+APP_TAGLINE = "Where Stories Are Forged, Not Just Written"
+
+# Required: Set GEMINI_API_KEY in Railway dashboard
+# GEMINI_API_KEY = "your-api-key-here"
+
+[build.env]
+# Build-time environment variables
+NPM_CONFIG_PRODUCTION = "false"
