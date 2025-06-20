@@ -1,52 +1,75 @@
 {
-  "name": "storyforge-guild",
+  "name": "storyforge",
   "version": "1.0.0",
-  "description": "StoryForge - Forge Your Own Epic. Learn to Write, One Story at a Time.",
+  "description": "StoryForge - Where Stories Are Forged, Not Just Written. AI-powered creative writing education for ages 8-16.",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
-    "build": "echo 'No build step required - StoryForge ready to deploy'",
-    "test": "echo 'StoryForge Guild tests not implemented yet'"
+    "build": "echo 'StoryForge is ready to deploy - no build step required'",
+    "test": "echo 'StoryForge tests coming soon'",
+    "health": "curl http://localhost:3000/health || echo 'Server not running'"
   },
   "dependencies": {
-    "express": "^4.18.2",
-    "sqlite3": "^5.1.6",
-    "uuid": "^9.0.0"
+    "express": "^4.18.2"
   },
   "engines": {
     "node": ">=18.0.0",
     "npm": ">=8.0.0"
   },
   "keywords": [
-    "education", 
+    "education",
     "creative-writing", 
-    "storytelling", 
-    "ai-powered", 
-    "children", 
+    "storytelling",
+    "ai-powered",
+    "children",
     "narrative-education",
     "storyforge",
-    "writing-mentor"
+    "writing-mentor",
+    "guild",
+    "interactive-learning"
   ],
-  "author": "StoryForge Guild",
+  "author": "StoryForge Team",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/storyforge/guild-platform"
+    "url": "https://github.com/storyforge/platform"
   },
   "bugs": {
-    "url": "https://github.com/storyforge/guild-platform/issues"
+    "url": "https://github.com/storyforge/platform/issues"
   },
-  "homepage": "https://storyforge.com",
+  "homepage": "https://storyforge.app",
   "config": {
-    "app_name": "StoryForge Guild Platform",
-    "tagline": "Forge Your Own Epic. Learn to Write, One Story at a Time.",
+    "app_name": "StoryForge",
+    "tagline": "Where Stories Are Forged, Not Just Written",
     "target_audience": "Ages 8-16",
-    "guild_services": [
-      "AI Writing Mentor",
-      "Story Library", 
-      "Guild Collaboration",
-      "Creative Writing Education"
-    ]
+    "core_features": [
+      "AI Writing Mentor (Editor)",
+      "Story Workshop with Video Inspiration", 
+      "Guild Collaboration System",
+      "Story Library & Downloads",
+      "Interactive Learning Journey"
+    ],
+    "guild_roles": {
+      "intern": "Young writers learning the craft",
+      "editor": "AI mentor providing feedback",
+      "guild": "Collaborative story expansion",
+      "press": "Final story creation and publishing"
+    }
+  },
+  "storyforge": {
+    "mission": "Transform creative writing from homework into adventure",
+    "approach": "Narrative wrapper education with AI assistance",
+    "differentiators": [
+      "Stories are forged through collaboration, not just written",
+      "Immersive guild universe experience",
+      "Multi-stage feedback and improvement process",
+      "Real-time video + writing workshop"
+    ],
+    "business_model": {
+      "freemium": "Basic tools with local storage",
+      "premium": "Advanced AI, cloud storage, print-on-demand",
+      "education": "School district partnerships"
+    }
   }
 }
