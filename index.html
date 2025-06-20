@@ -279,7 +279,66 @@
             margin-bottom: 8px;
         }
 
-        @media (max-width: 768px) {
+        .book-page {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .book-page img {
+            width: 100%;
+            max-width: 400px;
+            height: 400px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .book-page .page-text {
+            font-size: 18px;
+            line-height: 1.6;
+            color: #374151;
+            max-width: 500px;
+            margin: 0 auto;
+            text-align: left;
+        }
+
+        .book-page .page-number {
+            color: #6b7280;
+            font-size: 14px;
+            margin-top: 16px;
+            text-align: center;
+        }
+
+        .image-error {
+            width: 100%;
+            max-width: 400px;
+            height: 400px;
+            background: #f3f4f6;
+            border: 2px dashed #d1d5db;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 16px;
+            color: #6b7280;
+        }
+
+        .image-error .error-icon {
+            font-size: 48px;
+            margin-bottom: 8px;
+        }
+
+        .book-controls button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
             .video-writing-container {
                 grid-template-columns: 1fr;
             }
@@ -408,9 +467,52 @@
                 <button id="downloadStory" class="secondary-button">Download Story</button>
             </div>
             
+            <div class="ai-response" style="text-align: center; margin: 20px 0;">
+                <div class="character-badge">🎨 The Press</div>
+                <p>Would you like to bring this story to life with beautiful illustrations? We can create a full picture book for you!</p>
+                <button id="createIllustratedBook" style="margin: 10px auto; width: auto; padding: 12px 24px;">
+                    ✨ Create Illustrated Book
+                </button>
+            </div>
+            
             <div class="button-group">
                 <button id="createAnother">Forge Another Story</button>
                 <button id="viewLibrary" class="secondary-button">View Library</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Illustrated Book Page -->
+    <div id="illustratedBookPage" class="page">
+        <div class="card wide-card">
+            <h2>📖 Your Illustrated Story</h2>
+            <p class="subtitle" id="bookTitle">Loading your beautiful picture book...</p>
+            
+            <div id="bookLoadingSection">
+                <div class="ai-response">
+                    <div class="character-badge">🎨 The Press</div>
+                    <div id="bookProgress">
+                        <div class="loading">Creating your illustrated masterpiece...</div>
+                        <p id="progressText">Analyzing characters and scenes...</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="bookDisplaySection" style="display: none;">
+                <div class="book-controls" style="text-align: center; margin-bottom: 20px;">
+                    <button id="prevPage" class="secondary-button" style="width: auto; margin: 0 10px;">← Previous</button>
+                    <span id="pageCounter" style="margin: 0 20px; font-weight: bold;">Page 1 of 12</span>
+                    <button id="nextPage" class="secondary-button" style="width: auto; margin: 0 10px;">Next →</button>
+                </div>
+                
+                <div class="book-page" id="bookPageDisplay">
+                    <!-- Individual pages will be inserted here -->
+                </div>
+                
+                <div class="button-group" style="margin-top: 30px;">
+                    <button id="downloadIllustratedBook" class="success-button">Download Picture Book</button>
+                    <button id="backToStory" class="secondary-button">Back to Story</button>
+                </div>
             </div>
         </div>
     </div>
@@ -447,6 +549,8 @@
         let currentGuildStory = '';
         let guildRevisionCount = 0;
         let maxGuildRevisions = 3;
+        let illustratedPages = [];
+        let currentPageIndex = 0;
 
         // Page management
         function showPage(pageId) {
@@ -855,6 +959,32 @@ This is just your response to their feedback, not the story itself.`;
             document.getElementById('viewLibrary').addEventListener('click', () => {
                 showPage('libraryPage');
                 loadLibrary();
+            });
+
+            // Illustrated book functionality
+            document.getElementById('createIllustratedBook').addEventListener('click', createIllustratedBook);
+            
+            document.getElementById('prevPage').addEventListener('click', () => {
+                if (currentPageIndex > 0) {
+                    currentPageIndex--;
+                    showPage(currentPageIndex);
+                }
+            });
+            
+            document.getElementById('nextPage').addEventListener('click', () => {
+                if (currentPageIndex < illustratedPages.length - 1) {
+                    currentPageIndex++;
+                    showPage(currentPageIndex);
+                }
+            });
+            
+            document.getElementById('backToStory').addEventListener('click', () => {
+                showPage('successPage');
+            });
+            
+            document.getElementById('downloadIllustratedBook').addEventListener('click', () => {
+                // For now, just alert - could implement PDF generation later
+                alert('Illustrated book download feature coming soon! For now, you can screenshot each page.');
             });
 
             // Library page
