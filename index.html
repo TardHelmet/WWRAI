@@ -10,26 +10,22 @@
             padding: 0;
             box-sizing: border-box;
         }
-
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #2563eb 0%, #1e40af 50%, #1e3a8a 100%);
             color: #1f2937;
             min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
-        
         .page {
             display: none;
+            width: 100%;
             max-width: 900px;
             margin: 0 auto;
             padding: 20px;
-            min-height: 100vh;
         }
-        
-        .page.active {
-            display: block;
-        }
-
         .card {
             background: white;
             border-radius: 16px;
@@ -37,712 +33,193 @@
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
             margin-bottom: 20px;
         }
-        
         h1 {
             color: #1e40af;
             text-align: center;
+            margin-bottom: 8px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #4b5563;
             margin-bottom: 24px;
-            font-size: 2.5rem;
-            font-weight: 700;
         }
-
-        h2 {
-            color: #1e40af;
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 1.8rem;
-            font-weight: 600;
-        }
-
-        h3 {
-            color: #374151;
-            margin-bottom: 16px;
-            font-size: 1.2rem;
-            font-weight: 600;
-        }
-        
-        .tagline {
-            text-align: center;
-            color: #6b7280;
-            font-size: 1.1rem;
-            margin-bottom: 32px;
-            font-style: italic;
-        }
-
-        button {
-            background: #10b981;
-            color: white;
-            padding: 14px 28px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 16px;
-            margin: 8px;
-            transition: all 0.2s;
-        }
-        
-        button:hover {
-            background: #059669;
-            transform: translateY(-1px);
-        }
-        
-        button:disabled {
-            background: #d1d5db;
-            color: #9ca3af;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .button-secondary {
-            background: #6b7280;
-        }
-
-        .button-secondary:hover {
-            background: #4b5563;
-        }
-
-        .button-warning {
-            background: #f59e0b;
-        }
-
-        .button-warning:hover {
-            background: #d97706;
-        }
-        
         input[type="text"] {
             width: 100%;
-            padding: 16px;
-            border: 2px solid #e5e7eb;
+            padding: 12px;
             border-radius: 8px;
+            border: 1px solid #d1d5db;
+            margin-bottom: 16px;
             font-size: 16px;
-            margin: 12px 0;
-            transition: border-color 0.2s;
         }
-
-        input[type="text"]:focus {
-            outline: none;
-            border-color: #10b981;
-        }
-        
-        .video-container {
+        button {
             width: 100%;
-            max-width: 640px;
-            margin: 24px auto;
-            text-align: center;
-        }
-
-        .video-container iframe {
-            border-radius: 12px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        }
-        
-        textarea {
-            width: 100%;
-            min-height: 120px;
-            padding: 16px;
-            border: 2px solid #e5e7eb;
+            padding: 12px;
+            border: none;
             border-radius: 8px;
-            font-size: 16px;
-            font-family: inherit;
-            resize: vertical;
-            margin: 16px 0;
-            transition: border-color 0.2s;
-        }
-
-        textarea:focus {
-            outline: none;
-            border-color: #10b981;
-        }
-        
-        .writing-prompt {
-            background: #f0f9ff;
-            border: 2px solid #0ea5e9;
-            padding: 24px;
-            border-radius: 12px;
-            margin: 24px 0;
-            display: none;
-        }
-
-        .writing-prompt.active {
-            display: block;
-        }
-        
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #10b981;
+            background-color: #2563eb;
             color: white;
-            padding: 16px 24px;
-            border-radius: 8px;
-            z-index: 1000;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        }
-        
-        .editor-response {
-            background: #fef3c7;
-            border: 2px solid #f59e0b;
-            padding: 24px;
-            border-radius: 12px;
-            margin: 24px 0;
-        }
-        
-        .character-name {
-            font-weight: 700;
-            color: #1e40af;
-            font-size: 1.1rem;
-            margin-bottom: 12px;
-        }
-        
-        .story-display {
-            background: #f9fafb;
-            padding: 24px;
-            border-radius: 12px;
-            margin: 20px 0;
-            line-height: 1.6;
-            max-height: 400px;
-            overflow-y: auto;
-            border: 1px solid #e5e7eb;
-        }
-        
-        .story-item {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            margin: 16px 0;
+            font-size: 16px;
+            font-weight: bold;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #1d4ed8;
+        }
+        .secondary-button {
+            background-color: #6b7280;
+        }
+        .secondary-button:hover {
+            background-color: #4b5563;
+        }
+        .story-item {
             border: 1px solid #e5e7eb;
-        }
-        
-        .story-item:hover {
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            transform: translateY(-2px);
-        }
-        
-        .story-title {
-            font-weight: 600;
-            color: #1e40af;
-            margin-bottom: 8px;
-            font-size: 1.1rem;
-        }
-        
-        .story-preview {
-            color: #6b7280;
-            margin-bottom: 8px;
-        }
-        
-        .story-date {
-            font-size: 0.9rem;
-            color: #9ca3af;
-        }
-        
-        .timer {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            background: rgba(0,0,0,0.7);
-            color: white;
-            padding: 12px 20px;
-            border-radius: 24px;
-            font-family: monospace;
-            font-size: 18px;
-            display: none;
-        }
-
-        .user-info {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: rgba(0,0,0,0.7);
-            color: white;
-            padding: 12px 20px;
-            border-radius: 24px;
-            font-size: 14px;
-            display: none;
-        }
-
-        .status {
-            text-align: center;
-            margin: 20px 0;
-            color: #6b7280;
-        }
-
-        .center {
-            text-align: center;
-        }
-
-        .login-form {
-            max-width: 400px;
-            margin: 0 auto;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 8px;
-            background: #e5e7eb;
-            border-radius: 4px;
-            margin: 20px 0;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: #10b981;
-            border-radius: 4px;
-            transition: width 0.3s ease;
-        }
-
-        .step-indicator {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin: 20px 0;
-        }
-
-        .step {
-            flex: 1;
-            text-align: center;
-            padding: 8px;
-            color: #9ca3af;
-            font-size: 0.9rem;
-        }
-
-        .step.active {
-            color: #10b981;
-            font-weight: 600;
-        }
-
-        .step.completed {
-            color: #6b7280;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .loading-spinner {
-            animation: spin 2s linear infinite;
-            font-size: 2rem;
-            margin: 20px 0;
-        }
-
-        .guild-badge {
-            background: #7c3aed;
-            color: white;
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            display: inline-block;
-            margin-bottom: 8px;
-        }
-
-        .privacy-note {
-            font-size: 0.9rem;
-            color: #6b7280;
-            text-align: center;
-            margin-top: 24px;
             padding: 16px;
-            background: #f9fafb;
             border-radius: 8px;
+            margin-bottom: 12px;
         }
     </style>
 </head>
 <body>
-    <!-- Login Page -->
 
-
-<div id="loginPage" class="page">
-    <div class="card" style="text-align: center;">
-        <h1>Welcome to StoryForge</h1>
-        <p class="subtitle" style="margin-bottom: 24px;">What should we call you, brave storyteller?</p>
-        <input type="text" id="firstNameInput" placeholder="Enter your first name..." style="width: 80%; margin-bottom: 16px;">
-        <button id="registerButton">Begin My Adventure</button>
+    <div id="loadingPage" class="page" style="text-align: center;">
+        <p>Loading Your Adventures...</p>
     </div>
-</div>
 
-    <!-- Dashboard Page -->
-    <div class="page" id="dashboardPage">
-        <div class="user-info" id="userInfo"></div>
-        
+    <div id="loginPage" class="page">
         <div class="card">
-            <h1>📚 Your Story Library</h1>
-            <div class="guild-badge">Storymaker Intern</div>
-            
-            <div class="center">
-                <button id="newStoryButton">✨ Forge a New Story</button>
-                <button id="logoutButton" class="secondary-button">Logout</button>
-            </div>
-            
-            <div id="storiesContainer" style="margin-top: 32px;">
-                <div id="loadingStories" class="center">Loading your stories...</div>
-                <div id="noStories" class="center" style="display: none;">
-                    <p>No stories forged yet! Create your first masterpiece.</p>
-                </div>
-                <div id="storiesList"></div>
-            </div>
-        </div>
-    </div>
-<div id="loadingPage" class="page" style="display: flex; justify-content: center; align-items: center;">
-    <p>Loading Your Stories...</p>
-</div>
-
-    <!-- Welcome Page -->
-    <div class="page" id="welcomePage">
-        <div class="user-info" id="userInfoWelcome"></div>
-        
-        <div class="card">
-            <h1>⚒️ Welcome to the Storymakers Guild</h1>
-            <div class="guild-badge">Writing Assignment Available</div>
-            
-            <div class="center">
-                <p style="margin-bottom: 24px; font-size: 1.1rem;">As a new Intern, you'll learn to craft stories by watching inspiring videos and letting your imagination run wild. Your writing mentor will guide you through each step.</p>
-                
-                <div style="background: #f0f9ff; padding: 24px; border-radius: 12px; margin: 24px 0;">
-                    <h3>🎬 Your First Assignment</h3>
-                    <p>Watch a short video and create an original story inspired by what you see. Don't worry about being perfect - we're here to help you improve!</p>
-                </div>
-                
-                <button id="startButton">Begin Your Story Journey ⚒️</button>
-                <button id="backToDashboardButton" class="button-secondary">📚 Back to Library</button>
-            </div>
+            <h1>Welcome to StoryForge</h1>
+            <p class="subtitle">What should we call you, brave storyteller?</p>
+            <input type="text" id="firstNameInput" placeholder="Enter your first name...">
+            <button id="registerButton">Begin My Adventure</button>
         </div>
     </div>
 
-    <!-- Video Page with Integrated Writing -->
-    <div class="page" id="videoPage">
-        <div class="timer" id="timer">00:00</div>
-        <div class="user-info" id="userInfoVideo"></div>
-        
+    <div id="dashboardPage" class="page">
         <div class="card">
-            <h2>🎬 Story Forge Workshop</h2>
-            
-            <div class="step-indicator">
-                <div class="step active">Watch & Write</div>
-                <div class="step">Review</div>
-                <div class="step">Refine</div>
-                <div class="step">Complete</div>
-            </div>
-            
-            <p style="text-align: center; margin-bottom: 24px; color: #6b7280;">
-                Watch this video and build your story piece by piece. We'll pause every 30 seconds for you to write!
-            </p>
-            
-            <!-- Video and Writing Combined Interface -->
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;" id="videoWritingContainer">
-                <!-- Video Side -->
-                <div>
-                    <div class="video-container">
-                        <iframe id="videoPlayer" width="100%" height="300" 
-                                src="https://www.youtube.com/embed/OvOrbWggMTs?autoplay=1&mute=1" 
-                                frameborder="0" allowfullscreen allow="autoplay; encrypted-media"></iframe>
-                    </div>
-                    <div style="text-align: center; margin-top: 12px;">
-                        <div style="color: #10b981; font-weight: 600;">🎬 Watch and Write</div>
-                        <div style="font-size: 0.9rem; color: #6b7280;">Write your story as you watch the video</div>
-                    </div>
-                </div>
-                
-                <!-- Writing Side -->
-                <div>
-                    <div style="background: #f0f9ff; padding: 16px; border-radius: 12px; border: 2px solid #0ea5e9; margin-bottom: 16px;">
-                        <h3 style="margin: 0 0 12px 0; color: #0ea5e9;">✍️ Write Your Story</h3>
-                        <p style="margin: 0 0 12px 0; font-size: 0.9rem; color: #6b7280;">Let the video inspire you! Write your story as you watch.</p>
-                        <textarea id="storyInput" placeholder="Start writing your story here..." style="min-height: 200px; margin-bottom: 12px;"></textarea>
-                    </div>
-                    
-                    <!-- Story Preview -->
-                    <div id="storyPreview" style="background: #f9fafb; padding: 16px; border-radius: 8px; border: 1px solid #e5e7eb;">
-                        <div style="font-weight: 600; margin-bottom: 8px; color: #374151;">📖 Your Story Preview:</div>
-                        <div id="storyContent" style="font-size: 0.9rem; line-height: 1.5; color: #6b7280; font-style: italic;">Start writing to see your story appear here...</div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Mobile Layout (Stack Vertically) -->
-            <div style="display: none;" id="mobileVideoWriting">
-                <div class="video-container" style="margin-bottom: 16px;">
-                    <iframe id="videoPlayerMobile" width="100%" height="250" 
-                            src="https://www.youtube.com/embed/OvOrbWggMTs?autoplay=1&mute=1" 
-                            frameborder="0" allowfullscreen allow="autoplay; encrypted-media"></iframe>
-                </div>
-                
-                <div style="text-align: center; margin-bottom: 16px;">
-                    <div style="color: #10b981; font-weight: 600;">🎬 Watch and Write</div>
-                    <div style="font-size: 0.9rem; color: #6b7280;">Write your story as you watch the video</div>
-                </div>
-                
-                <div style="background: #f0f9ff; padding: 16px; border-radius: 12px; border: 2px solid #0ea5e9; margin-bottom: 16px;">
-                    <h3 style="margin: 0 0 12px 0; color: #0ea5e9;">✍️ Write Your Story</h3>
-                    <p style="margin: 0 0 12px 0; font-size: 0.9rem; color: #6b7280;">Let the video inspire you! Write your story as you watch.</p>
-                    <textarea id="storyInputMobile" placeholder="Start writing your story here..." style="min-height: 120px; margin-bottom: 12px;"></textarea>
-                </div>
-                
-                <div id="storyPreviewMobile" style="background: #f9fafb; padding: 16px; border-radius: 8px; border: 1px solid #e5e7eb; margin-bottom: 16px;">
-                    <div style="font-weight: 600; margin-bottom: 8px; color: #374151;">📖 Your Story Preview:</div>
-                    <div id="storyContentMobile" style="font-size: 0.9rem; line-height: 1.5; color: #6b7280; font-style: italic;">Start writing to see your story appear here...</div>
-                </div>
-            </div>
-            
-            <!-- Control Buttons -->
-            <div class="center" style="margin-top: 24px;">
-                <button id="finishStoryButton" style="background: #7c3aed;">✨ Finish My Story</button>
-                <button id="backToDashboardFromVideo" style="background: #6b7280;">📚 Back to Library</button>
+            <h1 id="welcomeMessage">Welcome!</h1>
+            <p class="subtitle">This is your story library. Start a new adventure or continue a previous one.</p>
+            <button id="newStoryButton" style="margin-bottom: 20px;">+ New Story</button>
+            <button id="logoutButton" class="secondary-button">Logout</button>
+        </div>
+        <div class="card">
+            <h2>Your Stories</h2>
+            <div id="storyList">
+                <!-- Stories will be listed here -->
             </div>
         </div>
     </div>
-
-    <!-- Story Review Page -->
-    <div class="page" id="reviewPage">
+    
+    <div id="workshopPage" class="page">
         <div class="card">
-            <h2>📖 Your Story Draft</h2>
-            
-            <div class="step-indicator">
-                <div class="step completed">Watch</div>
-                <div class="step active">Create</div>
-                <div class="step">Refine</div>
-                <div class="step">Complete</div>
-            </div>
-            
-            <div id="fullStory" class="story-display"></div>
-            
-            <div class="center">
-                <p style="margin-bottom: 20px;">Ready to get feedback from your Writing Mentor?</p>
-                <button id="sendEditorButton">📝 Send to Writing Mentor</button>
-                <button id="saveStoryButton" class="button-secondary">💾 Save As-Is</button>
-            </div>
+            <h1>Story Workshop</h1>
+            <p>The workshop is under construction. Check back soon!</p>
+             <button onclick="showPage('dashboardPage')">Back to Dashboard</button>
         </div>
     </div>
 
-    <!-- Waiting Page -->
-    <div class="page" id="waitingPage">
-        <div class="card">
-            <h2>⚒️ Your Mentor is Reading...</h2>
-            <div class="center">
-                <p>The Writing Mentor is carefully reading your story and preparing helpful suggestions!</p>
-                <div class="loading-spinner">⏳</div>
-                <p><small>This usually takes just a moment...</small></p>
-            </div>
-        </div>
-    </div>
+    <script>
+        let currentUser = null;
 
-    <!-- Editor Response Page -->
-    <div class="page" id="editorPage">
-        <div class="card">
-            <h2>📝 Mentor Feedback</h2>
-            
-            <div class="step-indicator">
-                <div class="step completed">Watch</div>
-                <div class="step completed">Create</div>
-                <div class="step active">Refine</div>
-                <div class="step">Complete</div>
-            </div>
-            
-            <div id="editorResponse" class="editor-response"></div>
-            
-            <h3>Improve Your Story:</h3>
-            <textarea id="editStory" placeholder="Revise your story based on the feedback..."></textarea>
-            
-            <!-- Revision buttons -->
-            <div id="revisionButtons" class="center" style="display: none;">
-                <button id="submitRevisionButton">📝 Send Updated Story</button>
-                <button id="finalizeButton">✨ My Story is Ready!</button>
-            </div>
-            
-            <!-- Guild collaboration buttons -->
-            <div id="guildButtons" class="center" style="display: none;">
-                <button id="sendToGuildButton" style="background: #7c3aed;">
-                    ⚒️ Send to Storymakers Guild
-                </button>
-                <button id="keepStoryButton" class="button-secondary">
-                    📚 Keep My Version
-                </button>
-            </div>
-            
-            <!-- Guild feedback section -->
-            <div id="guildSection" style="display: none;">
-                <div class="center">
-                    <button id="submitGuildFeedbackButton">📝 Send Feedback to Guild</button>
-                    <button id="approveGuildButton">🌟 Guild Story is Perfect!</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Success Page -->
-    <div class="page" id="successPage">
-        <div class="card">
-            <h1>🎉 Story Complete!</h1>
-            
-            <div class="step-indicator">
-                <div class="step completed">Watch</div>
-                <div class="step completed">Create</div>
-                <div class="step completed">Refine</div>
-                <div class="step completed">Complete</div>
-            </div>
-            
-            <div class="center">
-                <div class="guild-badge">Story Forged Successfully!</div>
-                <p style="margin: 20px 0;">Congratulations! You've created an amazing story. Your writing skills are getting stronger with every tale you forge.</p>
-                
-                <div id="finalStory" class="story-display"></div>
-                
-                <input type="text" id="storyTitle" placeholder="Give your story a title..." style="margin: 20px 0;">
-                
-                <div>
-                    <button id="saveFinishedStoryButton">💾 Save to Library</button>
-                    <button id="createAnotherButton">🔄 Forge Another Story</button>
-                    <button id="viewLibraryButton" class="button-secondary">📚 View Library</button>
-                </div>
-            </div>
-        </div>
-    </div>
-<script>
-    // Global variable to hold the current user's data
-    let currentUser = null;
-
-    /**
-     * Shows the specified page and hides all others.
-     * @param {string} pageId The ID of the page to display.
-     */
-    function showPage(pageId) {
-        document.querySelectorAll('.page').forEach(page => {
-            page.style.display = 'none';
-        });
-        const targetPage = document.getElementById(pageId);
-        if(targetPage) {
-            targetPage.style.display = 'block';
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => {
+                page.style.display = 'none';
+            });
+            const targetPage = document.getElementById(pageId);
+            if (targetPage) {
+                targetPage.style.display = 'block';
+            }
         }
-    }
 
-    /**
-     * This function runs as soon as the app loads.
-     * It checks for a user ID in local storage and tries to log the user in.
-     */
-    async function initializeApp() {
-        const userId = localStorage.getItem('storyforge_user_id');
+        async function initializeApp() {
+            const userId = localStorage.getItem('storyforge_user_id');
+            showPage('loadingPage');
 
-        if (userId) {
-            // A user ID was found, so let's try to fetch their data
-            try {
-                showPage('loadingPage'); // Show a loading indicator
-                const response = await fetch(`/api/users/${userId}`);
-
-                if (response.ok) {
-                    const data = await response.json();
-                    currentUser = data.user;
-                    document.getElementById('welcomeMessage').textContent = `Welcome back, ${currentUser.first_name}!`;
-                    displayStories(data.stories);
-                    showPage('dashboardPage'); // Go straight to the dashboard
-                } else {
-                    // The user ID was invalid (maybe from a cleared database)
-                    console.error('User ID found, but fetch failed. Clearing invalid ID.');
-                    localStorage.removeItem('storyforge_user_id');
+            if (userId) {
+                try {
+                    const response = await fetch(`/api/users/${userId}`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        currentUser = data.user;
+                        displayStories(data.stories);
+                        showPage('dashboardPage');
+                        // This now runs AFTER the page is visible
+                        document.getElementById('welcomeMessage').textContent = `Welcome back, ${currentUser.first_name}!`;
+                    } else {
+                        localStorage.removeItem('storyforge_user_id');
+                        showPage('loginPage');
+                    }
+                } catch (error) {
+                    console.error('Error fetching user data:', error);
                     showPage('loginPage');
                 }
-            } catch (error) {
-                console.error('Error fetching user data:', error);
-                showPage('loginPage'); // Show login on error
-            }
-        } else {
-            // No user ID found, show the registration page
-            showPage('loginPage');
-        }
-    }
-
-    /**
-     * Registers a new user with the name from the input field.
-     */
-    async function registerUser() {
-        const firstName = document.getElementById('firstNameInput').value.trim();
-        if (!firstName) {
-            alert('Please enter your first name.');
-            return;
-        }
-
-        try {
-            const response = await fetch('/api/users', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ firstName }),
-            });
-
-            const newUser = await response.json();
-
-            if (response.ok) {
-                currentUser = newUser;
-                // IMPORTANT: Save the new user's ID to local storage
-                localStorage.setItem('storyforge_user_id', newUser.id);
-                
-                document.getElementById('welcomeMessage').textContent = `Welcome, ${currentUser.first_name}!`;
-                displayStories([]); // Display an empty story list for the new user
-                showPage('dashboardPage');
             } else {
-                alert(newUser.error || 'Registration failed.');
+                showPage('loginPage');
             }
-        } catch (error) {
-            console.error('Registration error:', error);
-            alert('An error occurred during registration.');
-        }
-    }
-    
-    /**
-     * Renders the list of stories on the dashboard.
-     * @param {Array} stories An array of story objects.
-     */
-    function displayStories(stories) {
-        const storyList = document.getElementById('storyList');
-        storyList.innerHTML = ''; // Clear existing stories
-        if (!stories || stories.length === 0) {
-            storyList.innerHTML = '<p style="text-align:center; padding: 20px;">Your story library is empty. Click "New Story" to begin your first adventure!</p>';
-            return;
         }
 
-        stories.forEach(story => {
-            const storyElement = document.createElement('div');
-            storyElement.className = 'story-item';
-            storyElement.innerHTML = `
-                <h3>${story.title || 'Untitled Story'}</h3>
-                <p>Created on: ${new Date(story.created_at).toLocaleDateString()}</p>
-            `;
-            // TODO: Add a click listener to open and view the story
-            storyList.appendChild(storyElement);
-        });
-    }
-    
-    /**
-     * Logs the user out by clearing local storage and reloading the page.
-     */
-    function logout() {
-        localStorage.removeItem('storyforge_user_id');
-        currentUser = null;
-        window.location.reload();
-    }
-
-
-    // --- Main Execution ---
-    // This is what runs when the page is ready.
-    document.addEventListener('DOMContentLoaded', () => {
-        // Set up all the button clicks
-        document.getElementById('registerButton').addEventListener('click', registerUser);
-        document.getElementById('newStoryButton').addEventListener('click', () => showPage('workshopPage'));
-        document.getElementById('logoutButton').addEventListener('click', logout);
-
-        // Allow 'Enter' key to submit the name on the login page
-        document.getElementById('firstNameInput').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                registerUser();
+        async function registerUser() {
+            const firstName = document.getElementById('firstNameInput').value.trim();
+            if (!firstName) {
+                alert('Please enter your first name.');
+                return;
             }
-        });
-        
-        // Start the application!
-        initializeApp();
-    });
-</script>
 
-  
+            try {
+                const response = await fetch('/api/users', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ firstName }),
+                });
+                const newUser = await response.json();
+
+                if (response.ok) {
+                    currentUser = newUser;
+                    localStorage.setItem('storyforge_user_id', newUser.id);
+                    displayStories([]);
+                    showPage('dashboardPage');
+                    // We set the welcome message *after* switching to the dashboard page.
+                    document.getElementById('welcomeMessage').textContent = `Welcome, ${currentUser.first_name}!`;
+                } else {
+                    alert(newUser.error || 'Registration failed.');
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                alert('An error occurred during registration.');
+            }
+        }
+
+        function displayStories(stories) {
+            const storyList = document.getElementById('storyList');
+            storyList.innerHTML = '';
+            if (!stories || stories.length === 0) {
+                storyList.innerHTML = '<p style="text-align:center; padding: 20px;">Your story library is empty. Click "New Story" to begin!</p>';
+                return;
+            }
+
+            stories.forEach(story => {
+                const storyElement = document.createElement('div');
+                storyElement.className = 'story-item';
+                storyElement.innerHTML = `<h3>${story.title || 'Untitled Story'}</h3><p>Created: ${new Date(story.created_at).toLocaleDateString()}</p>`;
+                storyList.appendChild(storyElement);
+            });
+        }
+
+        function logout() {
+            localStorage.removeItem('storyforge_user_id');
+            currentUser = null;
+            window.location.reload();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('registerButton').addEventListener('click', registerUser);
+            document.getElementById('newStoryButton').addEventListener('click', () => showPage('workshopPage'));
+            document.getElementById('logoutButton').addEventListener('click', logout);
+            document.getElementById('firstNameInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') registerUser();
+            });
+            initializeApp();
+        });
+    </script>
 </body>
 </html>
