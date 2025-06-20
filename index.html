@@ -10,8 +10,6 @@ app.use(express.static(__dirname));
 
 // Get API key from environment variable
 const GEMINI_KEY = process.env.GEMINI_API_KEY;
-const GOOGLE_CLOUD_PROJECT = process.env.GOOGLE_CLOUD_PROJECT || 'your-project-id';
-const GOOGLE_APPLICATION_CREDENTIALS = process.env.GOOGLE_APPLICATION_CREDENTIALS;
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -84,88 +82,169 @@ app.post('/api/storyforge-ai', async (req, res) => {
     }
 });
 
-// Image generation endpoint using Google's Imagen 3.0
+// Image generation endpoint using Gemini 2.0 Flash Image Generation
 app.post('/api/generate-image', async (req, res) => {
     try {
         const { prompt, pageNumber } = req.body;
         
-        console.log(`🎨 Generating image ${pageNumber} with prompt:`, prompt.substring(0, 100) + '...');
+        console.log(`🎨 Generating image ${pageNumber} with Gemini 2.0 Flash...`);
+        console.log(`📝 Prompt preview:`, prompt.substring(0, 150) + '...');
         
-        if (!GOOGLE_CLOUD_PROJECT) {
-            console.error('❌ GOOGLE_CLOUD_PROJECT not configured');
-            return res.status(500).json({ 
-                error: 'Google Cloud project not configured',
-                message: 'Set GOOGLE_CLOUD_PROJECT environment variable'
+        if (!GEMINI_KEY) {
+            console.error('❌ GEMINI_API_KEY not configured');
+            return res.status(200).json({
+                success: false,
+                error: 'Gemini API key not configured',
+                pageNumber,
+                imageUrl: null
             });
         }
 
-        // Using Google Cloud Vertex AI Imagen API
-        const response = await fetch(`https://us-central1-aiplatform.googleapis.com/v1/projects/${GOOGLE_CLOUD_PROJECT}/locations/us-central1/publishers/google/models/imagen-3.0-generate-001:predict`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${await getGoogleAccessToken()}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                instances: [{
-                    prompt: prompt,
-                    image: {
-                        bytesBase64Encoded: ""
+        // Using Gemini 2.0 Flash Preview Image Generation
+        const response = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-preview-image-generation:generateContent?key=${GEMINI_KEY}`,
+            {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'User-Agent': 'StoryForge/1.0 - Image Generation'
+                },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: prompt }] }],
+                    generationConfig: {
+                        responseModalities: ["TEXT", "IMAGE"],
+                        temperature: 0.7
                     }
-                }],
-                parameters: {
-                    aspectRatio: "1:1",
-                    safetyFilterLevel: "block_few",
-                    personGeneration: "allow_adult"
-                }
-            })
-        });
+                })
+            }
+        );
 
-        console.log(`🎨 Imagen API response status for page ${pageNumber}:`, response.status);
+        console.log(`🎨 Gemini Image API response status for page ${pageNumber}:`, response.status);
 
         if (!response.ok) {
             const errorText = await response.text();
-            console.error(`❌ Imagen API Error for page ${pageNumber}:`, response.status, errorText);
+            console.error(`❌ Gemini Image API Error for page ${pageNumber}:`, response.status, errorText);
             
-            // Return a structured error response that the frontend can handle
             return res.status(200).json({
                 success: false,
-                error: `Image generation failed: ${response.status}`,
+                error: `Gemini image generation failed: ${response.status}`,
                 pageNumber,
-                imageUrl: null
+                imageUrl: null,
+                debugInfo: errorText.substring(0, 200)
             });
         }
 
         const data = await response.json();
+        console.log(`📊 Gemini response structure for page ${pageNumber}:`, Object.keys(data));
         
-        if (data.predictions && data.predictions[0] && data.predictions[0].bytesBase64Encoded) {
-            const imageBase64 = data.predictions[0].bytesBase64Encoded;
-            const imageUrl = `data:image/png;base64,${imageBase64}`;
+        // Look for image data in the response
+        if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) {
+            const parts = data.candidates[0].content.parts;
             
-            console.log(`✅ Successfully generated image ${pageNumber}`);
+            // Find the image part
+            const imagePart = parts.find(part => part.inlineData && part.inlineData.data);
             
-            res.json({
-                success: true,
-                imageUrl: imageUrl,
-                pageNumber: pageNumber
+            if (imagePart) {
+                const imageBase64 = imagePart.inlineData.data;
+                const mimeType = imagePart.inlineData.mimeType || 'image/png';
+                const imageUrl = `data:${mimeType};base64,${imageBase64}`;
+                
+                console.log(`✅ Successfully generated image ${pageNumber} (${mimeType})`);
+                
+                return res.json({
+                    success: true,
+                    imageUrl: imageUrl,
+                    pageNumber: pageNumber,
+                    mimeType: mimeType
+                });
+            }
+        }
+        
+        // If we get here, no image was found in the response
+        console.error(`❌ No image data found in Gemini response for page ${pageNumber}`);
+        console.log(`🔍 Full response structure:`, JSON.stringify(data, null, 2));
+        
+        return res.status(200).json({
+            success: false,
+            error: 'No image data found in Gemini response',
+            pageNumber,
+            imageUrl: null,
+            debugInfo: `Response had ${data.candidates?.length || 0} candidates with ${data.candidates?.[0]?.content?.parts?.length || 0} parts`
+        });
+        
+    } catch (error) {
+        console.error(`💥 Gemini image generation error for page ${req.body.pageNumber}:`, error);
+        return res.status(200).json({
+            success: false,
+            error: error.message,
+            pageNumber: req.body.pageNumber,
+            imageUrl: null,
+            debugInfo: error.stack?.substring(0, 300)
+        });
+    }
+});
+
+// Test endpoint for Gemini image generation
+app.get('/api/test-image', async (req, res) => {
+    try {
+        console.log('🧪 Testing Gemini 2.0 Flash Image Generation...');
+        
+        if (!GEMINI_KEY) {
+            return res.json({ 
+                error: 'No API key configured',
+                configured: false
+            });
+        }
+        
+        const testPrompt = "Children's book illustration, simple drawing style. A happy orange cat with white paws sitting in a sunny garden. Friendly and colorful, suitable for children.";
+        
+        const testResponse = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-preview-image-generation:generateContent?key=${GEMINI_KEY}`,
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: testPrompt }] }],
+                    generationConfig: {
+                        responseModalities: ["TEXT", "IMAGE"],
+                        temperature: 0.7
+                    }
+                })
+            }
+        );
+        
+        console.log('🧪 Test image response status:', testResponse.status);
+        
+        if (testResponse.ok) {
+            const data = await testResponse.json();
+            const hasImage = data.candidates?.[0]?.content?.parts?.some(part => part.inlineData);
+            
+            res.json({ 
+                status: testResponse.status,
+                configured: true,
+                working: true,
+                hasImage: hasImage,
+                message: hasImage ? 'Gemini Image Generation is working!' : 'API responded but no image found',
+                candidatesCount: data.candidates?.length || 0,
+                partsCount: data.candidates?.[0]?.content?.parts?.length || 0
             });
         } else {
-            console.error(`❌ No image data in response for page ${pageNumber}:`, data);
-            res.status(200).json({
-                success: false,
-                error: 'No image data received from API',
-                pageNumber,
-                imageUrl: null
+            const errorText = await testResponse.text();
+            res.json({
+                status: testResponse.status,
+                configured: true,
+                working: false,
+                error: errorText.substring(0, 200),
+                message: 'Gemini Image API connection issues'
             });
         }
         
     } catch (error) {
-        console.error(`💥 Image generation error for page ${req.body.pageNumber}:`, error);
-        res.status(200).json({
-            success: false,
+        console.error('🧪 Image test error:', error);
+        res.status(500).json({ 
             error: error.message,
-            pageNumber: req.body.pageNumber,
-            imageUrl: null
+            configured: !!GEMINI_KEY,
+            working: false
         });
     }
 });
