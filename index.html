@@ -727,7 +727,133 @@ This is just your response to their feedback, not the story itself.`;
                 return "I'm having trouble connecting right now. Please try again in a moment!";
             }
         }
+// Illustrated book creation function
+        async function createIllustratedBook() {
+            const title = document.getElementById('storyTitle').value.trim() || 'My StoryForge Tale';
+            const story = document.getElementById('finalStory').textContent;
+            
+            if (!story) {
+                alert('No story to illustrate! Please complete a story first.');
+                return;
+            }
 
+            // Set up the illustrated book page
+            document.getElementById('bookTitle').textContent = title;
+            showPage('illustratedBookPage');
+            
+            // Reset state
+            illustratedPages = [];
+            currentPageIndex = 0;
+            
+            // Show loading section
+            document.getElementById('bookLoadingSection').style.display = 'block';
+            document.getElementById('bookDisplaySection').style.display = 'none';
+            
+            try {
+                // Break story into paragraphs (max 12 for picture book)
+                const paragraphs = formatStoryText(story);
+                const maxPages = Math.min(paragraphs.length, 12);
+                
+                // Update progress
+                document.getElementById('progressText').textContent = `Creating ${maxPages} illustrated pages...`;
+                
+                // Generate images for each paragraph
+                for (let i = 0; i < maxPages; i++) {
+                    const paragraph = paragraphs[i];
+                    
+                    // Update progress
+                    document.getElementById('progressText').textContent = 
+                        `Illustrating page ${i + 1} of ${maxPages}...`;
+                    
+                    // Create image prompt from the paragraph
+                    const prompt = `Children's picture book illustration for: "${paragraph}". 
+                        Style: Colorful, friendly, whimsical children's book art. 
+                        Safe for ages 8-16. Bright colors, simple shapes, engaging characters.
+                        High quality digital illustration suitable for a picture book.`;
+                    
+                    try {
+                        const response = await fetch('/api/generate-image', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                prompt: prompt,
+                                pageNumber: i + 1
+                            })
+                        });
+                        
+                        const result = await response.json();
+                        
+                        // Store the page data
+                        illustratedPages.push({
+                            text: paragraph,
+                            imageUrl: result.success ? result.imageUrl : null,
+                            pageNumber: i + 1
+                        });
+                        
+                    } catch (error) {
+                        console.error(`Error generating image for page ${i + 1}:`, error);
+                        // Add page with error placeholder
+                        illustratedPages.push({
+                            text: paragraph,
+                            imageUrl: null,
+                            pageNumber: i + 1,
+                            error: true
+                        });
+                    }
+                }
+                
+                // Show the completed book
+                document.getElementById('bookLoadingSection').style.display = 'none';
+                document.getElementById('bookDisplaySection').style.display = 'block';
+                
+                // Display first page
+                showBookPage(0);
+                
+            } catch (error) {
+                console.error('Error creating illustrated book:', error);
+                alert('Sorry, there was an error creating your illustrated book. Please try again.');
+                showPage('successPage');
+            }
+        }
+
+        // Function to display a specific book page
+        function showBookPage(pageIndex) {
+            if (pageIndex < 0 || pageIndex >= illustratedPages.length) return;
+            
+            currentPageIndex = pageIndex;
+            const page = illustratedPages[pageIndex];
+            const pageDisplay = document.getElementById('bookPageDisplay');
+            
+            // Update page counter
+            document.getElementById('pageCounter').textContent = 
+                `Page ${pageIndex + 1} of ${illustratedPages.length}`;
+            
+            // Update navigation buttons
+            document.getElementById('prevPage').disabled = pageIndex === 0;
+            document.getElementById('nextPage').disabled = pageIndex === illustratedPages.length - 1;
+            
+            // Create page content
+            let imageHTML;
+            if (page.imageUrl && !page.error) {
+                imageHTML = `<img src="${page.imageUrl}" alt="Illustration for page ${page.pageNumber}">`;
+            } else {
+                imageHTML = `
+                    <div class="image-error">
+                        <div class="error-icon">🎨</div>
+                        <div>Illustration ${page.error ? 'failed to generate' : 'coming soon'}</div>
+                    </div>
+                `;
+            }
+            
+            pageDisplay.innerHTML = `
+                ${imageHTML}
+                <div class="page-text">${page.text}</div>
+                <div class="page-number">Page ${page.pageNumber}</div>
+            `;
+        }
+
+
+      
         // Story download function
         function downloadStory() {
             const title = document.getElementById('storyTitle').value || 'My StoryForge Tale';
@@ -966,15 +1092,13 @@ This is just your response to their feedback, not the story itself.`;
             
             document.getElementById('prevPage').addEventListener('click', () => {
                 if (currentPageIndex > 0) {
-                    currentPageIndex--;
-                    showPage(currentPageIndex);
+                    showBookPage(currentPageIndex - 1);
                 }
             });
             
             document.getElementById('nextPage').addEventListener('click', () => {
                 if (currentPageIndex < illustratedPages.length - 1) {
-                    currentPageIndex++;
-                    showPage(currentPageIndex);
+                    showBookPage(currentPageIndex + 1);
                 }
             });
             
