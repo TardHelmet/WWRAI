@@ -760,10 +760,10 @@ function extractStoryContext(fullStory) {
 // Function to build consistent prompts
 function buildConsistentPrompt(paragraph, context, pageNum, totalPages) {
     const characterInfo = context.characters.length > 0 
-        ? `Main characters: ${context.characters.slice(0, 3).join(', ')}. Keep these characters visually consistent with the same simple shapes and features throughout all pages.`
-        : "Maintain consistent simple character designs if characters appear.";
+        ? `Main characters: ${context.characters.slice(0, 3).join(', ')}. Keep these characters visually consistent with the same forms and features throughout all pages.`
+        : "Maintain consistent simple character designs if characters appear, and send detailed prompts that are identical with each image for the characters.";
     
-    return `Create a minimalist children's picture book illustration for page ${pageNum} of ${totalPages}.
+    return `Create a simple, artistic children's picture book illustration for page ${pageNum} of ${totalPages}.
 
 STORY CONTEXT: This is part of a cohesive story set in a ${context.setting} with a ${context.mood} tone.
 
@@ -771,44 +771,50 @@ SCENE TO ILLUSTRATE: "${paragraph}"
 
 CHARACTER CONSISTENCY: ${characterInfo}
 
-MINIMALIST STYLE REQUIREMENTS (Jon Klassen/Silverstein/Not a Box inspired):
-- ULTRA-SIMPLE geometric shapes and clean lines
-- Maximum 2-4 colors total (including white background)
-- Flat design with NO complex textures or gradients
-- Bold, expressive simplicity over detailed realism
-- Lots of negative space and clean white backgrounds
-- Simple oval/circle heads, basic body shapes
-- Minimal facial features but maximum emotional expression
+ARTISTIC STYLE (Jon Klassen/Silverstein inspired):
+- Hand-drawn quality with organic, slightly imperfect lines
+- Simple forms but with artistic warmth and personality
+- Painterly textures and subtle brush strokes
+- Gentle, muted watercolor-style backgrounds
+- Sketchy, expressive linework (not perfect vector lines)
+- Soft edges and natural irregularities that feel human-made
 
-COMPOSITION RULES:
-- Clean, uncluttered layout with plenty of breathing room
-- Focus on essential elements only - remove unnecessary details
-- Simple, bold shapes that read clearly from a distance
-- Strategic use of empty space to create impact
-- Single focal point per illustration
+VISUAL APPROACH:
+- Simple symbolic-styled character shapes with artistic charm
+- Limited color palette (2-4 warm, muted colors)
+- Plenty of negative space but with subtle artistic texture
+- Hand-lettered quality, not computer-perfect
+- Cozy, intimate feeling like a hand-illustrated book
+- Slight paper texture or watercolor bleeding effects
 
-COLOR PALETTE:
-- Limited palette: choose 1-2 main colors plus black/white
-- Muted, earthy tones (avoid bright, saturated colors)
-- Consistent color choices across all ${totalPages} pages
-- Use color sparingly for maximum impact
+COMPOSITION:
+- Clean, thoughtful layout with artistic breathing room
+- Focus on essential story elements only
+- Simple but expressive character poses and faces
+- Gentle, organic composition (not rigid geometric)
+- Strategic use of white space with subtle artistic texture
 
-TECHNICAL APPROACH:
-- Clean vector-style illustration (not painterly)
-- Bold outlines where needed
-- Flat color fills without complex shading
-- Simple geometric patterns if any patterns are used
-- Readable at small sizes
+COLOR & TEXTURE:
+- Warm, earthy palette with soft transitions
+- Watercolor or gouache painting aesthetic
+- Subtle color bleeding and organic edges
+- Muted tones that feel cozy and inviting
+- Consistent artistic treatment across all ${totalPages} pages
 
-STORYTELLING FOCUS:
-- Convey emotion through simple gestures and basic shapes
-- Clear visual narrative without visual clutter
-- Let the imagination fill in the details
-- Focus on the essence of the scene, not photographic accuracy
+ARTISTIC QUALITY:
+- Hand-drawn charm with slight imperfections that add warmth
+- Soft, painterly backgrounds with gentle textures
+- Expressive brushwork and organic line quality
+- Feels like an artist's sketchbook, not a computer program
+- Captures the soul and warmth of classic picture books
 
-AVOID: Complex details, realistic textures, busy backgrounds, multiple focal points, bright rainbow colors, photorealistic elements.
+STORYTELLING:
+- Simple but emotionally rich visual narrative
+- Characters with personality through simple artistic choices
+- Gentle, inviting atmosphere that draws children in
+- Focus on feeling and mood over photographic accuracy
 
-CREATE: A beautifully simple illustration that captures the story moment with maximum emotional impact using minimum visual elements.`;
+CREATE: A beautifully simple but artistically rich illustration with the warmth and charm of hand-drawn children's book art.`;
 }
         
 // Illustrated book creation function
