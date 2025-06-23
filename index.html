@@ -727,6 +727,90 @@ This is just your response to their feedback, not the story itself.`;
                 return "I'm having trouble connecting right now. Please try again in a moment!";
             }
         }
+// Function to extract story context for consistency
+function extractStoryContext(fullStory) {
+    const text = fullStory.toLowerCase();
+    
+    // Extract potential character names (capitalized words that appear multiple times)
+    const words = fullStory.match(/\b[A-Z][a-z]+\b/g) || [];
+    const characterCounts = {};
+    words.forEach(word => {
+        if (word.length > 2) characterCounts[word] = (characterCounts[word] || 0) + 1;
+    });
+    const characters = Object.keys(characterCounts).filter(char => characterCounts[char] > 1);
+    
+    // Detect setting/environment
+    let setting = "generic fantasy setting";
+    if (text.includes('forest') || text.includes('tree')) setting = "magical forest setting";
+    else if (text.includes('castle') || text.includes('kingdom')) setting = "fairy tale castle setting";
+    else if (text.includes('ocean') || text.includes('sea')) setting = "ocean/underwater setting";
+    else if (text.includes('space') || text.includes('star')) setting = "space/cosmic setting";
+    else if (text.includes('school') || text.includes('classroom')) setting = "school setting";
+    else if (text.includes('home') || text.includes('house')) setting = "cozy home setting";
+    
+    // Detect mood/tone
+    let mood = "adventurous and uplifting";
+    if (text.includes('scary') || text.includes('dark')) mood = "mysterious but safe";
+    else if (text.includes('funny') || text.includes('laugh')) mood = "humorous and lighthearted";
+    else if (text.includes('magic') || text.includes('spell')) mood = "magical and wonder-filled";
+    
+    return { characters, setting, mood };
+}
+
+// Function to build consistent prompts
+function buildConsistentPrompt(paragraph, context, pageNum, totalPages) {
+    const characterInfo = context.characters.length > 0 
+        ? `Main characters: ${context.characters.slice(0, 3).join(', ')}. Keep these characters visually consistent with the same simple shapes and features throughout all pages.`
+        : "Maintain consistent simple character designs if characters appear.";
+    
+    return `Create a minimalist children's picture book illustration for page ${pageNum} of ${totalPages}.
+
+STORY CONTEXT: This is part of a cohesive story set in a ${context.setting} with a ${context.mood} tone.
+
+SCENE TO ILLUSTRATE: "${paragraph}"
+
+CHARACTER CONSISTENCY: ${characterInfo}
+
+MINIMALIST STYLE REQUIREMENTS (Jon Klassen/Silverstein/Not a Box inspired):
+- ULTRA-SIMPLE geometric shapes and clean lines
+- Maximum 2-4 colors total (including white background)
+- Flat design with NO complex textures or gradients
+- Bold, expressive simplicity over detailed realism
+- Lots of negative space and clean white backgrounds
+- Simple oval/circle heads, basic body shapes
+- Minimal facial features but maximum emotional expression
+
+COMPOSITION RULES:
+- Clean, uncluttered layout with plenty of breathing room
+- Focus on essential elements only - remove unnecessary details
+- Simple, bold shapes that read clearly from a distance
+- Strategic use of empty space to create impact
+- Single focal point per illustration
+
+COLOR PALETTE:
+- Limited palette: choose 1-2 main colors plus black/white
+- Muted, earthy tones (avoid bright, saturated colors)
+- Consistent color choices across all ${totalPages} pages
+- Use color sparingly for maximum impact
+
+TECHNICAL APPROACH:
+- Clean vector-style illustration (not painterly)
+- Bold outlines where needed
+- Flat color fills without complex shading
+- Simple geometric patterns if any patterns are used
+- Readable at small sizes
+
+STORYTELLING FOCUS:
+- Convey emotion through simple gestures and basic shapes
+- Clear visual narrative without visual clutter
+- Let the imagination fill in the details
+- Focus on the essence of the scene, not photographic accuracy
+
+AVOID: Complex details, realistic textures, busy backgrounds, multiple focal points, bright rainbow colors, photorealistic elements.
+
+CREATE: A beautifully simple illustration that captures the story moment with maximum emotional impact using minimum visual elements.`;
+}
+        
 // Illustrated book creation function
         async function createIllustratedBook() {
             const title = document.getElementById('storyTitle').value.trim() || 'My StoryForge Tale';
@@ -765,11 +849,11 @@ This is just your response to their feedback, not the story itself.`;
                     document.getElementById('progressText').textContent = 
                         `Illustrating page ${i + 1} of ${maxPages}...`;
                     
-                    // Create image prompt from the paragraph
-                    const prompt = `Children's picture book illustration for: "${paragraph}". 
-                        Style: Colorful, friendly, whimsical children's book art. 
-                        Safe for ages 8-16. Bright colors, simple shapes, engaging characters.
-                        High quality digital illustration suitable for a picture book.`;
+                    // Extract story context for consistency (add this before the loop)
+                    const storyContext = extractStoryContext(story);
+
+                    // Then in the loop, use this improved prompt:
+                    const prompt = buildConsistentPrompt(paragraph, storyContext, i + 1, maxPages);
                     
                     try {
                         const response = await fetch('/api/generate-image', {
