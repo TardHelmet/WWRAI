@@ -906,6 +906,166 @@ CREATE: A beautifully simple but artistically rich illustration with the warmth 
             }
         }
 
+// Function to download illustrated book as PDF
+async function downloadIllustratedBookAsPDF() {
+    if (!illustratedPages || illustratedPages.length === 0) {
+        alert('No illustrated book to download!');
+        return;
+    }
+
+    try {
+        // Create a simple HTML document for PDF conversion
+        const title = document.getElementById('bookTitle').textContent;
+        
+        // Start building the PDF content
+        let pdfContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>${title}</title>
+            <style>
+                body { 
+                    font-family: 'Segoe UI', Arial, sans-serif; 
+                    margin: 0; 
+                    padding: 20px;
+                    background: white;
+                }
+                .page { 
+                    page-break-after: always; 
+                    min-height: 90vh; 
+                    display: flex; 
+                    flex-direction: column; 
+                    align-items: center; 
+                    justify-content: center;
+                    padding: 20px;
+                    margin-bottom: 40px;
+                }
+                .page:last-child { page-break-after: avoid; }
+                .page-image { 
+                    max-width: 80%; 
+                    max-height: 60vh; 
+                    object-fit: contain; 
+                    border-radius: 8px;
+                    margin-bottom: 20px;
+                }
+                .page-text { 
+                    font-size: 18px; 
+                    line-height: 1.6; 
+                    text-align: center; 
+                    max-width: 600px; 
+                    color: #374151;
+                    margin-bottom: 10px;
+                }
+                .page-number { 
+                    color: #6b7280; 
+                    font-size: 14px; 
+                }
+                .title-page {
+                    text-align: center;
+                    page-break-after: always;
+                }
+                .title-page h1 {
+                    font-size: 2.5rem;
+                    color: #1e40af;
+                    margin-bottom: 20px;
+                }
+                .title-page p {
+                    font-size: 1.2rem;
+                    color: #6b7280;
+                    font-style: italic;
+                }
+                .image-placeholder {
+                    width: 400px;
+                    height: 300px;
+                    background: #f3f4f6;
+                    border: 2px dashed #d1d5db;
+                    border-radius: 8px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: #6b7280;
+                    margin-bottom: 20px;
+                }
+                @media print {
+                    .page { margin-bottom: 0; }
+                }
+            </style>
+        </head>
+        <body>
+            <div class="title-page">
+                <h1>${title}</h1>
+                <p>Created with StoryForge</p>
+                <p style="margin-top: 40px;">Where Stories Are Forged, Not Just Written</p>
+            </div>
+        `;
+
+        // Add each page
+        for (let i = 0; i < illustratedPages.length; i++) {
+            const page = illustratedPages[i];
+            
+            pdfContent += `
+            <div class="page">
+                ${page.imageUrl && !page.error 
+                    ? `<img src="${page.imageUrl}" alt="Illustration for page ${page.pageNumber}" class="page-image">`
+                    : `<div class="image-placeholder">🎨<br>Illustration for Page ${page.pageNumber}</div>`
+                }
+                <div class="page-text">${page.text}</div>
+                <div class="page-number">Page ${page.pageNumber}</div>
+            </div>
+            `;
+        }
+
+        pdfContent += `
+        </body>
+        </html>
+        `;
+
+        // Create a blob and download
+        const blob = new Blob([pdfContent], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${title.replace(/[^a-z0-9]/gi, '_')}_illustrated_book.html`;
+        a.click();
+        URL.revokeObjectURL(url);
+
+        // Also offer to save as illustrated story to library
+        if (confirm('Would you like to save this illustrated story to your library for easy access later?')) {
+            saveIllustratedStoryToLibrary(title);
+        }
+
+    } catch (error) {
+        console.error('Error creating PDF:', error);
+        alert('Sorry, there was an error creating the download. You can still screenshot each page manually.');
+    }
+}
+
+// Function to save illustrated story to library
+function saveIllustratedStoryToLibrary(title) {
+    const stories = loadFromStorage('stories') || [];
+    const finalStoryText = document.getElementById('finalStory').textContent;
+    
+    const illustratedStory = {
+        id: Date.now().toString() + '_illustrated',
+        title: title + ' (Illustrated)',
+        originalStory: currentStory,
+        finalStory: finalStoryText,
+        illustratedPages: illustratedPages.map(page => ({
+            text: page.text,
+            pageNumber: page.pageNumber,
+            hasImage: !!(page.imageUrl && !page.error)
+        })),
+        isIllustrated: true,
+        createdAt: new Date().toISOString()
+    };
+    
+    stories.unshift(illustratedStory);
+    saveToStorage('stories', stories);
+    
+    alert('Illustrated story saved to your library! ✨');
+}
+        
         // Function to display a specific book page
         function showBookPage(pageIndex) {
             if (pageIndex < 0 || pageIndex >= illustratedPages.length) return;
@@ -974,23 +1134,34 @@ CREATE: A beautifully simple but artistically rich illustration with the warmth 
                 storiesList.innerHTML = '';
                 return;
             }
-
-            noStories.style.display = 'none';
+            noStories.style.display = 'none'; 
             storiesList.innerHTML = stories.map(story => `
-                <div class="story-item" onclick="viewStory('${story.id}')">
-                    <div class="story-title">${story.title}</div>
-                    <div class="story-date">Created: ${new Date(story.createdAt).toLocaleDateString()}</div>
-                </div>
+            <div class="story-item" onclick="viewStory('${story.id}')">
+            <div class="story-title">
+            ${story.isIllustrated ? '📖 ' : ''}${story.title}
+            ${story.isIllustrated ? '<span style="color: #10b981; font-size: 0.8rem; margin-left: 8px;">Illustrated</span>' : ''}
+            </div>
+            <div class="story-date">Created: ${new Date(story.createdAt).toLocaleDateString()}</div>
+            ${story.isIllustrated ? `<div style="color: #6b7280; font-size: 0.8rem; margin-top: 4px;">${story.illustratedPages?.length || 0} illustrated pages</div>` : ''}
+            </div>
             `).join('');
         }
 
-        function viewStory(storyId) {
+            function viewStory(storyId) {
             const stories = loadFromStorage('stories') || [];
             const story = stories.find(s => s.id === storyId);
             if (story) {
-                alert(`${story.title}\n\n${story.finalStory || story.originalStory}`);
-            }
+            if (story.isIllustrated) {
+            // Show a preview of the illustrated story
+            const pageCount = story.illustratedPages?.length || 0;
+            const preview = `${story.title}\n\n📖 This is an illustrated story with ${pageCount} pages.\n\n${story.finalStory || story.originalStory}\n\n✨ This story has been enhanced with beautiful illustrations!\n\nTo view the full illustrated version, you'll need to recreate it using the "Create Illustrated Book" feature.`;
+            alert(preview);
+            } else {
+            // Regular text story
+            alert(`${story.title}\n\n${story.finalStory || story.originalStory}`);
         }
+    }
+}
 
         function clearLibrary() {
             if (confirm('Are you sure you want to clear all your stories? This cannot be undone.')) {
@@ -1196,9 +1367,8 @@ CREATE: A beautifully simple but artistically rich illustration with the warmth 
                 showPage('successPage');
             });
             
-            document.getElementById('downloadIllustratedBook').addEventListener('click', () => {
-                // For now, just alert - could implement PDF generation later
-                alert('Illustrated book download feature coming soon! For now, you can screenshot each page.');
+           document.getElementById('downloadIllustratedBook').addEventListener('click', () => {
+           downloadIllustratedBookAsPDF();
             });
 
             // Library page
