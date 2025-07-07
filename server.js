@@ -346,7 +346,7 @@ app.listen(port, () => {
     console.log('🏰 ============================================');
     console.log(`📖 Tagline: "Where Stories Are Forged, Not Just Written"`);
     console.log(`🌐 Guild Portal: http://localhost:${port}`);
-    console.log(`🔑 API Key configured: ${GEMINI_KEY ? '✅ YES' : '❌ NO'}`);
+    console.log(`🔑 API Key configured: ${GEMINI_KEY ? '✅ YES' : '❌ NO'} (starts with: ${GEMINI_KEY ? GEMINI_KEY.substring(0, 5) + '...' : 'N/A'})`);
     console.log(`📁 Serving files from: ${__dirname}`);
     console.log(`⚡ Ready to help Interns forge amazing stories!`);
     console.log('🏰 ============================================');

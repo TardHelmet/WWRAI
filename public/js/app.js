@@ -748,6 +748,7 @@ function clearLibrary() {
 document.addEventListener('DOMContentLoaded', async () => {
     await loadComponents();
 
+    // All event listeners and initial page display logic moved here
     // Check for existing user
     const savedUser = loadFromStorage('user');
     if (savedUser) {
