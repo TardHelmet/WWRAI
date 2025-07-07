@@ -73,7 +73,7 @@ function displayFormattedStory(containerId, storyText) {
     container.innerHTML = paragraphs.map(para => `<p>${para}</p>`).join('');
 }
 
-function typeWriter(element, text, speed = 50, paragraphSpeed = 500) {
+function typeWriter(element, text, speed = 8, paragraphSpeed = 50) {
     let i = 0;
     element.innerHTML = "";
     function type() {
@@ -130,7 +130,14 @@ Please provide feedback in the following structure:
     *   For spelling: "I saw the word 'teh'. Did you mean to write 'the'?" (Always ask, never assume).
 3.  **Expansion Ideas:** Offer one or two points where they could expand the story to make it more impactful. "I wonder what the dragon was thinking right before he breathed fire?" or "What did the forest smell like?"
 
-Keep your tone consistently that of a caring, kind dwarf with a smile. Address them as "Intern" and sign as "Your friend, The Story-Dwarf".`;
+Keep your tone consistently that of a caring, kind dwarf with a smile. Address them as "Intern" and sign as "Your friend, The Story-Dwarf".`
+
+- `Do NOT include any introductory phrases like "Here is your feedback:" or "Overall Positive Response:". Just provide the feedback directly.`
+
+- `Do NOT include the numbered list or bolded headings from these instructions in your response.`
+
+- `Ensure your response contains ONLY the story ideas, without any conversational filler.`
+;
 
         } else if (mode === 'editor_revision') {
             prompt = `You are the Editor reviewing the Intern's revised story.
@@ -148,7 +155,13 @@ Respond with:
                 'Say their story is excellent and ready for Guild collaboration' : 
                 'One small suggestion OR say it\'s ready for the Guild'}
 3. Keep it under 80 words
-4. Sign as "Your Editor"`;
+4. Sign as "Your Editor"`
+- `Do NOT include any introductory phrases like "Here is your feedback:" or "Overall Positive Response:". Just provide the feedback directly.`
+
+- `Do NOT include the numbered list or bolded headings from these instructions in your response.`
+
+- `Ensure your response contains ONLY the story ideas, without any conversational filler.`
+;
 
         } else if (mode === 'guild_story') {
             prompt = `You are a Guild writer creating a 12-paragraph children's story based on the Intern's original idea.
@@ -165,7 +178,13 @@ Write a complete children's story that:
 
 Format your response with clear paragraph breaks. Start each paragraph on a new line.
 
-Just write the story - no introduction or explanation needed.`;
+Just write the story - no introduction or explanation needed.`
+- `Do NOT include any introductory phrases like "Here is your feedback:" or "Overall Positive Response:". Just provide the feedback directly.`
+
+- `Do NOT include the numbered list or bolded headings from these instructions in your response.`
+
+- `Ensure your response contains ONLY the story ideas, without any conversational filler.`
+;
 
         } else if (mode === 'guild_feedback') {
             prompt = `You are the Guild writer rewriting your story based on the Intern's feedback.
@@ -180,7 +199,13 @@ Rewrite the complete 12-paragraph children's story incorporating their suggestio
 4. Use simple, engaging language for 10-year-olds
 5. Format with clear paragraph breaks
 
-Write the complete revised story - no explanation, just the new story.`;
+Write the complete revised story - no explanation, just the new story.`
+- `Do NOT include any introductory phrases like "Here is your feedback:" or "Overall Positive Response:". Just provide the feedback directly.`
+
+- `Do NOT include the numbered list or bolded headings from these instructions in your response.`
+
+- `Ensure your response contains ONLY the story ideas, without any conversational filler.`
+;
 
         } else if (mode === 'guild_feedback_response') {
             prompt = `You are the Guild writer responding to the Intern's feedback.
@@ -196,7 +221,13 @@ Respond as the grateful Guild writer:
 4. Keep it warm and appreciative, under 60 words
 5. Sign as "Your Guild Writer"
 
-This is just your response to their feedback, not the story itself.`;
+This is just your response to their feedback, not the story itself.`
+- `Do NOT include any introductory phrases like "Here is your feedback:" or "Overall Positive Response:". Just provide the feedback directly.`
+
+- `Do NOT include the numbered list or bolded headings from these instructions in your response.`
+
+- `Ensure your response contains ONLY the story ideas, without any conversational filler.`
+;
         } else if (mode === 'inspiration') {
             prompt = `You are the Inspiration a friendly dwarf in the StoryForge Guild.
 
@@ -210,7 +241,13 @@ Here are some examples of the tone, but do not use these ideas:
 - A shy cloud who accidentally rains on a wizard's parade and learns that sometimes our biggest mistakes can bring the most unexpected joy.
 - A forgotten sock who must navigate the treacherous world under the bed to find its lost partner and learns that true friendship is worth the journey.
 
-Generate three new ideas now.`;
+Generate three new ideas now.`
+- `Do NOT include any introductory phrases like "Here is your feedback:" or "Overall Positive Response:". Just provide the feedback directly.`
+
+- `Do NOT include the numbered list or bolded headings from these instructions in your response.`
+
+- `Ensure your response contains ONLY the story ideas, without any conversational filler.`
+;
         } else if (mode === 'summarize_strengths') {
             prompt = `You are a caring, kind dwarf with a smile, an editor in the StoryForge Guild.
 
@@ -218,7 +255,13 @@ The Intern has decided they like their story as it is. Please provide a summary 
 
 Their story: "${userText}"
 
-Keep your tone consistently that of a caring, kind dwarf with a smile. Address them as "Intern" and sign as "Your friend, The Story-Dwarf".`;
+Keep your tone consistently that of a caring, kind dwarf with a smile. Address them as "Intern" and sign as "Your friend, The Story-Dwarf".`
+- `Do NOT include any introductory phrases like "Here is your feedback:" or "Overall Positive Response:". Just provide the feedback directly.`
+
+- `Do NOT include the numbered list or bolded headings from these instructions in your response.`
+
+- `Ensure your response contains ONLY the story ideas, without any conversational filler.`
+;
         }
 
         const response = await fetch('/api/storyforge-ai', {
