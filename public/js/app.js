@@ -117,6 +117,9 @@ function saveStoryToLibrary(title, originalStory, finalStory) {
 async function callStoryForgeAI(userText, mode, context = '') {
     try {
         let prompt = '';
+        if (!userText && mode !== 'inspiration') {
+            return "I can't provide feedback on an empty story. Please write something first!";
+        }
         
         if (mode === 'editor_feedback') {
             prompt = `You are a caring, kind dwarf with a smile, an editor in the StoryForge Guild, mentoring a young Intern (ages 8-16). Your goal is to help them become a better writer by guiding them to find their own mistakes, not just telling them what's wrong.
