@@ -349,6 +349,7 @@ VISUAL APPROACH:
 - Hand-lettered quality, not computer-perfect
 - Cozy, intimate feeling like a hand-illustrated book
 - Slight paper texture or watercolor bleeding effects
+- No text in any of these images
 
 COMPOSITION:
 - Clean, thoughtful layout with artistic breathing room
@@ -356,6 +357,7 @@ COMPOSITION:
 - Simple but expressive character poses and faces
 - Gentle, organic composition (not rigid geometric)
 - Strategic use of white space with subtle artistic texture
+- No text in any of these images
 
 COLOR & TEXTURE:
 - Warm, earthy palette with soft transitions
@@ -376,8 +378,9 @@ STORYTELLING:
 - Characters with personality through simple artistic choices
 - Gentle, inviting atmosphere that draws children in
 - Focus on feeling and mood over photographic accuracy
+- No text in any of these images
 
-CREATE: A beautifully simple but artistically rich illustration with the warmth and charm of hand-drawn children's book art.`;
+CREATE: A beautifully simple but artistically rich illustration with the warmth and charm of hand-drawn children's book art. - No text in any of these images.`;
 }
         
 // Illustrated book creation function
