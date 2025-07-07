@@ -117,7 +117,7 @@ function saveStoryToLibrary(title, originalStory, finalStory) {
 async function callStoryForgeAI(userText, mode, context = '') {
     try {
         let prompt = '';
-        if (!userText && mode !== 'inspiration') {
+        if ((!userText || userText.trim() === '') && mode !== 'inspiration') {
             return "I can't provide feedback on an empty story. Please write something first!";
         }
         
@@ -265,6 +265,10 @@ Keep your tone consistently that of a caring, kind dwarf with a smile. Address t
 
 - `Ensure your response contains ONLY the story ideas, without any conversational filler.`
 ;
+        }
+
+        if (!prompt || prompt.trim() === '') {
+            return "There was an issue generating the AI prompt. Please try again.";
         }
 
         const response = await fetch('/api/storyforge-ai', {
