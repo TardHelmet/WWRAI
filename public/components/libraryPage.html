@@ -1,0 +1,21 @@
+<div id="libraryPage" class="page">
+    <div class="card wide-card">
+        <h2>📚 Your Story Library</h2>
+        <p class="subtitle">Welcome back, <span id="userNameLibrary">Storyteller</span>! Here are all the stories you've forged.</p>
+        
+        <div class="button-group">
+            <button id="newStoryButton">⚡ Forge New Story</button>
+            <button id="clearLibraryButton" class="secondary-button">Clear Library</button>
+        </div>
+        
+        <div class="story-library">
+            <div id="storiesContainer">
+                <div id="loadingStories" class="loading">Loading your stories...</div>
+                <div id="noStories" style="display: none; text-align: center; padding: 40px;">
+                    <p>No stories yet! Click "Forge New Story" to begin your first adventure.</p>
+                </div>
+                <div id="storiesList"></div>
+            </div>
+        </div>
+    </div>
+</div>

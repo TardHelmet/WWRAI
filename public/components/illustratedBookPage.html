@@ -1,0 +1,33 @@
+<div id="illustratedBookPage" class="page">
+    <div class="card wide-card">
+        <h2>📖 Your Illustrated Story</h2>
+        <p class="subtitle" id="bookTitle">Loading your beautiful picture book...</p>
+        
+        <div id="bookLoadingSection">
+            <div class="ai-response">
+                <div class="character-badge">🎨 The Press</div>
+                <div id="bookProgress">
+                    <div class="loading">Creating your illustrated masterpiece...</div>
+                    <p id="progressText">Analyzing characters and scenes...</p>
+                </div>
+            </div>
+        </div>
+        
+        <div id="bookDisplaySection" style="display: none;">
+            <div class="book-controls" style="text-align: center; margin-bottom: 20px;">
+                <button id="prevPage" class="secondary-button" style="width: auto; margin: 0 10px;">← Previous</button>
+                <span id="pageCounter" style="margin: 0 20px; font-weight: bold;">Page 1 of 12</span>
+                <button id="nextPage" class="secondary-button" style="width: auto; margin: 0 10px;">Next →</button>
+            </div>
+            
+            <div class="book-page" id="bookPageDisplay">
+                <!-- Individual pages will be inserted here -->
+            </div>
+            
+            <div class="button-group" style="margin-top: 30px;">
+                <button id="downloadIllustratedBook" class="success-button">Download Picture Book</button>
+                <button id="backToStory" class="secondary-button">Back to Story</button>
+            </div>
+        </div>
+    </div>
+</div>

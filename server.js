@@ -6,7 +6,7 @@ const port = process.env.PORT || 3000;
 
 // Middleware
 app.use(express.json({ limit: '10mb' }));
-app.use(express.static(__dirname));
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Get API key from environment variable
 const GEMINI_KEY = process.env.GEMINI_API_KEY;
@@ -336,7 +336,7 @@ app.use((err, req, res, next) => {
 
 // Serve index.html for all other routes (SPA)
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // Start the server

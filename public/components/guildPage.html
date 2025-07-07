@@ -1,0 +1,30 @@
+<div id="guildPage" class="page">
+    <div class="card wide-card">
+        <h2>🏛️ Guild Collaboration</h2>
+        
+        <div id="guildIntro" class="ai-response">
+            <div class="character-badge">Editor</div>
+            <p>Excellent work, Intern! Your story has caught the attention of another writer in the Guild who would love to create their own version based on your amazing idea. Would you be willing to give them feedback on their interpretation?</p>
+        </div>
+        
+        <div class="button-group" id="guildChoice">
+            <button id="allowCollaboration" class="success-button">Yes, I'd love to help!</button>
+            <button id="declineCollaboration" class="secondary-button">No thanks, I'm done</button>
+        </div>
+        
+        <div id="guildStorySection" style="display: none;">
+            <h3>📖 The Guild Writer's Version:</h3>
+            <div id="guildStory" class="story-display">
+                <div class="loading">The Guild writer is crafting their version...</div>
+            </div>
+            
+            <h3>Your Feedback:</h3>
+            <textarea id="feedbackInput" placeholder="What do you think of this version? Any suggestions for the writer?"></textarea>
+            
+            <div class="button-group" id="feedbackButtons">
+                <button id="submitFeedback">Send Feedback</button>
+                <button id="approveFinalStory" class="success-button">It's Perfect!</button>
+            </div>
+        </div>
+    </div>
+</div>

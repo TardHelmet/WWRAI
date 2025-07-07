@@ -1,0 +1,31 @@
+<div id="workshopPage" class="page">
+    <div class="card wide-card">
+        <h2>⚡ StoryForge Workshop</h2>
+        <p class="subtitle">Welcome, <span id="userName">Intern</span>! Watch this video and write your story alongside it. Your Editor is standing by to help.</p>
+        
+        <div class="video-writing-container">
+            <div class="video-section">
+                <h3>📺 Your Story Inspiration</h3>
+                <div class="video-container">
+                    <iframe id="videoPlayer" 
+                            src="https://www.youtube.com/embed/OvOrbWggMTs" 
+                            allowfullscreen>
+                    </iframe>
+                </div>
+                <p style="margin-top: 12px; color: #6b7280; text-align: center;">
+                    Watch and write! You can pause, rewind, or replay anytime.
+                </p>
+            </div>
+            
+            <div class="writing-section">
+                <h3>✍️ Your Story</h3>
+                <textarea id="storyInput" 
+                          placeholder="Start writing your story as you watch the video. What do you see happening? Who are the characters? What's the adventure about?"></textarea>
+                <div class="button-group">
+                    <button id="getEditorFeedback">Get Editor Feedback</button>
+                    <button id="backToDashboard" class="secondary-button">Back to Library</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

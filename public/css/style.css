@@ -1,0 +1,346 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #60a5fa 100%);
+    color: #1f2937;
+    min-height: 100vh;
+}
+
+.page {
+    display: none;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.page.active {
+    display: block;
+}
+
+.card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 16px;
+    padding: 32px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    margin: 0 auto;
+    max-width: 600px;
+    backdrop-filter: blur(10px);
+}
+
+.wide-card {
+    max-width: 1200px;
+}
+
+h1 {
+    color: #1e40af;
+    text-align: center;
+    margin-bottom: 16px;
+    font-size: 2.5rem;
+}
+
+h2 {
+    color: #1e40af;
+    text-align: center;
+    margin-bottom: 16px;
+    font-size: 1.8rem;
+}
+
+.subtitle {
+    text-align: center;
+    color: #4b5563;
+    margin-bottom: 24px;
+    font-size: 1.1rem;
+}
+
+.tagline {
+    text-align: center;
+    color: #6b7280;
+    font-style: italic;
+    margin-bottom: 32px;
+    font-size: 1rem;
+}
+
+input[type="text"] {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: 2px solid #d1d5db;
+    margin-bottom: 16px;
+    font-size: 16px;
+    transition: border-color 0.3s;
+}
+
+input[type="text"]:focus {
+    outline: none;
+    border-color: #3b82f6;
+}
+
+button {
+    width: 100%;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-bottom: 12px;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+}
+
+button:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.video-writing-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    align-items: start;
+}
+
+.video-section {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.writing-section {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.video-container {
+    width: 100%;
+    aspect-ratio: 16/9;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+textarea {
+    width: 100%;
+    min-height: 300px;
+    padding: 15px;
+    border: 2px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 16px;
+    font-family: inherit;
+    resize: vertical;
+    transition: border-color 0.3s;
+}
+
+textarea:focus {
+    outline: none;
+    border-color: #3b82f6;
+}
+
+.ai-response {
+    background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+    border-left: 4px solid #3b82f6;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 20px 0;
+}
+
+.ai-character {
+    font-weight: bold;
+    color: #1e40af;
+    margin-bottom: 8px;
+    font-size: 1.1rem;
+}
+
+.story-display {
+    background: #f9fafb;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 20px 0;
+    line-height: 1.8;
+    font-size: 16px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.story-display p {
+    margin-bottom: 16px;
+    text-indent: 20px;
+}
+
+.story-display p:first-child {
+    text-indent: 0;
+    font-weight: bold;
+    color: #1e40af;
+}
+
+.story-library {
+    margin-top: 20px;
+}
+
+.story-item {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.story-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.story-title {
+    font-weight: bold;
+    color: #1e40af;
+    margin-bottom: 8px;
+}
+
+.story-date {
+    color: #6b7280;
+    font-size: 0.9rem;
+}
+
+.loading {
+    text-align: center;
+    padding: 40px;
+}
+
+.loading::after {
+    content: "⚡";
+    animation: spin 1s linear infinite;
+    font-size: 2rem;
+    display: block;
+    margin: 20px auto;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.button-group {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.button-group button {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+.secondary-button {
+    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+}
+
+.success-button {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.character-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.book-page {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    max-width: 600px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.book-page img {
+    width: 100%;
+    max-width: 400px;
+    height: 400px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.book-page .page-text {
+    font-size: 18px;
+    line-height: 1.6;
+    color: #374151;
+    max-width: 500px;
+    margin: 0 auto;
+    text-align: left;
+}
+
+.book-page .page-number {
+    color: #6b7280;
+    font-size: 14px;
+    margin-top: 16px;
+    text-align: center;
+}
+
+.image-error {
+    width: 100%;
+    max-width: 400px;
+    height: 400px;
+    background: #f3f4f6;
+    border: 2px dashed #d1d5db;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 16px;
+    color: #6b7280;
+}
+
+.image-error .error-icon {
+    font-size: 48px;
+    margin-bottom: 8px;
+}
+
+.book-controls button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+    .video-writing-container {
+        grid-template-columns: 1fr;
+    }
+    
+    h1 {
+        font-size: 2rem;
+    }
+    
+    .card {
+        padding: 20px;
+        margin: 10px;
+    }
