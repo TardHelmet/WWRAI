@@ -783,23 +783,66 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Parse the inspiration text and display it with genre labels
             inspirationContainer.innerHTML = ''; // Clear loading message
 
-            const blocks = inspirationText.split('\n\n'); // Split by double newline to get genre blocks
+            try {
+                // Try parsing with expected format first
+                const blocks = inspirationText.split('\n\n'); // Split by double newline to get genre blocks
+                let hasValidBlocks = false;
 
-            blocks.forEach(block => {
-                if (block.trim() === '') return; // Skip empty blocks
+                blocks.forEach(block => {
+                    if (block.trim() === '') return; // Skip empty blocks
 
-                const genreMatch = block.match(/\*\*(.*?)\*\*:\s*(.*)/s); // Match genre and sentence(s)
+                    // Try both formats: "**Genre:** text" and "Genre: text"
+                    const genreMatch = block.match(/(\*\*)?(.*?)(\*\*)?:\s*(.*)/s);
+                    
+                    if (genreMatch && genreMatch[2] && genreMatch[4]) {
+                        const genre = genreMatch[2].trim();
+                        const sentence = genreMatch[4].trim().replace(/\n/g, ' '); // Replace internal newlines with spaces
+                        hasValidBlocks = true;
 
-                if (genreMatch) {
-                    const genre = genreMatch[1].trim();
-                    const sentence = genreMatch[2].trim().replace(/\n/g, ' '); // Replace internal newlines with spaces
+                        const genreDiv = document.createElement('div');
+                        genreDiv.className = 'inspiration-genre';
+                        genreDiv.innerHTML = `<h3>${genre}</h3><p>${sentence}</p>`;
+                        inspirationContainer.appendChild(genreDiv);
+                    }
+                });
 
-                    const genreDiv = document.createElement('div');
-                    genreDiv.className = 'inspiration-genre';
-                    genreDiv.innerHTML = `<h3>${genre}</h3><p>${sentence}</p>`;
-                    inspirationContainer.appendChild(genreDiv);
+                // Fallback if no valid blocks found
+                if (!hasValidBlocks) {
+                    const fallbackGenres = ['Real World', 'Traditional Fantasy', 'Science Fiction', 'Absurdism'];
+                    const sentences = inspirationText.split('\n').filter(s => s.trim().length > 0);
+                    
+                    fallbackGenres.forEach((genre, i) => {
+                        const sentence = sentences[i] || 'An interesting story idea goes here!';
+                        const genreDiv = document.createElement('div');
+                        genreDiv.className = 'inspiration-genre';
+                        genreDiv.innerHTML = `<h3>${genre}</h3><p>${sentence}</p>`;
+                        inspirationContainer.appendChild(genreDiv);
+                    });
                 }
-            });
+            } catch (error) {
+                console.error('Error parsing inspiration:', error);
+                inspirationContainer.innerHTML = `
+                    <div class="error-message">
+                        <p>Couldn't parse the ideas. Here are some fallback prompts:</p>
+                        <div class="inspiration-genre">
+                            <h3>Real World</h3>
+                            <p>When I found the old key in my grandmother's attic, I never imagined what door it would open.</p>
+                        </div>
+                        <div class="inspiration-genre">
+                            <h3>Traditional Fantasy</h3>
+                            <p>The dragon's egg had been still for a hundred years, until today when it began to tremble.</p>
+                        </div>
+                        <div class="inspiration-genre">
+                            <h3>Science Fiction</h3>
+                            <p>The spaceship's AI suddenly stopped responding, leaving us alone in the vast emptiness of space.</p>
+                        </div>
+                        <div class="inspiration-genre">
+                            <h3>Absurdism</h3>
+                            <p>The mayor declared Tuesday illegal, and now everyone had to pretend it was still Monday.</p>
+                        </div>
+                    </div>
+                `;
+            }
         } catch (error) {
             console.error('Error generating inspiration:', error);
             inspirationContainer.innerHTML = `
