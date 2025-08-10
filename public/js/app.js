@@ -219,17 +219,30 @@ prompt += `\n- Ensure your response contains ONLY the story ideas, without any c
         } else if (mode === 'inspiration') {
             prompt = `You are the Inspiration a friendly dwarf in the StoryForge Guild.
 
-Generate three unique and random story ideas for a young writer. 
-Each idea should be a single, intriguing sentence.
-Follow the format: "A [adjective] [creature/object] who [action] and learns [lesson]." but make it sound natural and not like a formula.
-Make them very random and creative.
+Generate four unique and random story kickoff sentences for a young writer, each in a different genre:
 
-Here are some examples of the tone, but do not use these ideas:
-- A grumpy teacup who must safely carry a rainbow to the top of a mountain and learns that even small travelers can have big adventures.
-- A shy cloud who accidentally rains on a wizard's parade and learns that sometimes our biggest mistakes can bring the most unexpected joy.
-- A forgotten sock who must navigate the treacherous world under the bed to find its lost partner and learns that true friendship is worth the journey.
+1.  **Real World:** Example: "When Roger pulled up to the local Gas Station, he just wanted to get a soda. But what he saw happening inside would change his day forever."
+2.  **Traditional Fantasy:** Example: "The Princess knew that only knights were allowed to go into the dark forest, but she had been secretly training for years to be the first to make it through."
+3.  **Science Fiction:** Example: "A bright light blinded the captain of the USS Mcgillicuty as it passed Saturns third moon. There isn't supposed to be anyone out here, he thought to himself."
+4.  **Absurdism:** Example: "The people of Spumonitown Always kept the Cherri-ites seperate from the rest, but today the basket of pistachios somehow ended up in their bakery."
 
-Generate three new ideas now.`
+Ensure each sentence is intriguing and sets up a fun story.
+
+Format your response with each genre clearly labeled, followed by the sentence. For example:
+
+**Real World:**
+[Sentence here]
+
+**Traditional Fantasy:**
+[Sentence here]
+
+**Science Fiction:**
+[Sentence here]
+
+**Absurdism:**
+[Sentence here]
+
+Just provide the four sentences with labels - no other conversational text.`;
 prompt += `\n\n- Do NOT include any introductory phrases like "Here is your feedback:" or "Overall Positive Response:". Just provide the feedback directly.`;
 prompt += `\n- Do NOT include the numbered list or bolded headings from these instructions in your response.`;
 prompt += `\n- Ensure your response contains ONLY the story ideas, without any conversational filler.`;
@@ -253,7 +266,7 @@ prompt += `\n- Ensure your response contains ONLY the story ideas, without any c
         const response = await fetch('/api/storyforge-ai', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
+            body: JSON.JSON.stringify({
                 contents: [{
                     parts: [{ text: prompt }]
                 }],
@@ -755,15 +768,88 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // New Story Options page
     document.getElementById('haveIdea').addEventListener('click', () => {
-        showPage('workshopPage');
+        showPage('editorPage');
     });
 
     document.getElementById('needsInspiration').addEventListener('click', async () => {
         showPage('inspirationPage');
         const inspirationContainer = document.getElementById('inspirationContainer');
         inspirationContainer.innerHTML = '<div class="loading">Generating inspiration...</div>';
-        const inspiration = await callStoryForgeAI('', 'inspiration');
-        typeWriter(inspirationContainer, inspiration);
+        const inspirationText = await callStoryForgeAI('', 'inspiration');
+
+        // Parse the inspiration text and display it with genre labels
+        inspirationContainer.innerHTML = ''; // Clear loading message
+
+        const lines = inspirationText.split('\n');
+        let currentGenre = '';
+        let currentSentence = '';
+
+        lines.forEach(line => {
+            if (line.startsWith('**')) {
+                // New genre detected
+                if (currentGenre) {
+                    // Display previous genre and sentence
+                    const genreDiv = document.createElement('div');
+                    genreDiv.className = 'inspiration-genre';
+                    genreDiv.innerHTML = `<h3>${currentGenre}</h3><p>${currentSentence}</p>`;
+                    inspirationContainer.appendChild(genreDiv);
+                }
+                currentGenre = line.replace(/\*\*/g, '').trim();
+                currentSentence = '';
+            } else if (line.trim() !== '' && currentGenre) {
+                // Append to current sentence
+                currentSentence += (currentSentence ? ' ' : '') + line.trim();
+            }
+        });
+
+        // Display the last genre and sentence
+        if (currentGenre && currentSentence) {
+            const genreDiv = document.createElement('div');
+            genreDiv.className = 'inspiration-genre';
+            genreDiv.innerHTML = `<h3>${currentGenre}</h3><p>${currentSentence}</p>`;
+            inspirationContainer.appendChild(genreDiv);
+        }
+    });
+
+    // Add event listener for "Show me other ideas" button
+    document.getElementById('generateMoreInspiration').addEventListener('click', async () => {
+        showPage('inspirationPage');
+        const inspirationContainer = document.getElementById('inspirationContainer');
+        inspirationContainer.innerHTML = '<div class="loading">Generating more inspiration...</div>';
+        const inspirationText = await callStoryForgeAI('', 'inspiration');
+
+        // Parse the inspiration text and display it with genre labels
+        inspirationContainer.innerHTML = ''; // Clear loading message
+
+        const lines = inspirationText.split('\n');
+        let currentGenre = '';
+        let currentSentence = '';
+
+        lines.forEach(line => {
+            if (line.startsWith('**')) {
+                // New genre detected
+                if (currentGenre) {
+                    // Display previous genre and sentence
+                    const genreDiv = document.createElement('div');
+                    genreDiv.className = 'inspiration-genre';
+                    genreDiv.innerHTML = `<h3>${currentGenre}</h3><p>${currentSentence}</p>`;
+                    inspirationContainer.appendChild(genreDiv);
+                }
+                currentGenre = line.replace(/\*\*/g, '').trim();
+                currentSentence = '';
+            } else if (line.trim() !== '' && currentGenre) {
+                // Append to current sentence
+                currentSentence += (currentSentence ? ' ' : '') + line.trim();
+            }
+        });
+
+        // Display the last genre and sentence
+        if (currentGenre && currentSentence) {
+            const genreDiv = document.createElement('div');
+            genreDiv.className = 'inspiration-genre';
+            genreDiv.innerHTML = `<h3>${currentGenre}</h3><p>${currentSentence}</p>`;
+            inspirationContainer.appendChild(genreDiv);
+        }
     });
 
     // Workshop page
@@ -784,10 +870,29 @@ document.addEventListener('DOMContentLoaded', async () => {
         showPage('editorPage');
         
         const feedback = await callStoryForgeAI(story, 'editor_feedback');
-        const p = document.createElement('p');
-        responseDiv.innerHTML = '';
-        responseDiv.appendChild(p)
-        typeWriter(p, feedback);
+        
+        // Parse the feedback and display it in structured sections
+        const positiveResponseMatch = feedback.match(/Overall Positive Response:\s*(.*?)(?=\n\nGentle Guidance:|\n\nExpansion Ideas:|$)/s);
+        const gentleGuidanceMatch = feedback.match(/Gentle Guidance:\s*(.*?)(?=\n\nExpansion Ideas:|$)/s);
+        const expansionIdeasMatch = feedback.match(/Expansion Ideas:\s*(.*)/s);
+
+        const positiveResponse = positiveResponseMatch ? positiveResponseMatch[1].trim() : '';
+        const gentleGuidance = gentleGuidanceMatch ? gentleGuidanceMatch[1].trim() : '';
+        const expansionIdeas = expansionIdeasMatch ? expansionIdeasMatch[1].trim() : '';
+
+        const positiveResponseDiv = document.getElementById('positiveResponse');
+        const gentleGuidanceDiv = document.getElementById('gentleGuidance');
+        const expansionIdeasDiv = document.getElementById('expansionIdeas');
+
+        positiveResponseDiv.innerHTML = positiveResponse ? `<h3>Overall Positive Response</h3><p>${positiveResponse.replace(/\n/g, '<br>')}</p>` : '';
+        gentleGuidanceDiv.innerHTML = gentleGuidance ? `<h3>Gentle Guidance</h3><p>${gentleGuidance.replace(/\n/g, '<br>')}</p>` : '';
+        expansionIdeasDiv.innerHTML = expansionIdeas ? `<h3>Expansion Ideas</h3><p>${expansionIdeas.replace(/\n/g, '<br>')}</p>` : '';
+
+        // Hide the old response div if it exists and is empty
+        const oldResponseDiv = document.getElementById('editorResponse');
+        if (oldResponseDiv && oldResponseDiv.querySelector('.loading')) {
+            oldResponseDiv.style.display = 'none';
+        }
     });
 
     document.getElementById('backToDashboard').addEventListener('click', () => {

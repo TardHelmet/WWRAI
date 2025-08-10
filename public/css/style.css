@@ -230,7 +230,6 @@ textarea:focus {
 }
 
 .loading::after {
-    content: "⚡";
     animation: spin 1s linear infinite;
     font-size: 2rem;
     display: block;
@@ -324,8 +323,7 @@ textarea:focus {
 }
 
 .image-error .error-icon {
-    font-size: 48px;
-    margin-bottom: 8px;
+    /* Removed font-size and margin-bottom */
 }
 
 .book-controls button:disabled {
