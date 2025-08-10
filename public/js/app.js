@@ -879,7 +879,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('startWithInspiration').addEventListener('click', () => {
         if (selectedInspirationText) {
             // Set the selected inspiration as the story
-            document.getElementById('storyInput').value = selectedInspirationText;
+            document.getElementById('editableStory').value = selectedInspirationText;
             showPage('editorPage');
         } else {
             alert('Please select an idea first!');
