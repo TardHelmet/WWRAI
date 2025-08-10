@@ -266,7 +266,7 @@ prompt += `\n- Ensure your response contains ONLY the story ideas, without any c
         const response = await fetch('/api/storyforge-ai', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.JSON.stringify({
+            body: JSON.stringify({
                 contents: [{
                     parts: [{ text: prompt }]
                 }],
@@ -771,62 +771,57 @@ document.addEventListener('DOMContentLoaded', async () => {
         showPage('editorPage');
     });
 
-    document.getElementById('needsInspiration').addEventListener('click', async () => {
+    // Reusable function to generate and display inspiration
+    async function generateAndDisplayInspiration() {
         showPage('inspirationPage');
         const inspirationContainer = document.getElementById('inspirationContainer');
         inspirationContainer.innerHTML = '<div class="loading">Generating inspiration...</div>';
-        const inspirationText = await callStoryForgeAI('', 'inspiration');
+        
+        try {
+            const inspirationText = await callStoryForgeAI('', 'inspiration');
+            
+            // Parse the inspiration text and display it with genre labels
+            inspirationContainer.innerHTML = ''; // Clear loading message
 
-        // Parse the inspiration text and display it with genre labels
-        inspirationContainer.innerHTML = ''; // Clear loading message
+            const blocks = inspirationText.split('\n\n'); // Split by double newline to get genre blocks
 
-        const blocks = inspirationText.split('\n\n'); // Split by double newline to get genre blocks
+            blocks.forEach(block => {
+                if (block.trim() === '') return; // Skip empty blocks
 
-        blocks.forEach(block => {
-            if (block.trim() === '') return; // Skip empty blocks
+                const genreMatch = block.match(/\*\*(.*?)\*\*:\s*(.*)/s); // Match genre and sentence(s)
 
-            const genreMatch = block.match(/\*\*(.*?)\*\*:\s*(.*)/s); // Match genre and sentence(s)
+                if (genreMatch) {
+                    const genre = genreMatch[1].trim();
+                    const sentence = genreMatch[2].trim().replace(/\n/g, ' '); // Replace internal newlines with spaces
 
-            if (genreMatch) {
-                const genre = genreMatch[1].trim();
-                const sentence = genreMatch[2].trim().replace(/\n/g, ' '); // Replace internal newlines with spaces
+                    const genreDiv = document.createElement('div');
+                    genreDiv.className = 'inspiration-genre';
+                    genreDiv.innerHTML = `<h3>${genre}</h3><p>${sentence}</p>`;
+                    inspirationContainer.appendChild(genreDiv);
+                }
+            });
+        } catch (error) {
+            console.error('Error generating inspiration:', error);
+            inspirationContainer.innerHTML = `
+                <div class="error-message">
+                    <p>Couldn't generate new ideas right now. Here are some fallback prompts:</p>
+                    <div class="inspiration-genre">
+                        <h3>Real World</h3>
+                        <p>When I found the old key in my grandmother's attic, I never imagined what door it would open.</p>
+                    </div>
+                    <div class="inspiration-genre">
+                        <h3>Traditional Fantasy</h3>
+                        <p>The dragon's egg had been still for a hundred years, until today when it began to tremble.</p>
+                    </div>
+                </div>
+            `;
+        }
+    }
 
-                const genreDiv = document.createElement('div');
-                genreDiv.className = 'inspiration-genre';
-                genreDiv.innerHTML = `<h3>${genre}</h3><p>${sentence}</p>`;
-                inspirationContainer.appendChild(genreDiv);
-            }
-        });
-    });
+    document.getElementById('needsInspiration').addEventListener('click', generateAndDisplayInspiration);
 
     // Add event listener for "Show me other ideas" button
-    document.getElementById('generateMoreInspiration').addEventListener('click', async () => {
-        showPage('inspirationPage');
-        const inspirationContainer = document.getElementById('inspirationContainer');
-        inspirationContainer.innerHTML = '<div class="loading">Generating more inspiration...</div>';
-        const inspirationText = await callStoryForgeAI('', 'inspiration');
-
-        // Parse the inspiration text and display it with genre labels
-        inspirationContainer.innerHTML = ''; // Clear loading message
-
-        const blocks = inspirationText.split('\n\n'); // Split by double newline to get genre blocks
-
-        blocks.forEach(block => {
-            if (block.trim() === '') return; // Skip empty blocks
-
-            const genreMatch = block.match(/\*\*(.*?)\*\*:\s*(.*)/s); // Match genre and sentence(s)
-
-            if (genreMatch) {
-                const genre = genreMatch[1].trim();
-                const sentence = genreMatch[2].trim().replace(/\n/g, ' '); // Replace internal newlines with spaces
-
-                const genreDiv = document.createElement('div');
-                genreDiv.className = 'inspiration-genre';
-                genreDiv.innerHTML = `<h3>${genre}</h3><p>${sentence}</p>`;
-                inspirationContainer.appendChild(genreDiv);
-            }
-        });
-    });
+    document.getElementById('generateMoreInspiration').addEventListener('click', generateAndDisplayInspiration);
 
     // Workshop page
     document.getElementById('getEditorFeedback').addEventListener('click', async () => {
