@@ -13,6 +13,8 @@ let storyReaderInfo = {
     paragraphs: [],
     currentPage: 0
 };
+let selectedInspiration = '';
+let selectedInspirationText = '';
 
 // Page management
 async function loadComponents() {
@@ -802,6 +804,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                         const genreDiv = document.createElement('div');
                         genreDiv.className = 'inspiration-genre';
                         genreDiv.innerHTML = `<h3>${genre}</h3><p>${sentence}</p>`;
+                        genreDiv.addEventListener('click', () => {
+                            document.querySelectorAll('.inspiration-genre').forEach(el => {
+                                el.classList.remove('selected');
+                            });
+                            genreDiv.classList.add('selected');
+                            selectedInspirationText = sentence;
+                        });
                         inspirationContainer.appendChild(genreDiv);
                     }
                 });
@@ -865,6 +874,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Add event listener for "Show me other ideas" button
     document.getElementById('generateMoreInspiration').addEventListener('click', generateAndDisplayInspiration);
+
+    // Event listener for "Start Writing" button
+    document.getElementById('startWithInspiration').addEventListener('click', () => {
+        if (selectedInspirationText) {
+            // Set the selected inspiration as the story
+            document.getElementById('storyInput').value = selectedInspirationText;
+            showPage('editorPage');
+        } else {
+            alert('Please select an idea first!');
+        }
+    });
 
     // Workshop page
     document.getElementById('getEditorFeedback').addEventListener('click', async () => {

@@ -245,6 +245,11 @@ textarea:focus {
     border-left: 4px solid #3b82f6;
 }
 
+.inspiration-genre.selected {
+    background-color: #e2e8f0; /* Light gray background */
+    border-left-color: #6366f1; /* Slightly darker blue border */
+}
+
 .inspiration-genre h3 {
     color: #1e40af;
     margin-bottom: 8px;
