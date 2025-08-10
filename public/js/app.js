@@ -780,35 +780,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Parse the inspiration text and display it with genre labels
         inspirationContainer.innerHTML = ''; // Clear loading message
 
-        const lines = inspirationText.split('\n');
-        let currentGenre = '';
-        let currentSentence = '';
+        const blocks = inspirationText.split('\n\n'); // Split by double newline to get genre blocks
 
-        lines.forEach(line => {
-            if (line.startsWith('**')) {
-                // New genre detected
-                if (currentGenre) {
-                    // Display previous genre and sentence
-                    const genreDiv = document.createElement('div');
-                    genreDiv.className = 'inspiration-genre';
-                    genreDiv.innerHTML = `<h3>${currentGenre}</h3><p>${currentSentence}</p>`;
-                    inspirationContainer.appendChild(genreDiv);
-                }
-                currentGenre = line.replace(/\*\*/g, '').trim();
-                currentSentence = '';
-            } else if (line.trim() !== '' && currentGenre) {
-                // Append to current sentence
-                currentSentence += (currentSentence ? ' ' : '') + line.trim();
+        blocks.forEach(block => {
+            if (block.trim() === '') return; // Skip empty blocks
+
+            const genreMatch = block.match(/\*\*(.*?)\*\*:\s*(.*)/s); // Match genre and sentence(s)
+
+            if (genreMatch) {
+                const genre = genreMatch[1].trim();
+                const sentence = genreMatch[2].trim().replace(/\n/g, ' '); // Replace internal newlines with spaces
+
+                const genreDiv = document.createElement('div');
+                genreDiv.className = 'inspiration-genre';
+                genreDiv.innerHTML = `<h3>${genre}</h3><p>${sentence}</p>`;
+                inspirationContainer.appendChild(genreDiv);
             }
         });
-
-        // Display the last genre and sentence
-        if (currentGenre && currentSentence) {
-            const genreDiv = document.createElement('div');
-            genreDiv.className = 'inspiration-genre';
-            genreDiv.innerHTML = `<h3>${currentGenre}</h3><p>${currentSentence}</p>`;
-            inspirationContainer.appendChild(genreDiv);
-        }
     });
 
     // Add event listener for "Show me other ideas" button
@@ -821,35 +809,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Parse the inspiration text and display it with genre labels
         inspirationContainer.innerHTML = ''; // Clear loading message
 
-        const lines = inspirationText.split('\n');
-        let currentGenre = '';
-        let currentSentence = '';
+        const blocks = inspirationText.split('\n\n'); // Split by double newline to get genre blocks
 
-        lines.forEach(line => {
-            if (line.startsWith('**')) {
-                // New genre detected
-                if (currentGenre) {
-                    // Display previous genre and sentence
-                    const genreDiv = document.createElement('div');
-                    genreDiv.className = 'inspiration-genre';
-                    genreDiv.innerHTML = `<h3>${currentGenre}</h3><p>${currentSentence}</p>`;
-                    inspirationContainer.appendChild(genreDiv);
-                }
-                currentGenre = line.replace(/\*\*/g, '').trim();
-                currentSentence = '';
-            } else if (line.trim() !== '' && currentGenre) {
-                // Append to current sentence
-                currentSentence += (currentSentence ? ' ' : '') + line.trim();
+        blocks.forEach(block => {
+            if (block.trim() === '') return; // Skip empty blocks
+
+            const genreMatch = block.match(/\*\*(.*?)\*\*:\s*(.*)/s); // Match genre and sentence(s)
+
+            if (genreMatch) {
+                const genre = genreMatch[1].trim();
+                const sentence = genreMatch[2].trim().replace(/\n/g, ' '); // Replace internal newlines with spaces
+
+                const genreDiv = document.createElement('div');
+                genreDiv.className = 'inspiration-genre';
+                genreDiv.innerHTML = `<h3>${genre}</h3><p>${sentence}</p>`;
+                inspirationContainer.appendChild(genreDiv);
             }
         });
-
-        // Display the last genre and sentence
-        if (currentGenre && currentSentence) {
-            const genreDiv = document.createElement('div');
-            genreDiv.className = 'inspiration-genre';
-            genreDiv.innerHTML = `<h3>${currentGenre}</h3><p>${currentSentence}</p>`;
-            inspirationContainer.appendChild(genreDiv);
-        }
     });
 
     // Workshop page
