@@ -124,43 +124,39 @@ async function callStoryForgeAI(userText, mode, context = '') {
         }
         
         if (mode === 'editor_feedback') {
-            prompt = `You are a caring, kind dwarf with a smile, an editor in the StoryForge Guild, mentoring a young Intern (ages 8-16). Your goal is to help them become a better writer by guiding them to find their own mistakes, not just telling them what's wrong.
+            prompt = `You are an editor in the StoryForge Guild. Your task is to provide structured, actionable feedback on a young writer's story.
 
 Their story: "${userText}"
 
-Please provide feedback in the following structure:
-1.  **Overall Positive Response:** Start with a warm, encouraging paragraph about their story.
-2.  **Gentle Guidance:** Write a few short, simple paragraphs (two sentences max) that guide them to notice potential issues.
-    *   For grammar/clarity: "I was a bit unsure what you meant here..." or "This part is exciting! How could you make it even clearer for your reader?"
-    *   For spelling: "I saw the word 'teh'. Did you mean to write 'the'?" (Always ask, never assume).
-3.  **Expansion Ideas:** Offer one or two points where they could expand the story to make it more impactful. "I wonder what the dragon was thinking right before he breathed fire?" or "What did the forest smell like?"
+Analyze the story and return a JSON object containing an array of feedback items. Each item in the array should be an object with the following structure:
+{
+  "type": "string", // "praise", "suggestion", "grammar", or "question"
+  "text": "string", // Your feedback message.
+  "quote": "string" // An exact quote from the user's story that the feedback refers to.
+}
 
-Keep your tone consistently that of a caring, kind dwarf with a smile. Address them as "Intern" and sign as "Your friend, The Story-Dwarf".`
+- For "praise", highlight a specific part of the story that is well-written.
+- For "suggestion", offer a way to improve a sentence or idea.
+- For "grammar", point out a grammatical error and suggest a correction.
+- For "question", ask a question to prompt the writer to think more deeply about their story.
 
-prompt += `\n\n- Do NOT include any introductory phrases like "Here is your feedback:" or "Overall Positive Response:". Just provide the feedback directly.`;
-prompt += `\n- Do NOT include the numbered list or bolded headings from these instructions in your response.`;
-prompt += `\n- Ensure your response contains ONLY the story ideas, without any conversational filler.`;
-
+Do not include any sign-off or conversational filler. The entire response must be a single JSON object.
+`
         } else if (mode === 'editor_revision') {
             prompt = `You are the Editor reviewing the Intern's revised story.
 
 Original: "${context}"
 Revision: "${userText}"
 
-${currentRevision >= maxRevisions - 1 ? 
-            'This is their final revision - be very encouraging and guide them to finish.' : 
+${currentRevision >= maxRevisions - 1 ?
+            'This is their final revision - be very encouraging and guide them to finish.' :
             'Provide brief, encouraging feedback on their improvements.'}
 
-Respond with:
-1. Praise their improvements
-2. ${currentRevision >= maxRevisions - 1 ? 
-                'Say their story is excellent and ready for Guild collaboration' : 
-                'One small suggestion OR say it\'s ready for the Guild'}
-3. Keep it under 80 words
-4. Sign as "Your Editor"`
-prompt += `\n\n- Do NOT include any introductory phrases like "Here is your feedback:" or "Overall Positive Response:". Just provide the feedback directly.`;
-prompt += `\n- Do NOT include the numbered list or bolded headings from these instructions in your response.`;
-prompt += `\n- Ensure your response contains ONLY the story ideas, without any conversational filler.`;
+Respond with a JSON object with a "response" field containing your feedback. For example:
+{
+  "response": "This is a great improvement! I love how you added more detail to the dragon's roar. It feels much more powerful now."
+}
+`
 
         } else if (mode === 'guild_story') {
             prompt = `You are a Guild writer creating a 12-paragraph children's story based on the Intern's original idea.
@@ -898,34 +894,32 @@ document.addEventListener('DOMContentLoaded', async () => {
         currentRevision = 0;
         document.getElementById('editableStory').value = story;
         
-        const responseDiv = document.getElementById('editorResponse');
-        responseDiv.innerHTML = '<div class="loading">Your Editor is reviewing your story...</div>';
+        const feedbackContainer = document.getElementById('feedbackContainer');
+        feedbackContainer.innerHTML = '<div class="loading">Your Editor is reviewing your story...</div>';
         
         showPage('editorPage');
         
-        const feedback = await callStoryForgeAI(story, 'editor_feedback');
+        const feedbackJSON = await callStoryForgeAI(story, 'editor_feedback');
         
-        // Parse the feedback and display it in structured sections
-        const positiveResponseMatch = feedback.match(/Overall Positive Response:\s*(.*?)(?=\n\nGentle Guidance:|\n\nExpansion Ideas:|$)/s);
-        const gentleGuidanceMatch = feedback.match(/Gentle Guidance:\s*(.*?)(?=\n\nExpansion Ideas:|$)/s);
-        const expansionIdeasMatch = feedback.match(/Expansion Ideas:\s*(.*)/s);
-
-        const positiveResponse = positiveResponseMatch ? positiveResponseMatch[1].trim() : '';
-        const gentleGuidance = gentleGuidanceMatch ? gentleGuidanceMatch[1].trim() : '';
-        const expansionIdeas = expansionIdeasMatch ? expansionIdeasMatch[1].trim() : '';
-
-        const positiveResponseDiv = document.getElementById('positiveResponse');
-        const gentleGuidanceDiv = document.getElementById('gentleGuidance');
-        const expansionIdeasDiv = document.getElementById('expansionIdeas');
-
-        positiveResponseDiv.innerHTML = positiveResponse ? `<h3>Overall Positive Response</h3><p>${positiveResponse.replace(/\n/g, '<br>')}</p>` : '';
-        gentleGuidanceDiv.innerHTML = gentleGuidance ? `<h3>Gentle Guidance</h3><p>${gentleGuidance.replace(/\n/g, '<br>')}</p>` : '';
-        expansionIdeasDiv.innerHTML = expansionIdeas ? `<h3>Expansion Ideas</h3><p>${expansionIdeas.replace(/\n/g, '<br>')}</p>` : '';
-
-        // Hide the old response div if it exists and is empty
-        const oldResponseDiv = document.getElementById('editorResponse');
-        if (oldResponseDiv && oldResponseDiv.querySelector('.loading')) {
-            oldResponseDiv.style.display = 'none';
+        try {
+            const feedback = JSON.parse(feedbackJSON);
+            feedbackContainer.innerHTML = ''; // Clear loading message
+            
+            feedback.forEach(item => {
+                const feedbackItem = document.createElement('div');
+                feedbackItem.className = `feedback-item feedback-${item.type}`;
+                
+                let content = `<strong>${item.type.charAt(0).toUpperCase() + item.type.slice(1)}:</strong> ${item.text}`;
+                if (item.quote) {
+                    content += `<div class="feedback-quote">"${item.quote}"</div>`;
+                }
+                
+                feedbackItem.innerHTML = content;
+                feedbackContainer.appendChild(feedbackItem);
+            });
+        } catch (error) {
+            console.error('Error parsing feedback JSON:', error);
+            feedbackContainer.innerHTML = '<div class="error-message">There was an issue getting feedback. Please try again.</div>';
         }
     });
 
@@ -943,14 +937,29 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         currentRevision++;
-        const responseDiv = document.getElementById('editorResponse');
-        responseDiv.innerHTML = '<div class="loading">Your Editor is reviewing your revision...</div>';
+        const feedbackContainer = document.getElementById('feedbackContainer');
+        const loadingDiv = document.createElement('div');
+        loadingDiv.className = 'loading';
+        loadingDiv.textContent = 'Your Editor is reviewing your revision...';
+        feedbackContainer.appendChild(loadingDiv);
 
-        const feedback = await callStoryForgeAI(revisedStory, 'editor_revision', currentStory);
-        const p = document.createElement('p');
-        responseDiv.innerHTML = '';
-        responseDiv.appendChild(p)
-        typeWriter(p, feedback);
+        const feedbackJSON = await callStoryForgeAI(revisedStory, 'editor_revision', currentStory);
+        
+        feedbackContainer.removeChild(loadingDiv);
+
+        try {
+            const feedback = JSON.parse(feedbackJSON);
+            const feedbackItem = document.createElement('div');
+            feedbackItem.className = 'feedback-item feedback-revision';
+            feedbackItem.innerHTML = `<p>${feedback.response}</p>`;
+            feedbackContainer.appendChild(feedbackItem);
+        } catch (error) {
+            console.error('Error parsing revision feedback JSON:', error);
+            const errorItem = document.createElement('div');
+            errorItem.className = 'error-message';
+            errorItem.textContent = 'There was an issue getting feedback on your revision. Please try again.';
+            feedbackContainer.appendChild(errorItem);
+        }
 
         currentStory = revisedStory;
 
@@ -958,7 +967,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('likeAsIs').style.display = 'block';
         }
 
-        if (currentRevision >= maxRevisions || feedback.toLowerCase().includes('ready') || feedback.toLowerCase().includes('excellent')) {
+        if (currentRevision >= maxRevisions) {
             document.getElementById('acceptStory').textContent = 'Move to Guild!';
         }
     });
