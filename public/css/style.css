@@ -9,12 +9,14 @@ body {
     background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #60a5fa 100%);
     color: #1f2937;
     min-height: 100vh;
+    font-size: 18px;
+    line-height: 1.6;
 }
 
 .page {
     display: none;
     min-height: 100vh;
-    padding: 20px;
+    padding: 30px;
 }
 
 .page.active {
@@ -23,9 +25,9 @@ body {
 
 .card {
     background: rgba(255, 255, 255, 0.95);
-    border-radius: 16px;
-    padding: 32px;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     margin: 0 auto;
     max-width: 600px;
     backdrop-filter: blur(10px);
@@ -38,15 +40,15 @@ body {
 h1 {
     color: #1e40af;
     text-align: center;
-    margin-bottom: 16px;
-    font-size: 2.5rem;
+    margin-bottom: 24px;
+    font-size: 3rem;
 }
 
 h2 {
     color: #1e40af;
     text-align: center;
-    margin-bottom: 16px;
-    font-size: 1.8rem;
+    margin-bottom: 20px;
+    font-size: 2.2rem;
 }
 
 .subtitle {
@@ -66,28 +68,30 @@ h2 {
 
 input[type="text"] {
     width: 100%;
-    padding: 12px;
-    border-radius: 8px;
-    border: 2px solid #d1d5db;
+    padding: 16px;
+    border-radius: 12px;
+    border: 3px solid #d1d5db;
     margin-bottom: 16px;
-    font-size: 16px;
+    font-size: 18px;
     transition: border-color 0.3s;
 }
 
 input[type="text"]:focus {
-    outline: none;
+    outline: 3px solid #3b82f6;
+    outline-offset: 2px;
     border-color: #3b82f6;
 }
 
 button {
     width: 100%;
-    padding: 12px 24px;
+    padding: 16px 32px;
     border: none;
-    border-radius: 8px;
+    border-radius: 12px;
     background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
     color: white;
-    font-size: 16px;
-    font-weight: bold;
+    font-size: 18px;
+    font-weight: 600;
+    min-height: 56px;
     cursor: pointer;
     transition: all 0.3s;
     margin-bottom: 12px;
@@ -96,6 +100,11 @@ button {
 button:hover {
     transform: translateY(-2px);
     box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+}
+
+button:focus {
+    outline: 3px solid #3b82f6;
+    outline-offset: 2px;
 }
 
 button:disabled {
@@ -142,17 +151,18 @@ iframe {
 textarea {
     width: 100%;
     min-height: 300px;
-    padding: 15px;
-    border: 2px solid #d1d5db;
-    border-radius: 8px;
-    font-size: 16px;
+    padding: 16px;
+    border: 3px solid #d1d5db;
+    border-radius: 12px;
+    font-size: 18px;
     font-family: inherit;
     resize: vertical;
     transition: border-color 0.3s;
 }
 
 textarea:focus {
-    outline: none;
+    outline: 3px solid #3b82f6;
+    outline-offset: 2px;
     border-color: #3b82f6;
 }
 
@@ -174,11 +184,11 @@ textarea:focus {
 .story-display {
     background: #f9fafb;
     border: 2px solid #e5e7eb;
-    border-radius: 8px;
-    padding: 20px;
+    border-radius: 12px;
+    padding: 24px;
     margin: 20px 0;
     line-height: 1.8;
-    font-size: 16px;
+    font-size: 20px;
     max-height: 400px;
     overflow-y: auto;
 }
@@ -200,17 +210,19 @@ textarea:focus {
 
 .story-item {
     background: white;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    padding: 16px;
-    margin-bottom: 12px;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
     cursor: pointer;
     transition: all 0.3s;
+    font-size: 18px;
 }
 
 .story-item:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-color: #3b82f6;
 }
 
 .story-title {
@@ -226,7 +238,8 @@ textarea:focus {
 
 .loading {
     text-align: center;
-    padding: 40px;
+    padding: 32px;
+    font-size: 20px;
 }
 
 .loading::after {
@@ -239,15 +252,22 @@ textarea:focus {
 
 .inspiration-genre {
     background: white;
-    border-radius: 8px;
-    padding: 16px;
-    margin-bottom: 16px;
-    border-left: 4px solid #3b82f6;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    border: 3px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.inspiration-genre:hover {
+    border-color: #3b82f6;
+    transform: translateY(-2px);
 }
 
 .inspiration-genre.selected {
-    background-color: #e2e8f0; /* Light gray background */
-    border-left-color: #6366f1; /* Slightly darker blue border */
+    border-color: #10b981;
+    background-color: #f0fdf4;
 }
 
 .inspiration-genre h3 {
@@ -274,8 +294,8 @@ textarea:focus {
 
 .button-group {
     display: flex;
-    gap: 12px;
-    margin-top: 20px;
+    gap: 16px;
+    margin-top: 24px;
 }
 
 .button-group button {
@@ -295,11 +315,11 @@ textarea:focus {
     display: inline-block;
     background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
     color: white;
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 0.9rem;
+    padding: 8px 16px;
+    border-radius: 24px;
+    font-size: 16px;
     font-weight: bold;
-    margin-bottom: 8px;
+    margin-bottom: 12px;
 }
 
 .book-page {
@@ -353,26 +373,10 @@ textarea:focus {
     color: #6b7280;
 }
 
-.image-error .error-icon {
-    /* Removed font-size and margin-bottom */
-}
-
 .book-controls button:disabled {
     opacity: 0.5;
     cursor: not-allowed;
 }
-    .video-writing-container {
-        grid-template-columns: 1fr;
-    }
-    
-    h1 {
-        font-size: 2rem;
-    }
-    
-    .card {
-        padding: 20px;
-        margin: 10px;
-    }
 
 .feedback-container {
     display: flex;
@@ -382,10 +386,12 @@ textarea:focus {
 }
 
 .feedback-item {
-    padding: 16px;
-    border-radius: 8px;
+    padding: 20px;
+    border-radius: 12px;
     border-left-width: 4px;
     border-left-style: solid;
+    margin-bottom: 16px;
+    font-size: 18px;
 }
 
 .feedback-praise {
@@ -424,4 +430,30 @@ textarea:focus {
     border-left: 2px solid rgba(0, 0, 0, 0.1);
     font-style: italic;
     color: rgba(0, 0, 0, 0.6);
+}
+
+/* Better mobile responsiveness */
+@media (max-width: 768px) {
+    .card {
+        padding: 24px;
+        margin: 16px;
+    }
+    
+    .video-writing-container {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+    
+    button {
+        padding: 20px;
+        font-size: 20px;
+    }
+    
+    h1 {
+        font-size: 2.4rem;
+    }
+    
+    h2 {
+        font-size: 1.8rem;
+    }
 }
