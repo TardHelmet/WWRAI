@@ -316,13 +316,48 @@ app.post('/api/stories', (req, res) => {
     });
 });
 
-// Analytics endpoint for future use
+// Analytics endpoints for production monitoring
 app.post('/api/analytics/story-event', (req, res) => {
     const { event, userId, storyId, metadata } = req.body;
     console.log('📊 Story event:', event, { userId, storyId, metadata });
 
     // Future: Track user engagement for improvement
     res.json({ recorded: true });
+});
+
+app.post('/api/analytics/error', (req, res) => {
+    const errorData = req.body;
+    
+    // Log error with timestamp
+    console.error('🚨 Production Error:', {
+        message: errorData.message,
+        context: errorData.context,
+        userId: errorData.userId,
+        timestamp: errorData.timestamp,
+        url: errorData.url,
+        isOnline: errorData.isOnline,
+        userAgent: errorData.userAgent?.substring(0, 100) // Truncate long user agents
+    });
+
+    // Future: Send to error tracking service (Sentry, LogRocket, etc.)
+    res.json({ logged: true });
+});
+
+app.post('/api/analytics/performance', (req, res) => {
+    const performanceData = req.body;
+    
+    // Log performance metrics
+    console.log('⚡ Performance:', {
+        event: performanceData.event,
+        data: performanceData.data,
+        userId: performanceData.userId,
+        isMobile: performanceData.isMobile,
+        isOnline: performanceData.isOnline,
+        timestamp: performanceData.timestamp
+    });
+
+    // Future: Send to analytics service (Google Analytics, Mixpanel, etc.)
+    res.json({ tracked: true });
 });
 
 // Error handling middleware

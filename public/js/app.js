@@ -115,12 +115,47 @@ function saveStoryToLibrary(title, originalStory, finalStory) {
     return newStory;
 }
 
-// AI API calls
+// Response cache for reducing API calls
+const responseCache = new Map();
+
+// Helper function to generate cache key
+function getCacheKey(userText, mode, context) {
+    return `${mode}:${btoa(userText + context).substring(0, 50)}`;
+}
+
+// Helper function for exponential backoff retry
+async function retryWithBackoff(fn, maxRetries = 3, baseDelay = 1000) {
+    let lastError;
+    for (let i = 0; i < maxRetries; i++) {
+        try {
+            return await fn();
+        } catch (error) {
+            lastError = error;
+            if (i < maxRetries - 1) {
+                const delay = baseDelay * Math.pow(2, i) + Math.random() * 1000;
+                console.log(`Retry ${i + 1} in ${Math.round(delay)}ms...`);
+                await new Promise(resolve => setTimeout(resolve, delay));
+            }
+        }
+    }
+    throw lastError;
+}
+
+// AI API calls with caching and retry logic
 async function callStoryForgeAI(userText, mode, context = '') {
     try {
         let prompt = '';
         if ((!userText || userText.trim() === '') && mode !== 'inspiration') {
             return "I can't provide feedback on an empty story. Please write something first!";
+        }
+
+        // Check cache first (except for inspiration which should be fresh)
+        if (mode !== 'inspiration') {
+            const cacheKey = getCacheKey(userText, mode, context);
+            if (responseCache.has(cacheKey)) {
+                console.log('Using cached response for', mode);
+                return responseCache.get(cacheKey);
+            }
         }
         
         if (mode === 'editor_feedback') {
@@ -261,29 +296,67 @@ prompt += `\n- Ensure your response contains ONLY the story ideas, without any c
             return "There was an issue generating the AI prompt. Please try again.";
         }
 
-        const response = await fetch('/api/storyforge-ai', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                contents: [{
-                    parts: [{ text: prompt }]
-                }],
-                generationConfig: {
-                    temperature: 0.8,
-                    maxOutputTokens: mode === 'guild_story' ? 1500 : 500
+        // Use retry logic for API calls
+        const result = await retryWithBackoff(async () => {
+            const response = await fetch('/api/storyforge-ai', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{
+                        parts: [{ text: prompt }]
+                    }],
+                    generationConfig: {
+                        temperature: 0.8,
+                        maxOutputTokens: mode === 'guild_story' ? 1500 : 500
+                    }
+                })
+            });
+
+            if (!response.ok) {
+                if (response.status >= 500 || response.status === 429) {
+                    // Retry on server errors and rate limits
+                    throw new Error(`Server error: ${response.status}`);
+                } else {
+                    // Don't retry on client errors
+                    const errorText = await response.text();
+                    throw new Error(`Client error: ${response.status} - ${errorText}`);
                 }
-            })
+            }
+
+            const data = await response.json();
+            if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
+                throw new Error('Invalid API response structure');
+            }
+
+            return data.candidates[0].content.parts[0].text;
         });
 
-        if (!response.ok) {
-            throw new Error(`API error: ${response.status}`);
+        // Cache successful responses (except inspiration)
+        if (mode !== 'inspiration') {
+            const cacheKey = getCacheKey(userText, mode, context);
+            responseCache.set(cacheKey, result);
+            
+            // Limit cache size
+            if (responseCache.size > 50) {
+                const firstKey = responseCache.keys().next().value;
+                responseCache.delete(firstKey);
+            }
         }
 
-        const data = await response.json();
-        return data.candidates[0].content.parts[0].text;
+        return result;
 
     } catch (error) {
         console.error('AI call error:', error);
+        
+        // Provide more specific error messages
+        if (error.message.includes('Server error') || error.message.includes('fetch')) {
+            return "I'm having trouble connecting to the AI service. Please check your internet connection and try again.";
+        } else if (error.message.includes('429')) {
+            return "The AI service is busy right now. Please wait a moment and try again.";
+        } else if (error.message.includes('Client error')) {
+            return "There was an issue with your request. Please try again.";
+        }
+        
         return "I'm having trouble connecting right now. Please try again in a moment!";
     }
 }
@@ -380,7 +453,41 @@ STORYTELLING:
 CREATE: A beautifully simple but artistically rich illustration with the warmth and charm of hand-drawn children's book art. - No text in any of these images.`;
 }
         
-// Illustrated book creation function
+// Mobile-optimized image compression
+function compressImageForMobile(base64Image, maxWidth = 800, quality = 0.8) {
+    return new Promise((resolve) => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const img = new Image();
+        
+        img.onload = () => {
+            // Calculate new dimensions
+            let { width, height } = img;
+            if (width > maxWidth) {
+                height = (height * maxWidth) / width;
+                width = maxWidth;
+            }
+            
+            canvas.width = width;
+            canvas.height = height;
+            
+            // Draw and compress
+            ctx.drawImage(img, 0, 0, width, height);
+            const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+            resolve(compressedDataUrl);
+        };
+        
+        img.onerror = () => resolve(base64Image); // Return original on error
+        img.src = base64Image;
+    });
+}
+
+// Network status detection
+function isOnline() {
+    return navigator.onLine;
+}
+
+// Illustrated book creation function with mobile optimizations
 async function createIllustratedBook() {
     const title = document.getElementById('storyTitle').value.trim() || 'My StoryForge Tale';
     const story = document.getElementById('finalStory').textContent;
@@ -388,6 +495,16 @@ async function createIllustratedBook() {
     if (!story) {
         alert('No story to illustrate! Please complete a story first.');
         return;
+    }
+
+    // Check network status
+    if (!isOnline()) {
+        if (confirm('You appear to be offline. Illustration generation requires an internet connection. Would you like to save the text-only story instead?')) {
+            saveStoryToLibrary(title, currentStory, story);
+            return;
+        } else {
+            return;
+        }
     }
 
     // Set up the illustrated book page
@@ -403,55 +520,86 @@ async function createIllustratedBook() {
     document.getElementById('bookDisplaySection').style.display = 'none';
     
     try {
-        // Break story into paragraphs (max 12 for picture book)
+        // Break story into paragraphs (max 8 for mobile performance)
         const paragraphs = formatStoryText(story);
-        const maxPages = Math.min(paragraphs.length, 12);
+        const isMobile = window.innerWidth < 768;
+        const maxPages = Math.min(paragraphs.length, isMobile ? 8 : 12);
         
         // Update progress
         document.getElementById('progressText').textContent = `Creating ${maxPages} illustrated pages...`;
         
-        // Generate images for each paragraph
-        for (let i = 0; i < maxPages; i++) {
-            const paragraph = paragraphs[i];
+        // Extract story context once
+        const storyContext = extractStoryContext(story);
+        
+        // Generate images with controlled concurrency for mobile
+        const concurrentLimit = isMobile ? 1 : 2; // Mobile: sequential, Desktop: 2 at once
+        
+        for (let i = 0; i < maxPages; i += concurrentLimit) {
+            const batch = [];
             
-            // Update progress
-            document.getElementById('progressText').textContent = 
-                `Illustrating page ${i + 1} of ${maxPages}...`;
-            
-            // Extract story context for consistency (add this before the loop)
-            const storyContext = extractStoryContext(story);
-
-            // Then in the loop, use this improved prompt:
-            const prompt = buildConsistentPrompt(paragraph, storyContext, i + 1, maxPages);
-            
-            try {
-                const response = await fetch('/api/generate-image', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        prompt: prompt,
-                        pageNumber: i + 1
-                    })
+            for (let j = 0; j < concurrentLimit && (i + j) < maxPages; j++) {
+                const pageIndex = i + j;
+                const paragraph = paragraphs[pageIndex];
+                
+                // Update progress
+                document.getElementById('progressText').textContent = 
+                    `Illustrating page ${pageIndex + 1} of ${maxPages}...`;
+                
+                const prompt = buildConsistentPrompt(paragraph, storyContext, pageIndex + 1, maxPages);
+                
+                const imagePromise = retryWithBackoff(async () => {
+                    const response = await fetch('/api/generate-image', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            prompt: prompt,
+                            pageNumber: pageIndex + 1,
+                            mobileOptimized: isMobile
+                        })
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`Image generation failed: ${response.status}`);
+                    }
+                    
+                    const result = await response.json();
+                    let imageUrl = result.success ? result.imageUrl : null;
+                    
+                    // Compress image for mobile
+                    if (imageUrl && isMobile && imageUrl.startsWith('data:')) {
+                        try {
+                            imageUrl = await compressImageForMobile(imageUrl);
+                        } catch (error) {
+                            console.warn('Image compression failed, using original:', error);
+                        }
+                    }
+                    
+                    return {
+                        text: paragraph,
+                        imageUrl: imageUrl,
+                        pageNumber: pageIndex + 1,
+                        error: !result.success
+                    };
+                }, 2, 2000).catch(error => {
+                    console.error(`Error generating image for page ${pageIndex + 1}:`, error);
+                    return {
+                        text: paragraph,
+                        imageUrl: null,
+                        pageNumber: pageIndex + 1,
+                        error: true
+                    };
                 });
                 
-                const result = await response.json();
-                
-                // Store the page data
-                illustratedPages.push({
-                    text: paragraph,
-                    imageUrl: result.success ? result.imageUrl : null,
-                    pageNumber: i + 1
-                });
-                
-            } catch (error) {
-                console.error(`Error generating image for page ${i + 1}:`, error);
-                // Add page with error placeholder
-                illustratedPages.push({
-                    text: paragraph,
-                    imageUrl: null,
-                    pageNumber: i + 1,
-                    error: true
-                });
+                batch.push(imagePromise);
+            }
+            
+            // Wait for current batch to complete
+            const batchResults = await Promise.all(batch);
+            illustratedPages.push(...batchResults);
+            
+            // Small delay between batches to prevent overwhelming mobile devices
+            if (i + concurrentLimit < maxPages && isMobile) {
+                await new Promise(resolve => setTimeout(resolve, 500));
             }
         }
         
@@ -462,9 +610,17 @@ async function createIllustratedBook() {
         // Display first page
         showBookPage(0);
         
+        // Save illustrated pages to cache for offline viewing
+        const cacheKey = `illustrated_${title}_${Date.now()}`;
+        try {
+            saveToStorage(cacheKey, illustratedPages);
+        } catch (error) {
+            console.warn('Could not cache illustrated pages:', error);
+        }
+        
     } catch (error) {
         console.error('Error creating illustrated book:', error);
-        alert('Sorry, there was an error creating your illustrated book. Please try again.');
+        alert('Sorry, there was an error creating your illustrated book. Please check your connection and try again.');
         showPage('successPage');
     }
 }
@@ -741,18 +897,136 @@ function clearLibrary() {
     }
 }
 
+// Offline mode and network monitoring
+let isOfflineMode = false;
+
+function updateOfflineStatus() {
+    isOfflineMode = !navigator.onLine;
+    
+    // Update UI to show offline status
+    const offlineIndicator = document.getElementById('offlineIndicator');
+    if (offlineIndicator) {
+        offlineIndicator.style.display = isOfflineMode ? 'block' : 'none';
+    }
+    
+    // Disable AI-dependent features when offline
+    const aiButtons = document.querySelectorAll('[data-requires-ai]');
+    aiButtons.forEach(button => {
+        if (isOfflineMode) {
+            button.disabled = true;
+            button.title = 'This feature requires an internet connection';
+        } else {
+            button.disabled = false;
+            button.removeAttribute('title');
+        }
+    });
+}
+
+// Production monitoring and error tracking
+function logError(error, context = '') {
+    const errorData = {
+        message: error.message || 'Unknown error',
+        stack: error.stack,
+        context: context,
+        timestamp: new Date().toISOString(),
+        userAgent: navigator.userAgent,
+        url: window.location.href,
+        userId: currentUser,
+        isOnline: navigator.onLine
+    };
+    
+    console.error('StoryForge Error:', errorData);
+    
+    // Store error locally for later analysis
+    try {
+        const errors = loadFromStorage('errors') || [];
+        errors.push(errorData);
+        
+        // Keep only last 50 errors to prevent storage bloat
+        if (errors.length > 50) {
+            errors.splice(0, errors.length - 50);
+        }
+        
+        saveToStorage('errors', errors);
+    } catch (storageError) {
+        console.warn('Could not store error data:', storageError);
+    }
+    
+    // Send to server if online (for production monitoring)
+    if (navigator.onLine && typeof fetch !== 'undefined') {
+        fetch('/api/analytics/error', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(errorData)
+        }).catch(() => {}); // Silently fail to avoid error loops
+    }
+}
+
+// Performance monitoring
+function trackPerformance(eventName, data = {}) {
+    const performanceData = {
+        event: eventName,
+        data: data,
+        timestamp: new Date().toISOString(),
+        userId: currentUser,
+        isOnline: navigator.onLine,
+        isMobile: window.innerWidth < 768
+    };
+    
+    // Send to server if online
+    if (navigator.onLine && typeof fetch !== 'undefined') {
+        fetch('/api/analytics/performance', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(performanceData)
+        }).catch(() => {}); // Silently fail
+    }
+}
+
+// Global error handler
+window.addEventListener('error', (event) => {
+    logError(event.error || new Error(event.message), 'Global error handler');
+});
+
+window.addEventListener('unhandledrejection', (event) => {
+    logError(new Error(event.reason), 'Unhandled promise rejection');
+});
+
+// Network status monitoring
+window.addEventListener('online', updateOfflineStatus);
+window.addEventListener('offline', updateOfflineStatus);
+
 // Event listeners
 document.addEventListener('DOMContentLoaded', async () => {
-    await loadComponents();
+    try {
+        trackPerformance('app_start');
+        
+        await loadComponents();
 
-    // All event listeners and initial page display logic moved here
-    // Check for existing user
-    const savedUser = loadFromStorage('user');
-    if (savedUser) {
-        currentUser = savedUser;
+        // Initialize offline status
+        updateOfflineStatus();
+
+        // All event listeners and initial page display logic moved here
+        // Check for existing user
+        const savedUser = loadFromStorage('user');
+        if (savedUser) {
+            currentUser = savedUser;
+        }
+
+        showPage('welcomePage');
+        
+        trackPerformance('app_loaded');
+    } catch (error) {
+        logError(error, 'App initialization');
+        // Show fallback UI
+        document.body.innerHTML = `
+            <div style="text-align: center; padding: 50px; font-family: Arial, sans-serif;">
+                <h1>StoryForge</h1>
+                <p>Sorry, there was a problem loading the app. Please refresh the page and try again.</p>
+                <button onclick="window.location.reload()">Reload Page</button>
+            </div>
+        `;
     }
-
-    showPage('welcomePage');
 
     // Welcome page
     document.getElementById('newStoryChoice').addEventListener('click', () => {
@@ -902,7 +1176,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         const feedbackJSON = await callStoryForgeAI(story, 'editor_feedback');
         
         try {
-            const feedback = JSON.parse(feedbackJSON);
+            // Strip markdown code blocks before parsing JSON
+            const cleanJSON = feedbackJSON.replace(/```json\s*|\s*```/g, '').trim();
+            const feedback = JSON.parse(cleanJSON);
             feedbackContainer.innerHTML = ''; // Clear loading message
             
             feedback.forEach(item => {
@@ -948,7 +1224,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         feedbackContainer.removeChild(loadingDiv);
 
         try {
-            const feedback = JSON.parse(feedbackJSON);
+            // Strip markdown code blocks before parsing JSON
+            const cleanJSON = feedbackJSON.replace(/```json\s*|\s*```/g, '').trim();
+            const feedback = JSON.parse(cleanJSON);
             const feedbackItem = document.createElement('div');
             feedbackItem.className = 'feedback-item feedback-revision';
             feedbackItem.innerHTML = `<p>${feedback.response}</p>`;
