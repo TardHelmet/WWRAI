@@ -149,8 +149,8 @@ async function callStoryForgeAI(userText, mode, context = '') {
             return "I can't provide feedback on an empty story. Please write something first!";
         }
 
-        // Check cache first (except for inspiration and editor_feedback which should be fresh)
-        if (mode !== 'inspiration' && mode !== 'editor_feedback') {
+        // Check cache first (except for inspiration, editor_feedback and editor_revision which should be fresh)
+        if (mode !== 'inspiration' && mode !== 'editor_feedback' && mode !== 'editor_revision') {
             const cacheKey = getCacheKey(userText, mode, context);
             if (responseCache.has(cacheKey)) {
                 console.log('Using cached response for', mode);
@@ -367,8 +367,8 @@ Write in a conversational, caring tone that makes them excited about their writi
             return data.candidates[0].content.parts[0].text;
         });
 
-        // Cache successful responses (except inspiration and editor_feedback)
-        if (mode !== 'inspiration' && mode !== 'editor_feedback') {
+        // Cache successful responses (except inspiration, editor_feedback and editor_revision)
+        if (mode !== 'inspiration' && mode !== 'editor_feedback' && mode !== 'editor_revision') {
             const cacheKey = getCacheKey(userText, mode, context);
             responseCache.set(cacheKey, result);
             
@@ -1064,20 +1064,29 @@ document.addEventListener('DOMContentLoaded', async () => {
         `;
     }
 
-    // Welcome page
-    document.getElementById('newStoryChoice').addEventListener('click', () => {
-        showPage('newStoryOptionsPage');
-    });
+    // Welcome page - Add null checks
+    const newStoryChoice = document.getElementById('newStoryChoice');
+    if (newStoryChoice) {
+        newStoryChoice.addEventListener('click', () => {
+            showPage('newStoryOptionsPage');
+        });
+    }
 
-    document.getElementById('oldStoryChoice').addEventListener('click', () => {
-        showPage('libraryPage');
-        loadLibrary();
-    });
+    const oldStoryChoice = document.getElementById('oldStoryChoice');
+    if (oldStoryChoice) {
+        oldStoryChoice.addEventListener('click', () => {
+            showPage('libraryPage');
+            loadLibrary();
+        });
+    }
 
-    // New Story Options page
-    document.getElementById('haveIdea').addEventListener('click', () => {
-        showPage('editorPage');
-    });
+    // New Story Options page - Add null checks
+    const haveIdea = document.getElementById('haveIdea');
+    if (haveIdea) {
+        haveIdea.addEventListener('click', () => {
+            showPage('editorPage');
+        });
+    }
 
     // Reusable function to generate and display inspiration
     async function generateAndDisplayInspiration() {
