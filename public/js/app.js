@@ -1185,133 +1185,186 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    document.getElementById('needsInspiration').addEventListener('click', generateAndDisplayInspiration);
+    const needsInspiration = document.getElementById('needsInspiration');
+    if (needsInspiration) {
+        needsInspiration.addEventListener('click', generateAndDisplayInspiration);
+    }
 
     // Add event listener for "Show me other ideas" button
-    document.getElementById('generateMoreInspiration').addEventListener('click', generateAndDisplayInspiration);
+    const generateMoreInspiration = document.getElementById('generateMoreInspiration');
+    if (generateMoreInspiration) {
+        generateMoreInspiration.addEventListener('click', generateAndDisplayInspiration);
+    }
 
     // Event listener for "Start Writing" button
-    document.getElementById('startWithInspiration').addEventListener('click', () => {
-        if (selectedInspirationText) {
-            // Set the selected inspiration as the story
-            document.getElementById('editableStory').value = selectedInspirationText;
-            showPage('editorPage');
-        } else {
-            alert('Please select an idea first!');
-        }
-    });
+    const startWithInspiration = document.getElementById('startWithInspiration');
+    if (startWithInspiration) {
+        startWithInspiration.addEventListener('click', () => {
+            if (selectedInspirationText) {
+                // Set the selected inspiration as the story
+                const editableStory = document.getElementById('editableStory');
+                if (editableStory) {
+                    editableStory.value = selectedInspirationText;
+                    showPage('editorPage');
+                }
+            } else {
+                alert('Please select an idea first!');
+            }
+        });
+    }
 
     // Workshop page
-    document.getElementById('getEditorFeedback').addEventListener('click', async () => {
-        const story = document.getElementById('storyInput').value.trim();
-        if (!story) {
-            alert('Please write your story first!');
-            return;
-        }
-        
-        currentStory = story;
-        currentRevision = 0;
-        document.getElementById('editableStory').value = story;
-        
-        const feedbackContainer = document.getElementById('feedbackContainer');
-        feedbackContainer.innerHTML = '<div class="loading">Your Editor is reviewing your story...</div>';
-        
-        showPage('editorPage');
-        
-        const feedbackJSON = await callStoryForgeAI(story, 'editor_feedback');
-        
-        try {
-            // Strip markdown code blocks before parsing JSON
-            const cleanJSON = feedbackJSON.replace(/```json\s*|\s*```/g, '').trim();
-            const feedback = JSON.parse(cleanJSON);
-            feedbackContainer.innerHTML = ''; // Clear loading message
+    const getEditorFeedback = document.getElementById('getEditorFeedback');
+    if (getEditorFeedback) {
+        getEditorFeedback.addEventListener('click', async () => {
+            const story = document.getElementById('storyInput').value.trim();
+            if (!story) {
+                alert('Please write your story first!');
+                return;
+            }
             
-            feedback.forEach(item => {
-                const feedbackItem = document.createElement('div');
-                feedbackItem.className = `feedback-item feedback-${item.type}`;
-                
-                let content = `<strong>${item.type.charAt(0).toUpperCase() + item.type.slice(1)}:</strong> ${item.text}`;
-                if (item.quote) {
-                    content += `<div class="feedback-quote">"${item.quote}"</div>`;
+            currentStory = story;
+            currentRevision = 0;
+            const editableStory = document.getElementById('editableStory');
+            if (editableStory) {
+                editableStory.value = story;
+            }
+            
+            const feedbackContainer = document.getElementById('feedbackContainer');
+            if (feedbackContainer) {
+                feedbackContainer.innerHTML = '<div class="loading">Your Editor is reviewing your story...</div>';
+            }
+            
+            showPage('editorPage');
+            
+            const feedbackJSON = await callStoryForgeAI(story, 'editor_feedback');
+            
+            try {
+                // Strip markdown code blocks before parsing JSON
+                const cleanJSON = feedbackJSON.replace(/```json\s*|\s*```/g, '').trim();
+                const feedback = JSON.parse(cleanJSON);
+                if (feedbackContainer) {
+                    feedbackContainer.innerHTML = ''; // Clear loading message
+                    
+                    feedback.forEach(item => {
+                        const feedbackItem = document.createElement('div');
+                        feedbackItem.className = `feedback-item feedback-${item.type}`;
+                        
+                        let content = `<strong>${item.type.charAt(0).toUpperCase() + item.type.slice(1)}:</strong> ${item.text}`;
+                        if (item.quote) {
+                            content += `<div class="feedback-quote">"${item.quote}"</div>`;
+                        }
+                        
+                        feedbackItem.innerHTML = content;
+                        feedbackContainer.appendChild(feedbackItem);
+                    });
                 }
-                
-                feedbackItem.innerHTML = content;
-                feedbackContainer.appendChild(feedbackItem);
-            });
-        } catch (error) {
-            console.error('Error parsing feedback JSON:', error);
-            feedbackContainer.innerHTML = '<div class="error-message">There was an issue getting feedback. Please try again.</div>';
-        }
-    });
+            } catch (error) {
+                console.error('Error parsing feedback JSON:', error);
+                if (feedbackContainer) {
+                    feedbackContainer.innerHTML = '<div class="error-message">There was an issue getting feedback. Please try again.</div>';
+                }
+            }
+        });
+    }
 
-    document.getElementById('backToDashboard').addEventListener('click', () => {
-        showPage('libraryPage');
-        loadLibrary();
-    });
+    const backToDashboard = document.getElementById('backToDashboard');
+    if (backToDashboard) {
+        backToDashboard.addEventListener('click', () => {
+            showPage('libraryPage');
+            loadLibrary();
+        });
+    }
 
     // Editor page
-    document.getElementById('submitRevision').addEventListener('click', async () => {
-        const revisedStory = document.getElementById('editableStory').value.trim();
-        if (!revisedStory) {
-            alert('Please revise your story!');
-            return;
-        }
+    const submitRevision = document.getElementById('submitRevision');
+    if (submitRevision) {
+        submitRevision.addEventListener('click', async () => {
+            const revisedStory = document.getElementById('editableStory').value.trim();
+            if (!revisedStory) {
+                alert('Please revise your story!');
+                return;
+            }
 
-        currentRevision++;
-        const feedbackContainer = document.getElementById('feedbackContainer');
-        // Clear existing feedback before adding new revision feedback
-        feedbackContainer.innerHTML = '';
-        const loadingDiv = document.createElement('div');
-        loadingDiv.className = 'loading';
-        loadingDiv.textContent = 'Your Editor is reviewing your revision...';
-        feedbackContainer.appendChild(loadingDiv);
+            currentRevision++;
+            const feedbackContainer = document.getElementById('feedbackContainer');
+            // Clear existing feedback before adding new revision feedback
+            feedbackContainer.innerHTML = '';
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'loading';
+            loadingDiv.textContent = 'Your Editor is reviewing your revision...';
+            feedbackContainer.appendChild(loadingDiv);
 
-        const feedbackJSON = await callStoryForgeAI(revisedStory, 'editor_revision', currentStory);
-        
-        feedbackContainer.removeChild(loadingDiv);
+            const feedbackJSON = await callStoryForgeAI(revisedStory, 'editor_revision', currentStory);
+            
+            feedbackContainer.removeChild(loadingDiv);
 
-        try {
-            // Strip markdown code blocks before parsing JSON
-            const cleanJSON = feedbackJSON.replace(/```json\s*|\s*```/g, '').trim();
-            const feedback = JSON.parse(cleanJSON);
-            const feedbackItem = document.createElement('div');
-            feedbackItem.className = 'feedback-item feedback-revision';
-            feedbackItem.innerHTML = `<p>${feedback.response}</p>`;
-            feedbackContainer.appendChild(feedbackItem);
-        } catch (error) {
-            console.error('Error parsing revision feedback JSON:', error);
-            const errorItem = document.createElement('div');
-            errorItem.className = 'error-message';
-            errorItem.textContent = 'There was an issue getting feedback on your revision. Please try again.';
-            feedbackContainer.appendChild(errorItem);
-        }
+            try {
+                // Strip markdown code blocks before parsing JSON
+                const cleanJSON = feedbackJSON.replace(/```json\s*|\s*```/g, '').trim();
+                const feedback = JSON.parse(cleanJSON);
+                const feedbackItem = document.createElement('div');
+                feedbackItem.className = 'feedback-item feedback-revision';
+                feedbackItem.innerHTML = `<p>${feedback.response}</p>`;
+                feedbackContainer.appendChild(feedbackItem);
+            } catch (error) {
+                console.error('Error parsing revision feedback JSON:', error);
+                const errorItem = document.createElement('div');
+                errorItem.className = 'error-message';
+                errorItem.textContent = 'There was an issue getting feedback on your revision. Please try again.';
+                feedbackContainer.appendChild(errorItem);
+            }
 
-        currentStory = revisedStory;
+            currentStory = revisedStory;
 
-        if (currentRevision >= 2) {
-            document.getElementById('likeAsIs').style.display = 'block';
-        }
+            if (currentRevision >= 2) {
+                const likeAsIs = document.getElementById('likeAsIs');
+                if (likeAsIs) {
+                    likeAsIs.style.display = 'block';
+                }
+            }
 
-        if (currentRevision >= maxRevisions) {
-            document.getElementById('acceptStory').textContent = 'Move to Guild!';
-        }
-    });
+            if (currentRevision >= maxRevisions) {
+                const acceptStory = document.getElementById('acceptStory');
+                if (acceptStory) {
+                    acceptStory.textContent = 'Move to Guild!';
+                }
+            }
+        });
+    }
 
-    document.getElementById('acceptStory').addEventListener('click', () => {
-        currentStory = document.getElementById('editableStory').value.trim();
-        showPage('guildPage');
-    });
+    const acceptStory = document.getElementById('acceptStory');
+    if (acceptStory) {
+        acceptStory.addEventListener('click', () => {
+            const editableStory = document.getElementById('editableStory');
+            if (editableStory) {
+                currentStory = editableStory.value.trim();
+                showPage('guildPage');
+            }
+        });
+    }
 
-    document.getElementById('likeAsIs').addEventListener('click', async () => {
-        const story = document.getElementById('editableStory').value.trim();
-        const summary = await callStoryForgeAI(story, 'summarize_strengths');
-        const responseDiv = document.getElementById('editorResponse');
-        const p = document.createElement('p');
-        responseDiv.innerHTML = '';
-        responseDiv.appendChild(p)
-        typeWriter(p, summary);
-        document.getElementById('editorButtons').style.display = 'none';
-    });
+    const likeAsIs = document.getElementById('likeAsIs');
+    if (likeAsIs) {
+        likeAsIs.addEventListener('click', async () => {
+            const editableStory = document.getElementById('editableStory');
+            if (editableStory) {
+                const story = editableStory.value.trim();
+                const summary = await callStoryForgeAI(story, 'summarize_strengths');
+                const responseDiv = document.getElementById('editorResponse');
+                if (responseDiv) {
+                    const p = document.createElement('p');
+                    responseDiv.innerHTML = '';
+                    responseDiv.appendChild(p);
+                    typeWriter(p, summary);
+                    const editorButtons = document.getElementById('editorButtons');
+                    if (editorButtons) {
+                        editorButtons.style.display = 'none';
+                    }
+                }
+            }
+        });
+    }
 
     // Guild page
     document.getElementById('allowCollaboration').addEventListener('click', async () => {
