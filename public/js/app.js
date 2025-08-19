@@ -149,8 +149,8 @@ async function callStoryForgeAI(userText, mode, context = '') {
             return "I can't provide feedback on an empty story. Please write something first!";
         }
 
-        // Check cache first (except for inspiration which should be fresh)
-        if (mode !== 'inspiration') {
+        // Check cache first (except for inspiration and editor_feedback which should be fresh)
+        if (mode !== 'inspiration' && mode !== 'editor_feedback') {
             const cacheKey = getCacheKey(userText, mode, context);
             if (responseCache.has(cacheKey)) {
                 console.log('Using cached response for', mode);
@@ -159,28 +159,57 @@ async function callStoryForgeAI(userText, mode, context = '') {
         }
         
         if (mode === 'editor_feedback') {
-            prompt = `You are a caring writing teacher in the StoryForge Guild, working with a young writer. Your task is to provide personalized, educational feedback on their specific story.
+            prompt = `You are an experienced, caring writing teacher working with a young writer in the StoryForge Guild. Your job is to provide detailed, educational feedback that teaches writing skills while celebrating their creativity.
 
 Their story: "${userText}"
 
-Analyze this specific story and return a JSON object containing an array of 4-6 feedback items. Each item should be an object with this structure:
+Analyze this story thoroughly and return a JSON object with 6-8 detailed feedback items. Each item should be a comprehensive mini-lesson that teaches while encouraging.
+
+Structure: 
 {
-  "type": "string", // "praise", "suggestion", "grammar", or "question"
-  "text": "string", // Your personalized feedback message addressing the writer directly
-  "quote": "string" // An exact quote from their story that your feedback refers to
+  "type": "praise" | "grammar" | "spelling" | "suggestion" | "question" | "technique",
+  "text": "Your detailed educational response (3-5 sentences minimum)",
+  "quote": "Exact text from their story this refers to"
 }
 
-FEEDBACK REQUIREMENTS:
-- Address the writer personally ("I love how you..." "Your story shows..." "You did a great job...")
-- Reference specific details from THEIR story, not generic writing advice
-- Include at least one grammar item that explains the rule (e.g., "In your sentence 'The dragon was flying' you could make it more exciting by adding details: 'The enormous red dragon was flying swiftly through the clouds.' This makes your writing more vivid!")
-- Give specific praise for what they did well in THIS story
-- Provide suggestions that build on their existing ideas
-- Ask questions that help them think deeper about their specific characters/plot
+EDUCATIONAL REQUIREMENTS:
 
-Make each piece of feedback feel like it's specifically about their unique story, not generic writing tips.
+**GRAMMAR & SPELLING FOCUS:**
+- Scan for: capitalization errors, missing punctuation, comma splices, run-on sentences, sentence fragments, subject-verb disagreement, wrong verb tenses, their/there/they're confusion, its/it's errors, commonly misspelled words
+- For each error found: Quote the mistake, explain the rule, show the correction, explain why it matters
+- Example: "In your sentence 'The dog ran fast it was scared,' you have two complete thoughts that need to be separated. This is called a run-on sentence. You can fix it by adding a period: 'The dog ran fast. It was scared.' Or connect them: 'The dog ran fast because it was scared.' This helps readers follow your thoughts clearly!"
 
-Return only the JSON object, no other text.`
+**DETAILED PRAISE (2-3 items):**
+- Quote specific phrases, sentences, or ideas that work well
+- Explain WHY they work (builds tension, creates vivid imagery, shows character emotion, etc.)
+- Connect to broader writing techniques they're learning
+- Example: "I love your phrase 'the darkness swallowed everything' - this is called a metaphor, and it makes your writing so much more powerful than just saying 'it was dark.' You're showing me how scary the moment feels!"
+
+**EDUCATIONAL SUGGESTIONS (2-3 items):**
+- Build on their existing ideas with specific techniques
+- Teach concepts like: show don't tell, dialogue punctuation, paragraph structure, sensory details, character development
+- Give before/after examples using their content
+- Example: "You wrote 'Sam was nervous.' Let's try 'showing' instead of 'telling' - what if Sam's hands shook as he reached for the door, or his heart pounded so loud he was sure everyone could hear it? This lets readers feel the nervousness with Sam!"
+
+**TECHNIQUE TEACHING:**
+- Introduce age-appropriate writing concepts: setting description, character motivation, story structure, dialogue tags
+- Connect to their story specifically
+- Example: "I notice your characters talk to each other, which brings your story to life! Let's learn about dialogue punctuation: when someone speaks, we put their words in quotation marks and usually add a comma before closing. 'Hello Sam,' she said. Try this with your characters!"
+
+**CURIOUS QUESTIONS (1-2 items):**
+- Ask about character motivations, plot choices, or world-building
+- Help them think deeper about their story
+- Example: "I'm curious about why your character decided to go into the scary forest. What was she feeling in that moment? Adding her thoughts or feelings could help readers understand her brave choice!"
+
+RESPONSE STYLE:
+- Address them personally and enthusiastically
+- Use their exact words and characters in examples
+- Make each response feel like a mini writing lesson
+- Keep encouraging tone while teaching
+- Be specific about what they did well and why
+- Explain writing concepts in kid-friendly terms
+
+Return only the JSON object with 6-8 educational feedback items.`
         } else if (mode === 'editor_revision') {
             prompt = `You are a caring writing teacher reviewing the student's revised story.
 
@@ -313,7 +342,8 @@ Write in a conversational, caring tone that makes them excited about their writi
                     }],
                     generationConfig: {
                         temperature: 0.8,
-                        maxOutputTokens: mode === 'guild_story' ? 1500 : 500
+                        maxOutputTokens: mode === 'guild_story' ? 1500 : 
+                                       mode === 'editor_feedback' ? 1500 : 500
                     }
                 })
             });
@@ -337,8 +367,8 @@ Write in a conversational, caring tone that makes them excited about their writi
             return data.candidates[0].content.parts[0].text;
         });
 
-        // Cache successful responses (except inspiration)
-        if (mode !== 'inspiration') {
+        // Cache successful responses (except inspiration and editor_feedback)
+        if (mode !== 'inspiration' && mode !== 'editor_feedback') {
             const cacheKey = getCacheKey(userText, mode, context);
             responseCache.set(cacheKey, result);
             
