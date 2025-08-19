@@ -1250,6 +1250,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         currentRevision++;
         const feedbackContainer = document.getElementById('feedbackContainer');
+        // Clear existing feedback before adding new revision feedback
+        feedbackContainer.innerHTML = '';
         const loadingDiv = document.createElement('div');
         loadingDiv.className = 'loading';
         loadingDiv.textContent = 'Your Editor is reviewing your revision...';
