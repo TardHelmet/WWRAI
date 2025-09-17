@@ -788,7 +788,7 @@ function isOnline() {
 
 // Illustrated book creation function with mobile optimizations
 async function createIllustratedBook() {
-    const title = document.getElementById('storyTitle').value.trim() || 'My StoryForge Tale';
+    const title = document.getElementById('storyTitle').value.trim() || 'My Watch, Write, Read Tale';
     const story = document.getElementById('finalStory').textContent;
     
     if (!story) {
@@ -1013,7 +1013,7 @@ async function downloadIllustratedBookAsPDF() {
         <body>
             <div class="title-page">
                 <h1>${title}</h1>
-                <p>Created with StoryForge</p>
+                <p>Created with Watch, Write, Read</p>
                 <p style="margin-top: 40px;">Where Stories Are Forged, Not Just Written</p>
             </div>
         `;
@@ -1124,9 +1124,9 @@ function showBookPage(pageIndex) {
       
 // Story download function
 function downloadStory() {
-    const title = document.getElementById('storyTitle').value || 'My StoryForge Tale';
+    const title = document.getElementById('storyTitle').value || 'My Watch, Write, Read Tale';
     const story = document.getElementById('finalStory').textContent;
-    const content = `${title}\n\nForged with StoryForge\nWhere Stories Are Forged, Not Just Written\n\n${story}\n\nCreated by: ${currentUser}\nDate: ${new Date().toLocaleDateString()}`;
+    const content = `${title}\n\nForged with Watch, Write, Read\nWhere Stories Are Read, Not Just Written\n\n${story}\n\nCreated by: ${currentUser}\nDate: ${new Date().toLocaleDateString()}`;
     
     const blob = new Blob([content], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
@@ -1320,7 +1320,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Show fallback UI
         document.body.innerHTML = `
             <div style="text-align: center; padding: 50px; font-family: Arial, sans-serif;">
-                <h1>StoryForge</h1>
+                <h1>Watch, Write, Read</h1>
                 <p>Sorry, there was a problem loading the app. Please refresh the page and try again.</p>
                 <button onclick="window.location.reload()">Reload Page</button>
             </div>
