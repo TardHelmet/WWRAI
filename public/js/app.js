@@ -16,19 +16,279 @@ let storyReaderInfo = {
 let selectedInspiration = '';
 let selectedInspirationText = '';
 
+// Video writing state
+let selectedVideo = null;
+let videoPlayer = null;
+let videoWritingState = {
+    isPlaying: false,
+    currentSegment: 0,
+    storyText: '',
+    isVideoEnded: false,
+    playbackTimer: null
+};
+let videoConfig = null;
+
 // Page management
 async function loadComponents() {
     const app = document.getElementById('app');
     const components = [
         'welcomePage', 'workshopPage', 'editorPage',
         'guildPage', 'successPage', 'illustratedBookPage', 'libraryPage',
-        'newStoryOptionsPage', 'inspirationPage', 'storyReaderPage'
+        'newStoryOptionsPage', 'inspirationPage', 'storyReaderPage', 'videoWritingPage'
     ];
 
     for (const component of components) {
         const response = await fetch(`components/${component}.html`);
         const html = await response.text();
         app.innerHTML += html;
+    }
+}
+
+// Video functionality
+async function loadVideoConfig() {
+    try {
+        const response = await fetch('data/videoConfig.json');
+        videoConfig = await response.json();
+        return videoConfig;
+    } catch (error) {
+        console.error('Error loading video config:', error);
+        // Fallback config
+        return {
+            videos: [
+                { id: '_Td7JjCTfyc', title: 'Creative Inspiration Video 1' },
+                { id: '_Td7JjCTfyc', title: 'Creative Inspiration Video 2' },
+                { id: '_Td7JjCTfyc', title: 'Creative Inspiration Video 3' }
+            ]
+        };
+    }
+}
+
+async function displayVideoOptions() {
+    const container = document.getElementById('videoContainer');
+    const config = await loadVideoConfig();
+    
+    container.innerHTML = '';
+    
+    config.videos.forEach((video, index) => {
+        const videoOption = document.createElement('div');
+        videoOption.className = 'video-option';
+        videoOption.innerHTML = `
+            <img src="https://img.youtube.com/vi/${video.id}/maxresdefault.jpg" 
+                 alt="${video.title}" class="video-thumbnail">
+            <div class="video-title">${video.title}</div>
+        `;
+        
+        videoOption.addEventListener('click', () => {
+            // Remove selection from other videos
+            document.querySelectorAll('.video-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            // Select this video
+            videoOption.classList.add('selected');
+            selectedVideo = video;
+            
+            // Enable start button
+            const startButton = document.getElementById('startWithVideo');
+            startButton.disabled = false;
+        });
+        
+        container.appendChild(videoOption);
+    });
+}
+
+function initializeVideoPlayer(videoId) {
+    return new Promise((resolve) => {
+        // Load YouTube IFrame API if not already loaded
+        if (!window.YT) {
+            const tag = document.createElement('script');
+            tag.src = 'https://www.youtube.com/iframe_api';
+            const firstScriptTag = document.getElementsByTagName('script')[0];
+            firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+            
+            window.onYouTubeIframeAPIReady = () => {
+                createPlayer(videoId, resolve);
+            };
+        } else {
+            createPlayer(videoId, resolve);
+        }
+    });
+}
+
+function createPlayer(videoId, resolve) {
+    videoPlayer = new YT.Player('videoPlayer', {
+        height: '100%',
+        width: '100%',
+        videoId: videoId,
+        playerVars: {
+            controls: 0,        // Hide controls
+            disablekb: 1,       // Disable keyboard
+            modestbranding: 1,  // Minimal YouTube branding
+            rel: 0,             // No related videos
+            showinfo: 0,        // No video info
+            fs: 0,              // No fullscreen button
+            iv_load_policy: 3,  // No annotations
+            autoplay: 0,        // Don't autoplay
+            start: 0            // Start from beginning
+        },
+        events: {
+            onReady: (event) => {
+                console.log('YouTube player ready');
+                resolve(event.target);
+            },
+            onStateChange: onPlayerStateChange
+        }
+    });
+}
+
+function onPlayerStateChange(event) {
+    if (event.data === YT.PlayerState.ENDED) {
+        videoWritingState.isVideoEnded = true;
+        showFinalWritingPrompt();
+    }
+}
+
+function startVideoWritingCycle() {
+    videoWritingState.isPlaying = true;
+    videoWritingState.currentSegment = 0;
+    videoWritingState.storyText = '';
+    
+    // Update UI
+    document.getElementById('videoStatus').textContent = 'Playing...';
+    document.getElementById('writingPrompt').textContent = 'Watch carefully...';
+    document.getElementById('videoStoryText').disabled = true;
+    document.getElementById('continueWatching').disabled = true;
+    
+    // Hide writing section during playback
+    document.getElementById('writingSection').classList.add('hidden');
+    
+    // Start playing video
+    videoPlayer.playVideo();
+    
+    // Set timer for 15 seconds
+    videoWritingState.playbackTimer = setTimeout(() => {
+        pauseVideoAndPromptWriting();
+    }, 15000);
+}
+
+function pauseVideoAndPromptWriting() {
+    videoPlayer.pauseVideo();
+    videoWritingState.isPlaying = false;
+    videoWritingState.currentSegment++;
+    
+    // Update UI
+    document.getElementById('videoStatus').textContent = 'Paused - Time to write!';
+    document.getElementById('writingPrompt').textContent = 'Now write what you saw';
+    document.getElementById('videoStoryText').disabled = false;
+    document.getElementById('continueWatching').disabled = true; // Will be enabled when minimum text is written
+    
+    // Show writing section
+    document.getElementById('writingSection').classList.remove('hidden');
+    
+    // Scroll to writing area
+    document.getElementById('writingSection').scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'center' 
+    });
+    
+    // Focus on textarea
+    document.getElementById('videoStoryText').focus();
+}
+
+function showFinalWritingPrompt() {
+    document.getElementById('videoStatus').textContent = 'Video complete!';
+    document.getElementById('writingPrompt').textContent = 'Finish your story';
+    document.getElementById('continueWatching').textContent = 'Submit Your Story';
+    document.getElementById('continueWatching').disabled = false;
+    document.getElementById('writingSection').classList.remove('hidden');
+    
+    // Scroll to writing area
+    document.getElementById('writingSection').scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'center' 
+    });
+}
+
+function validateWritingInput() {
+    const textarea = document.getElementById('videoStoryText');
+    const currentText = textarea.value.trim();
+    const wordCount = currentText.split(/\s+/).filter(word => word.length > 0).length;
+    
+    // Update word count display
+    document.getElementById('currentWordCount').textContent = wordCount;
+    
+    // Enable continue button if minimum words written (at least 3 words)
+    const continueButton = document.getElementById('continueWatching');
+    if (wordCount >= 3) {
+        continueButton.disabled = false;
+    } else {
+        continueButton.disabled = true;
+    }
+}
+
+function continueVideoOrSubmit() {
+    const textarea = document.getElementById('videoStoryText');
+    const currentText = textarea.value.trim();
+    
+    if (videoWritingState.isVideoEnded) {
+        // Submit the complete story
+        submitVideoStory();
+    } else {
+        // Add current text to story and continue video
+        if (currentText) {
+            if (videoWritingState.storyText) {
+                videoWritingState.storyText += '\n\n' + currentText;
+            } else {
+                videoWritingState.storyText = currentText;
+            }
+            
+            // Update textarea with accumulated text
+            textarea.value = videoWritingState.storyText;
+        }
+        
+        // Continue video playback
+        startVideoWritingCycle();
+    }
+}
+
+function submitVideoStory() {
+    const textarea = document.getElementById('videoStoryText');
+    const finalStory = textarea.value.trim();
+    
+    if (!finalStory) {
+        alert('Please write your story before submitting!');
+        return;
+    }
+    
+    // Set the story as current story and move to editor
+    currentStory = finalStory;
+    const editableStory = document.getElementById('editableStory');
+    if (editableStory) {
+        editableStory.value = finalStory;
+    }
+    
+    // Reset video state
+    resetVideoWritingState();
+    
+    // Move to editor page
+    showPage('editorPage');
+}
+
+function resetVideoWritingState() {
+    videoWritingState = {
+        isPlaying: false,
+        currentSegment: 0,
+        storyText: '',
+        isVideoEnded: false,
+        playbackTimer: null
+    };
+    
+    if (videoWritingState.playbackTimer) {
+        clearTimeout(videoWritingState.playbackTimer);
+    }
+    
+    if (videoPlayer) {
+        videoPlayer.stopVideo();
     }
 }
 
@@ -159,7 +419,7 @@ async function callStoryForgeAI(userText, mode, context = '') {
         }
         
         if (mode === 'editor_feedback') {
-            prompt = `You are an experienced, caring writing teacher working with a young writer in the StoryForge Guild. Your job is to provide detailed, educational feedback that teaches writing skills while celebrating their creativity.
+            prompt = `You are an experienced, caring writing teacher working with a young writer in the StoryForge Guild. Your job is to provide detailed, educational feedback that focuses on story beats, spelling, and grammar while celebrating their creativity.
 
 Their story: "${userText}"
 
@@ -167,49 +427,52 @@ Analyze this story thoroughly and return a JSON object with 6-8 detailed feedbac
 
 Structure: 
 {
-  "type": "praise" | "grammar" | "spelling" | "suggestion" | "question" | "technique",
+  "type": "praise" | "grammar" | "spelling" | "story_beats" | "suggestion" | "question",
   "text": "Your detailed educational response (3-5 sentences minimum)",
   "quote": "Exact text from their story this refers to"
 }
 
-EDUCATIONAL REQUIREMENTS:
+PRIORITY FOCUS AREAS:
 
-**GRAMMAR & SPELLING FOCUS:**
-- Scan for: capitalization errors, missing punctuation, comma splices, run-on sentences, sentence fragments, subject-verb disagreement, wrong verb tenses, their/there/they're confusion, its/it's errors, commonly misspelled words
-- For each error found: Quote the mistake, explain the rule, show the correction, explain why it matters
-- Example: "In your sentence 'The dog ran fast it was scared,' you have two complete thoughts that need to be separated. This is called a run-on sentence. You can fix it by adding a period: 'The dog ran fast. It was scared.' Or connect them: 'The dog ran fast because it was scared.' This helps readers follow your thoughts clearly!"
+**STORY BEATS IDENTIFICATION & PRAISE (2-3 items):**
+- Identify and celebrate key plot points in their story (beginning, conflict, climax, resolution)
+- Point out strong story moments, character decisions, or plot developments
+- Be positive and encouraging about their storytelling choices
+- Example: "I love how you started your story with the character finding the mysterious key - this is called a 'hook' and it immediately makes readers want to know what happens next! You've created a perfect story beat that draws us into the adventure."
 
-**DETAILED PRAISE (2-3 items):**
-- Quote specific phrases, sentences, or ideas that work well
-- Explain WHY they work (builds tension, creates vivid imagery, shows character emotion, etc.)
-- Connect to broader writing techniques they're learning
-- Example: "I love your phrase 'the darkness swallowed everything' - this is called a metaphor, and it makes your writing so much more powerful than just saying 'it was dark.' You're showing me how scary the moment feels!"
+**SPELLING ERRORS (1-2 items):**
+- Count total spelling errors in the story
+- Show 1-2 specific examples with corrections
+- Explain the correct spelling and provide memory tips when helpful
+- Example: "I found 3 spelling errors in your story. For example, you wrote 'recieve' but the correct spelling is 'receive' - remember the rule 'i before e except after c!' Fixing these small details will make your wonderful story even more polished."
 
-**EDUCATIONAL SUGGESTIONS (2-3 items):**
-- Build on their existing ideas with specific techniques
-- Teach concepts like: show don't tell, dialogue punctuation, paragraph structure, sensory details, character development
-- Give before/after examples using their content
-- Example: "You wrote 'Sam was nervous.' Let's try 'showing' instead of 'telling' - what if Sam's hands shook as he reached for the door, or his heart pounded so loud he was sure everyone could hear it? This lets readers feel the nervousness with Sam!"
+**GRAMMAR ISSUES (1-2 items):**
+- Identify specific grammar problems with corrections and explanations
+- Focus on: capitalization, punctuation, run-on sentences, sentence fragments, subject-verb agreement, verb tenses
+- Provide clear corrections and explain why the rule matters
+- Example: "In your sentence 'The dragon was huge it breathed fire,' you have two complete thoughts that need separation. You can fix this by adding a period: 'The dragon was huge. It breathed fire.' This helps readers follow your ideas more clearly!"
 
-**TECHNIQUE TEACHING:**
-- Introduce age-appropriate writing concepts: setting description, character motivation, story structure, dialogue tags
-- Connect to their story specifically
-- Example: "I notice your characters talk to each other, which brings your story to life! Let's learn about dialogue punctuation: when someone speaks, we put their words in quotation marks and usually add a comma before closing. 'Hello Sam,' she said. Try this with your characters!"
+**POSITIVE STORY ELEMENTS (1-2 items):**
+- Celebrate creative choices, interesting characters, or engaging dialogue
+- Point out what makes their story unique and engaging
+- Connect their good instincts to broader writing concepts
+- Example: "Your character's decision to help the lost puppy shows great character development - it tells us your main character is kind and brave. This kind of character action is what makes readers care about what happens next!"
 
-**CURIOUS QUESTIONS (1-2 items):**
-- Ask about character motivations, plot choices, or world-building
-- Help them think deeper about their story
-- Example: "I'm curious about why your character decided to go into the scary forest. What was she feeling in that moment? Adding her thoughts or feelings could help readers understand her brave choice!"
+**GENTLE SUGGESTIONS (1 item):**
+- Offer one constructive suggestion to improve their storytelling
+- Keep it simple and actionable
+- Focus on story structure, character development, or descriptive details
+- Example: "Consider adding a sentence about how your character felt when they saw the dragon - were they scared, excited, or curious? Adding emotions helps readers connect with your character even more!"
 
 RESPONSE STYLE:
-- Address them personally and enthusiastically
+- Be enthusiastic and encouraging about their story beats and creativity
 - Use their exact words and characters in examples
-- Make each response feel like a mini writing lesson
-- Keep encouraging tone while teaching
-- Be specific about what they did well and why
+- Make each response feel like a celebration of their storytelling with gentle teaching
+- Keep a warm, supportive tone throughout
+- Be specific about what story elements work well and why
 - Explain writing concepts in kid-friendly terms
 
-Return only the JSON object with 6-8 educational feedback items.`
+Return only the JSON object with 6-8 educational feedback items focusing primarily on story beats, spelling, and grammar.`
         } else if (mode === 'editor_revision') {
             prompt = `You are a caring writing teacher reviewing the student's revised story.
 
@@ -1064,20 +1327,74 @@ document.addEventListener('DOMContentLoaded', async () => {
         `;
     }
 
-    // Welcome page - Add null checks
-    const newStoryChoice = document.getElementById('newStoryChoice');
-    if (newStoryChoice) {
-        newStoryChoice.addEventListener('click', () => {
-            showPage('newStoryOptionsPage');
+    // Welcome page - Updated button handlers
+    const watchAndWriteChoice = document.getElementById('watchAndWriteChoice');
+    if (watchAndWriteChoice) {
+        watchAndWriteChoice.addEventListener('click', async () => {
+            await displayVideoOptions();
+            showPage('inspirationPage');
         });
     }
 
-    const oldStoryChoice = document.getElementById('oldStoryChoice');
-    if (oldStoryChoice) {
-        oldStoryChoice.addEventListener('click', () => {
+    const readChoice = document.getElementById('readChoice');
+    if (readChoice) {
+        readChoice.addEventListener('click', () => {
             showPage('libraryPage');
             loadLibrary();
         });
+    }
+
+    // Video inspiration page
+    const startWithVideo = document.getElementById('startWithVideo');
+    if (startWithVideo) {
+        startWithVideo.addEventListener('click', () => {
+            if (selectedVideo) {
+                // Set up video writing page
+                document.getElementById('selectedVideoTitle').textContent = selectedVideo.title;
+                showPage('videoWritingPage');
+            } else {
+                alert('Please select a video first!');
+            }
+        });
+    }
+
+    // Video writing page
+    const startVideoWriting = document.getElementById('startVideoWriting');
+    if (startVideoWriting) {
+        startVideoWriting.addEventListener('click', async () => {
+            if (selectedVideo) {
+                // Initialize YouTube player
+                await initializeVideoPlayer(selectedVideo.id);
+                
+                // Hide start button and show video interface
+                document.getElementById('startVideoWriting').style.display = 'none';
+                document.getElementById('backToVideoSelection').style.display = 'none';
+                
+                // Start the video writing cycle
+                startVideoWritingCycle();
+            }
+        });
+    }
+
+    const backToVideoSelection = document.getElementById('backToVideoSelection');
+    if (backToVideoSelection) {
+        backToVideoSelection.addEventListener('click', () => {
+            resetVideoWritingState();
+            showPage('inspirationPage');
+        });
+    }
+
+    const continueWatching = document.getElementById('continueWatching');
+    if (continueWatching) {
+        continueWatching.addEventListener('click', () => {
+            continueVideoOrSubmit();
+        });
+    }
+
+    // Add input validation for video writing
+    const videoStoryText = document.getElementById('videoStoryText');
+    if (videoStoryText) {
+        videoStoryText.addEventListener('input', validateWritingInput);
     }
 
     // New Story Options page - Add null checks

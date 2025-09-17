@@ -432,6 +432,141 @@ textarea:focus {
     color: rgba(0, 0, 0, 0.6);
 }
 
+/* Video selection styles */
+.video-selection-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin: 20px 0;
+}
+
+.video-option {
+    background: white;
+    border: 3px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.video-option:hover {
+    border-color: #3b82f6;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+}
+
+.video-option.selected {
+    border-color: #10b981;
+    background-color: #f0fdf4;
+}
+
+.video-thumbnail {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 12px;
+}
+
+.video-title {
+    font-weight: bold;
+    color: #1e40af;
+    font-size: 1.1rem;
+}
+
+/* Video writing interface styles */
+.video-writing-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 24px;
+}
+
+.video-section, .writing-section {
+    background: #f9fafb;
+    border-radius: 12px;
+    padding: 20px;
+    border: 2px solid #e5e7eb;
+}
+
+.video-container {
+    width: 100%;
+    aspect-ratio: 16/9;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #000;
+    margin-bottom: 16px;
+}
+
+.video-info h3 {
+    color: #1e40af;
+    margin-bottom: 8px;
+    font-size: 1.2rem;
+}
+
+.video-status {
+    color: #6b7280;
+    font-size: 0.9rem;
+}
+
+.writing-section {
+    transition: all 0.3s ease;
+}
+
+.writing-section.hidden {
+    opacity: 0.3;
+    pointer-events: none;
+}
+
+.writing-prompt h3 {
+    color: #1e40af;
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+#videoStoryText {
+    width: 100%;
+    min-height: 200px;
+    margin-bottom: 16px;
+    font-family: inherit;
+    line-height: 1.6;
+}
+
+.writing-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.word-count {
+    color: #6b7280;
+    font-size: 0.9rem;
+}
+
+.video-writing-controls {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.video-writing-controls button {
+    flex: 1;
+    max-width: 300px;
+}
+
+/* Smooth scrolling */
+html {
+    scroll-behavior: smooth;
+}
+
+.scroll-target {
+    scroll-margin-top: 20px;
+}
+
 /* Better mobile responsiveness */
 @media (max-width: 768px) {
     .card {
@@ -442,6 +577,23 @@ textarea:focus {
     .video-writing-container {
         grid-template-columns: 1fr;
         gap: 24px;
+    }
+    
+    .video-selection-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .video-writing-controls {
+        flex-direction: column;
+    }
+    
+    .video-writing-controls button {
+        max-width: none;
+    }
+    
+    .writing-controls {
+        flex-direction: column;
+        align-items: stretch;
     }
     
     button {
@@ -455,5 +607,34 @@ textarea:focus {
     
     h2 {
         font-size: 1.8rem;
+    }
+    
+    .video-container {
+        aspect-ratio: 16/9;
+    }
+    
+    #videoStoryText {
+        min-height: 150px;
+        font-size: 16px;
+    }
+}
+
+/* Extra small screens */
+@media (max-width: 480px) {
+    .card {
+        padding: 16px;
+        margin: 8px;
+    }
+    
+    .video-section, .writing-section {
+        padding: 16px;
+    }
+    
+    h1 {
+        font-size: 2rem;
+    }
+    
+    h2 {
+        font-size: 1.6rem;
     }
 }

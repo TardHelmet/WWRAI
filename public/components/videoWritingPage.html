@@ -1,0 +1,39 @@
+<div id="videoWritingPage" class="page">
+    <div class="card wide-card">
+        <div class="video-writing-container">
+            <div class="video-section">
+                <div id="videoPlayer" class="video-container">
+                    <!-- YouTube iframe will be inserted here -->
+                </div>
+                <div class="video-info">
+                    <h3 id="selectedVideoTitle">Video Title</h3>
+                    <div class="video-status">
+                        <span id="videoStatus">Ready to start</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="writing-section" id="writingSection">
+                <div class="writing-prompt">
+                    <h3 id="writingPrompt">Get ready to watch and write!</h3>
+                </div>
+                <textarea 
+                    id="videoStoryText" 
+                    placeholder="Your story will build here as you watch and write..."
+                    disabled
+                ></textarea>
+                <div class="writing-controls">
+                    <button id="continueWatching" disabled>Continue Watching</button>
+                    <div class="word-count">
+                        <span id="currentWordCount">0</span> words written
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="video-writing-controls">
+            <button id="startVideoWriting" class="success-button">Start Your Story Journey</button>
+            <button id="backToVideoSelection" class="secondary-button">Choose Different Video</button>
+        </div>
+    </div>
+</div>
