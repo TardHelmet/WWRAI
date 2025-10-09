@@ -24,9 +24,20 @@ let videoWritingState = {
     currentSegment: 0,
     storyText: '',
     isVideoEnded: false,
-    playbackTimer: null
+    playbackTimer: null,
+    autoSaveInterval: null,
+    wordGoal: 25
 };
 let videoConfig = null;
+
+// XP and Progress System
+let userProgress = {
+    xp: 0,
+    level: 1,
+    totalWords: 0,
+    storiesCompleted: 0,
+    segmentsCompleted: 0
+};
 
 // Page management
 async function loadComponents() {
@@ -150,8 +161,7 @@ function onPlayerStateChange(event) {
 
 function startVideoWritingCycle() {
     videoWritingState.isPlaying = true;
-    videoWritingState.currentSegment = 0;
-    videoWritingState.storyText = '';
+    videoWritingState.currentSegment++;
     
     // Update UI
     document.getElementById('videoStatus').textContent = 'Playing...';
@@ -159,10 +169,28 @@ function startVideoWritingCycle() {
     document.getElementById('videoStoryText').disabled = true;
     document.getElementById('continueWatching').disabled = true;
     
-    // Hide writing section during playback
-    document.getElementById('writingSection').classList.add('hidden');
+    // Trigger slide animations
+    const videoSection = document.getElementById('videoSection');
+    const writingSection = document.getElementById('writingSection');
     
-    // Start playing video
+    // Remove any existing animation classes
+    videoSection.classList.remove('slide-out-left', 'slide-in-left');
+    writingSection.classList.remove('slide-out-right', 'slide-in-right', 'panel-hidden');
+    
+    // Slide writing section out to the right
+    writingSection.classList.add('slide-out-right');
+    
+    // After animation completes, hide writing section and show video
+    setTimeout(() => {
+        writingSection.classList.add('panel-hidden');
+        writingSection.classList.remove('slide-out-right');
+        
+        // Slide video in from left
+        videoSection.classList.remove('panel-hidden');
+        videoSection.classList.add('slide-in-left');
+    }, 500);
+    
+    // Start playing video with autoplay
     videoPlayer.playVideo();
     
     // Set timer for 15 seconds
@@ -174,25 +202,41 @@ function startVideoWritingCycle() {
 function pauseVideoAndPromptWriting() {
     videoPlayer.pauseVideo();
     videoWritingState.isPlaying = false;
-    videoWritingState.currentSegment++;
     
     // Update UI
     document.getElementById('videoStatus').textContent = 'Paused - Time to write!';
     document.getElementById('writingPrompt').textContent = 'Now write what you saw';
     document.getElementById('videoStoryText').disabled = false;
-    document.getElementById('continueWatching').disabled = true; // Will be enabled when minimum text is written
+    document.getElementById('continueWatching').disabled = true;
     
-    // Show writing section
-    document.getElementById('writingSection').classList.remove('hidden');
+    // Trigger slide animations
+    const videoSection = document.getElementById('videoSection');
+    const writingSection = document.getElementById('writingSection');
     
-    // Scroll to writing area
-    document.getElementById('writingSection').scrollIntoView({ 
-        behavior: 'smooth', 
-        block: 'center' 
-    });
+    // Remove any existing animation classes
+    videoSection.classList.remove('slide-out-left', 'slide-in-left');
+    writingSection.classList.remove('slide-out-right', 'slide-in-right', 'panel-hidden');
     
-    // Focus on textarea
-    document.getElementById('videoStoryText').focus();
+    // Slide video out to the left
+    videoSection.classList.add('slide-out-left');
+    
+    // After animation completes, hide video and show writing section
+    setTimeout(() => {
+        videoSection.classList.add('panel-hidden');
+        videoSection.classList.remove('slide-out-left');
+        
+        // Slide writing section in from right
+        writingSection.classList.remove('panel-hidden');
+        writingSection.classList.add('slide-in-right');
+        
+        // Focus on textarea after animation
+        setTimeout(() => {
+            document.getElementById('videoStoryText').focus();
+            
+            // Start auto-save
+            startAutoSave();
+        }, 500);
+    }, 500);
 }
 
 function showFinalWritingPrompt() {
@@ -275,21 +319,26 @@ function submitVideoStory() {
 }
 
 function resetVideoWritingState() {
-    videoWritingState = {
-        isPlaying: false,
-        currentSegment: 0,
-        storyText: '',
-        isVideoEnded: false,
-        playbackTimer: null
-    };
+    // Stop auto-save before resetting
+    stopAutoSave();
     
+    // Clear playback timer
     if (videoWritingState.playbackTimer) {
         clearTimeout(videoWritingState.playbackTimer);
     }
     
+    // Stop video player
     if (videoPlayer) {
         videoPlayer.stopVideo();
     }
+    
+    // Reset state while preserving autoSaveInterval and wordGoal properties
+    videoWritingState.isPlaying = false;
+    videoWritingState.currentSegment = 0;
+    videoWritingState.storyText = '';
+    videoWritingState.isVideoEnded = false;
+    videoWritingState.playbackTimer = null;
+    // Keep autoSaveInterval and wordGoal intact
 }
 
 function showPage(pageId) {
@@ -1196,6 +1245,221 @@ function clearLibrary() {
     }
 }
 
+// XP System Functions
+function loadUserProgress() {
+    const saved = loadFromStorage('userProgress');
+    if (saved) {
+        userProgress = saved;
+        updateXPDisplay();
+    }
+}
+
+function saveUserProgress() {
+    saveToStorage('userProgress', userProgress);
+}
+
+function awardXP(amount, reason) {
+    userProgress.xp += amount;
+    
+    // Check for level up
+    const xpForNextLevel = userProgress.level * 100;
+    if (userProgress.xp >= xpForNextLevel) {
+        userProgress.level++;
+        userProgress.xp = userProgress.xp - xpForNextLevel;
+        showXPNotification(`🎉 Level Up! You're now Level ${userProgress.level}!`);
+    } else {
+        showXPNotification(`+${amount} XP: ${reason}`);
+    }
+    
+    saveUserProgress();
+    updateXPDisplay();
+}
+
+function updateXPDisplay() {
+    const xpBar = document.getElementById('xpBarContainer');
+    if (!xpBar) return;
+    
+    // Show XP bar
+    xpBar.style.display = 'flex';
+    
+    // Update level badge
+    document.getElementById('levelBadge').textContent = `Level ${userProgress.level}`;
+    
+    // Update XP text
+    const xpForNextLevel = userProgress.level * 100;
+    document.getElementById('xpText').textContent = `${userProgress.xp} / ${xpForNextLevel} XP`;
+    
+    // Update progress bar
+    const percentage = (userProgress.xp / xpForNextLevel) * 100;
+    const progressBar = document.getElementById('xpProgress');
+    progressBar.style.width = `${percentage}%`;
+    document.getElementById('xpPercentage').textContent = `${Math.round(percentage)}%`;
+}
+
+function showXPNotification(message) {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = 'xp-notification';
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    // Remove after animation
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+
+// Auto-save functionality
+function startAutoSave() {
+    // Clear any existing interval
+    if (videoWritingState.autoSaveInterval) {
+        clearInterval(videoWritingState.autoSaveInterval);
+    }
+    
+    // Auto-save every 3 seconds
+    videoWritingState.autoSaveInterval = setInterval(() => {
+        const textarea = document.getElementById('videoStoryText');
+        if (textarea && textarea.value.trim()) {
+            saveDraft(textarea.value);
+            showAutoSaveIndicator();
+        }
+    }, 3000);
+}
+
+function stopAutoSave() {
+    if (videoWritingState.autoSaveInterval) {
+        clearInterval(videoWritingState.autoSaveInterval);
+        videoWritingState.autoSaveInterval = null;
+    }
+}
+
+function saveDraft(content) {
+    const draft = {
+        content: content,
+        timestamp: new Date().toISOString(),
+        videoId: selectedVideo?.id
+    };
+    saveToStorage('currentDraft', draft);
+}
+
+function loadDraft() {
+    return loadFromStorage('currentDraft');
+}
+
+function clearDraft() {
+    localStorage.removeItem('storyforge_currentDraft');
+}
+
+function showAutoSaveIndicator() {
+    const indicator = document.getElementById('autoSaveIndicator');
+    if (indicator) {
+        indicator.classList.add('visible');
+        setTimeout(() => {
+            indicator.classList.remove('visible');
+        }, 2000);
+    }
+}
+
+// Word count goal functionality
+function updateWordCountGoal() {
+    const textarea = document.getElementById('videoStoryText');
+    const wordGoal = videoWritingState.wordGoal;
+    
+    if (!textarea) return;
+    
+    const currentText = textarea.value.trim();
+    const wordCount = currentText.split(/\s+/).filter(word => word.length > 0).length;
+    
+    // Update word count display
+    document.getElementById('currentWordCount').textContent = wordCount;
+    document.getElementById('wordGoal').textContent = wordGoal;
+    
+    // Update progress bar
+    const progressBar = document.getElementById('wordGoalProgressBar');
+    if (progressBar) {
+        const percentage = Math.min((wordCount / wordGoal) * 100, 100);
+        progressBar.style.width = `${percentage}%`;
+        
+        // Change color when goal is met
+        if (wordCount >= wordGoal) {
+            progressBar.classList.add('complete');
+            
+            // Enable continue button
+            const continueButton = document.getElementById('continueWatching');
+            if (continueButton && !videoWritingState.isVideoEnded) {
+                continueButton.disabled = false;
+            }
+        } else {
+            progressBar.classList.remove('complete');
+        }
+    }
+}
+
+// Enhanced validate writing input with word goals
+function validateWritingInputEnhanced() {
+    updateWordCountGoal();
+    
+    const textarea = document.getElementById('videoStoryText');
+    const currentText = textarea.value.trim();
+    const wordCount = currentText.split(/\s+/).filter(word => word.length > 0).length;
+    const wordGoal = videoWritingState.wordGoal;
+    
+    // Enable continue button if word goal is met
+    const continueButton = document.getElementById('continueWatching');
+    if (wordCount >= wordGoal) {
+        continueButton.disabled = false;
+    } else {
+        continueButton.disabled = true;
+    }
+}
+
+// Enhanced continue function with XP rewards
+function continueVideoOrSubmitEnhanced() {
+    const textarea = document.getElementById('videoStoryText');
+    const currentText = textarea.value.trim();
+    
+    if (videoWritingState.isVideoEnded) {
+        // Award XP for completing the story
+        const wordCount = currentText.split(/\s+/).filter(word => word.length > 0).length;
+        userProgress.totalWords += wordCount;
+        userProgress.storiesCompleted++;
+        
+        awardXP(50, 'Completed video story!');
+        
+        // Stop auto-save
+        stopAutoSave();
+        clearDraft();
+        
+        // Submit the complete story
+        submitVideoStory();
+    } else {
+        // Award XP for completing a segment
+        const segmentWords = currentText.split(/\s+/).filter(word => word.length > 0).length;
+        if (segmentWords >= videoWritingState.wordGoal) {
+            userProgress.segmentsCompleted++;
+            awardXP(10, 'Completed writing segment!');
+        }
+        
+        // Add current text to story and continue video
+        if (currentText) {
+            if (videoWritingState.storyText) {
+                videoWritingState.storyText += '\n\n' + currentText;
+            } else {
+                videoWritingState.storyText = currentText;
+            }
+            
+            // Update textarea with accumulated text
+            textarea.value = videoWritingState.storyText;
+        }
+        
+        // Stop auto-save before continuing
+        stopAutoSave();
+        
+        // Continue video playback
+        startVideoWritingCycle();
+    }
+}
+
 // Offline mode and network monitoring
 let isOfflineMode = false;
 
@@ -1304,6 +1568,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // Initialize offline status
         updateOfflineStatus();
+        
+        // Initialize XP system
+        loadUserProgress();
 
         // All event listeners and initial page display logic moved here
         // Check for existing user
@@ -1387,14 +1654,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     const continueWatching = document.getElementById('continueWatching');
     if (continueWatching) {
         continueWatching.addEventListener('click', () => {
-            continueVideoOrSubmit();
+            continueVideoOrSubmitEnhanced();
         });
     }
 
-    // Add input validation for video writing
+    // Add input validation for video writing with word count goals
     const videoStoryText = document.getElementById('videoStoryText');
     if (videoStoryText) {
-        videoStoryText.addEventListener('input', validateWritingInput);
+        videoStoryText.addEventListener('input', validateWritingInputEnhanced);
     }
 
     // New Story Options page - Add null checks

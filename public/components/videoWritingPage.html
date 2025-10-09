@@ -1,7 +1,7 @@
 <div id="videoWritingPage" class="page">
     <div class="card wide-card">
-        <div class="video-writing-container">
-            <div class="video-section">
+        <div class="video-writing-container single-panel-mode">
+            <div class="video-section" id="videoSection">
                 <div id="videoPlayer" class="video-container">
                     <!-- YouTube iframe will be inserted here -->
                 </div>
@@ -13,19 +13,25 @@
                 </div>
             </div>
             
-            <div class="writing-section" id="writingSection">
+            <div class="writing-section panel-hidden" id="writingSection">
                 <div class="writing-prompt">
                     <h3 id="writingPrompt">Get ready to watch and write!</h3>
                 </div>
-                <textarea 
-                    id="videoStoryText" 
-                    placeholder="Your story will build here as you watch and write..."
-                    disabled
-                ></textarea>
+                <div style="position: relative;">
+                    <textarea 
+                        id="videoStoryText" 
+                        placeholder="Your story will build here as you watch and write..."
+                        disabled
+                    ></textarea>
+                    <div class="auto-save-indicator" id="autoSaveIndicator">✓ Draft saved</div>
+                </div>
                 <div class="writing-controls">
                     <button id="continueWatching" disabled>Continue Watching</button>
                     <div class="word-count">
-                        <span id="currentWordCount">0</span> words written
+                        <span id="currentWordCount">0</span> / <span id="wordGoal">25</span> words
+                        <div class="word-goal-progress">
+                            <div class="word-goal-progress-bar" id="wordGoalProgressBar"></div>
+                        </div>
                     </div>
                 </div>
             </div>

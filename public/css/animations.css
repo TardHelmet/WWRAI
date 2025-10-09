@@ -1,0 +1,229 @@
+/* Slide Animation Keyframes */
+@keyframes slideOutLeft {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutRight {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Animation Classes */
+.slide-out-left {
+    animation: slideOutLeft 0.5s ease-in-out forwards;
+}
+
+.slide-in-left {
+    animation: slideInLeft 0.5s ease-in-out forwards;
+}
+
+.slide-out-right {
+    animation: slideOutRight 0.5s ease-in-out forwards;
+}
+
+.slide-in-right {
+    animation: slideInRight 0.5s ease-in-out forwards;
+}
+
+/* Video Writing Container - Single Panel Mode */
+.video-writing-container {
+    position: relative;
+    overflow: hidden;
+    min-height: 500px;
+}
+
+.video-writing-container.single-panel-mode {
+    display: block;
+}
+
+.video-writing-container.single-panel-mode .video-section,
+.video-writing-container.single-panel-mode .writing-section {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.video-writing-container.single-panel-mode .video-section {
+    z-index: 2;
+}
+
+.video-writing-container.single-panel-mode .writing-section {
+    z-index: 1;
+}
+
+/* Hidden state for panels */
+.panel-hidden {
+    display: none;
+}
+
+/* XP Bar Styles */
+.xp-bar-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 12px 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.xp-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 600;
+    color: #1e40af;
+}
+
+.xp-bar {
+    flex: 1;
+    height: 24px;
+    background: #e5e7eb;
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+}
+
+.xp-progress {
+    height: 100%;
+    background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+    transition: width 0.5s ease-out;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 8px;
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.level-badge {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 16px;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+/* XP Notification */
+.xp-notification {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    padding: 16px 24px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    z-index: 1001;
+    animation: slideInRight 0.3s ease-out, fadeOut 0.3s ease-in 2.7s forwards;
+    font-weight: 600;
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+/* Auto-save indicator */
+.auto-save-indicator {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    color: #10b981;
+    font-size: 14px;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.auto-save-indicator.visible {
+    opacity: 1;
+}
+
+/* Word count goal progress */
+.word-goal-progress {
+    margin-top: 8px;
+    height: 8px;
+    background: #e5e7eb;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.word-goal-progress-bar {
+    height: 100%;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    transition: width 0.3s ease-out;
+}
+
+.word-goal-progress-bar.complete {
+    background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .xp-bar-container {
+        padding: 8px 12px;
+        flex-wrap: wrap;
+    }
+    
+    .xp-info {
+        font-size: 14px;
+    }
+    
+    .xp-bar {
+        width: 100%;
+        order: 3;
+    }
+    
+    .xp-notification {
+        right: 12px;
+        left: 12px;
+        top: 70px;
+    }
+}
