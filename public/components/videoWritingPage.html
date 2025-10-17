@@ -9,6 +9,7 @@
                     <h3 id="selectedVideoTitle">Video Title</h3>
                     <div class="video-status">
                         <span id="videoStatus">Ready to start</span>
+                        <span id="segmentProgress" class="segment-progress"></span>
                     </div>
                 </div>
             </div>
@@ -16,11 +17,16 @@
             <div class="writing-section panel-hidden" id="writingSection">
                 <div class="writing-prompt">
                     <h3 id="writingPrompt">Get ready to watch and write!</h3>
+                    <p id="sectionCount" class="section-count"></p>
                 </div>
+                
+                <!-- Previous sections display -->
+                <div id="previousSections" class="previous-sections" style="display: none;"></div>
+                
                 <div style="position: relative;">
                     <textarea 
                         id="videoStoryText" 
-                        placeholder="Your story will build here as you watch and write..."
+                        placeholder="Write what you just saw..."
                         disabled
                     ></textarea>
                     <div class="auto-save-indicator" id="autoSaveIndicator">✓ Draft saved</div>
@@ -32,6 +38,7 @@
                         <div class="word-goal-progress">
                             <div class="word-goal-progress-bar" id="wordGoalProgressBar"></div>
                         </div>
+                        <span id="wordGoalStatus" class="word-goal-status"></span>
                     </div>
                 </div>
             </div>

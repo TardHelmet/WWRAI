@@ -22,11 +22,12 @@ let videoPlayer = null;
 let videoWritingState = {
     isPlaying: false,
     currentSegment: 0,
-    storyText: '',
+    sections: [], // Array to store completed sections
     isVideoEnded: false,
     playbackTimer: null,
     autoSaveInterval: null,
-    wordGoal: 25
+    wordGoal: 25,
+    estimatedTotalSegments: 0
 };
 let videoConfig = null;
 
@@ -155,7 +156,8 @@ function createPlayer(videoId, resolve) {
 function onPlayerStateChange(event) {
     if (event.data === YT.PlayerState.ENDED) {
         videoWritingState.isVideoEnded = true;
-        showFinalWritingPrompt();
+        // Pause the video and show final writing prompt
+        pauseVideoAndPromptWriting();
     }
 }
 
@@ -203,11 +205,51 @@ function pauseVideoAndPromptWriting() {
     videoPlayer.pauseVideo();
     videoWritingState.isPlaying = false;
     
+    // Dynamic prompts based on segment and video state
+    let promptText;
+    let sectionText;
+    let buttonText = 'Continue Watching';
+    
+    if (videoWritingState.isVideoEnded) {
+        promptText = 'Finish your story';
+        sectionText = 'Final Section';
+        buttonText = 'Submit Your Story';
+    } else if (videoWritingState.currentSegment === 1) {
+        promptText = 'Now write what you saw';
+        sectionText = 'Writing Section 1';
+    } else {
+        promptText = 'Continue writing the story you see';
+        sectionText = `Writing Section ${videoWritingState.currentSegment}`;
+    }
+    
     // Update UI
-    document.getElementById('videoStatus').textContent = 'Paused - Time to write!';
-    document.getElementById('writingPrompt').textContent = 'Now write what you saw';
+    document.getElementById('videoStatus').textContent = videoWritingState.isVideoEnded ? 'Video complete!' : 'Paused - Time to write!';
+    document.getElementById('writingPrompt').textContent = promptText;
+    document.getElementById('sectionCount').textContent = sectionText;
+    document.getElementById('continueWatching').textContent = buttonText;
     document.getElementById('videoStoryText').disabled = false;
     document.getElementById('continueWatching').disabled = true;
+    
+    // Display previous sections if any
+    updatePreviousSectionsDisplay();
+    
+    // Clear textarea for new section input
+    document.getElementById('videoStoryText').value = '';
+    
+    // Reset word count for new section
+    document.getElementById('currentWordCount').textContent = '0';
+    const progressBar = document.getElementById('wordGoalProgressBar');
+    if (progressBar) {
+        progressBar.style.width = '0%';
+        progressBar.classList.remove('complete');
+    }
+    
+    // Clear word goal status
+    const wordGoalStatus = document.getElementById('wordGoalStatus');
+    if (wordGoalStatus) {
+        wordGoalStatus.textContent = '';
+        wordGoalStatus.classList.remove('complete');
+    }
     
     // Trigger slide animations
     const videoSection = document.getElementById('videoSection');
@@ -335,9 +377,10 @@ function resetVideoWritingState() {
     // Reset state while preserving autoSaveInterval and wordGoal properties
     videoWritingState.isPlaying = false;
     videoWritingState.currentSegment = 0;
-    videoWritingState.storyText = '';
+    videoWritingState.sections = [];
     videoWritingState.isVideoEnded = false;
     videoWritingState.playbackTimer = null;
+    videoWritingState.estimatedTotalSegments = 0;
     // Keep autoSaveInterval and wordGoal intact
 }
 
@@ -1384,9 +1427,9 @@ function updateWordCountGoal() {
         if (wordCount >= wordGoal) {
             progressBar.classList.add('complete');
             
-            // Enable continue button
+            // Enable continue/submit button
             const continueButton = document.getElementById('continueWatching');
-            if (continueButton && !videoWritingState.isVideoEnded) {
+            if (continueButton) {
                 continueButton.disabled = false;
             }
         } else {
@@ -1419,8 +1462,19 @@ function continueVideoOrSubmitEnhanced() {
     const currentText = textarea.value.trim();
     
     if (videoWritingState.isVideoEnded) {
+        // Save final section
+        if (currentText) {
+            videoWritingState.sections.push({
+                number: videoWritingState.currentSegment,
+                text: currentText
+            });
+        }
+        
+        // Compile all sections into final story
+        const fullStory = videoWritingState.sections.map(s => s.text).join('\n\n');
+        
         // Award XP for completing the story
-        const wordCount = currentText.split(/\s+/).filter(word => word.length > 0).length;
+        const wordCount = fullStory.split(/\s+/).filter(word => word.length > 0).length;
         userProgress.totalWords += wordCount;
         userProgress.storiesCompleted++;
         
@@ -1430,26 +1484,32 @@ function continueVideoOrSubmitEnhanced() {
         stopAutoSave();
         clearDraft();
         
-        // Submit the complete story
-        submitVideoStory();
-    } else {
-        // Award XP for completing a segment
-        const segmentWords = currentText.split(/\s+/).filter(word => word.length > 0).length;
-        if (segmentWords >= videoWritingState.wordGoal) {
-            userProgress.segmentsCompleted++;
-            awardXP(10, 'Completed writing segment!');
+        // Set the full story and move to editor
+        currentStory = fullStory;
+        const editableStory = document.getElementById('editableStory');
+        if (editableStory) {
+            editableStory.value = fullStory;
         }
         
-        // Add current text to story and continue video
+        // Reset video state
+        resetVideoWritingState();
+        
+        // Move to editor page
+        showPage('editorPage');
+    } else {
+        // Save current section to sections array
         if (currentText) {
-            if (videoWritingState.storyText) {
-                videoWritingState.storyText += '\n\n' + currentText;
-            } else {
-                videoWritingState.storyText = currentText;
-            }
+            videoWritingState.sections.push({
+                number: videoWritingState.currentSegment,
+                text: currentText
+            });
             
-            // Update textarea with accumulated text
-            textarea.value = videoWritingState.storyText;
+            // Award XP for completing a segment
+            const segmentWords = currentText.split(/\s+/).filter(word => word.length > 0).length;
+            if (segmentWords >= videoWritingState.wordGoal) {
+                userProgress.segmentsCompleted++;
+                awardXP(10, 'Completed writing segment!');
+            }
         }
         
         // Stop auto-save before continuing
@@ -1458,6 +1518,33 @@ function continueVideoOrSubmitEnhanced() {
         // Continue video playback
         startVideoWritingCycle();
     }
+}
+
+// Helper function to display previous sections
+function updatePreviousSectionsDisplay() {
+    const previousSectionsContainer = document.getElementById('previousSections');
+    
+    if (!previousSectionsContainer) return;
+    
+    if (videoWritingState.sections.length === 0) {
+        previousSectionsContainer.style.display = 'none';
+        return;
+    }
+    
+    previousSectionsContainer.style.display = 'block';
+    previousSectionsContainer.innerHTML = '';
+    
+    videoWritingState.sections.forEach((section, index) => {
+        const sectionDiv = document.createElement('div');
+        sectionDiv.className = 'section-item';
+        sectionDiv.innerHTML = `
+            <div class="section-separator">
+                <span>Section ${section.number}</span>
+            </div>
+            <div>${section.text}</div>
+        `;
+        previousSectionsContainer.appendChild(sectionDiv);
+    });
 }
 
 // Offline mode and network monitoring

@@ -558,6 +558,139 @@ textarea:focus {
     max-width: 300px;
 }
 
+/* Previous sections display */
+.previous-sections {
+    background: #f3f4f6;
+    padding: 16px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    max-height: 200px;
+    overflow-y: auto;
+    border: 2px solid #e5e7eb;
+}
+
+.section-item {
+    background: white;
+    padding: 12px;
+    margin-bottom: 10px;
+    border-radius: 6px;
+    border-left: 4px solid #3b82f6;
+    color: #6b7280;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.section-item:last-child {
+    margin-bottom: 0;
+}
+
+.section-separator {
+    display: flex;
+    align-items: center;
+    margin: 8px 0;
+    color: #9ca3af;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.section-separator span {
+    padding: 4px 12px;
+    background: #e5e7eb;
+    border-radius: 12px;
+}
+
+/* Segment progress indicator */
+.segment-progress {
+    display: inline-block;
+    margin-left: 12px;
+    padding: 4px 12px;
+    background: #e0e7ff;
+    color: #3730a3;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+/* Section count display */
+.section-count {
+    text-align: center;
+    color: #6b7280;
+    font-size: 0.9rem;
+    margin-top: 8px;
+    font-weight: 500;
+}
+
+/* Word goal status */
+.word-goal-status {
+    display: inline-block;
+    margin-left: 12px;
+    font-size: 1.2rem;
+    animation: scaleIn 0.3s ease;
+}
+
+.word-goal-status.complete {
+    color: #10b981;
+}
+
+@keyframes scaleIn {
+    from {
+        transform: scale(0);
+    }
+    to {
+        transform: scale(1);
+    }
+}
+
+/* Enhanced word goal progress bar */
+.word-goal-progress {
+    width: 100%;
+    height: 8px;
+    background: #e5e7eb;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 8px;
+}
+
+.word-goal-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #3b82f6 0%, #1e40af 100%);
+    border-radius: 4px;
+    transition: width 0.3s ease, background 0.3s ease;
+}
+
+.word-goal-progress-bar.complete {
+    background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+    animation: pulse 0.5s ease;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+/* Auto-save indicator */
+.auto-save-indicator {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: #10b981;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.auto-save-indicator.visible {
+    opacity: 1;
+}
+
 /* Smooth scrolling */
 html {
     scroll-behavior: smooth;
