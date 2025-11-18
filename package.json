@@ -11,7 +11,9 @@
     "health": "curl http://localhost:3000/health || echo 'Server not running'"
   },
   "dependencies": {
-    "express": "^4.18.2"
+    "compression": "^1.8.1",
+    "express": "^4.18.2",
+    "express-rate-limit": "^8.2.1"
   },
   "engines": {
     "node": ">=18.0.0",
@@ -19,7 +21,7 @@
   },
   "keywords": [
     "education",
-    "creative-writing", 
+    "creative-writing",
     "storytelling",
     "ai-powered",
     "children",
@@ -45,7 +47,7 @@
     "target_audience": "Ages 8-16",
     "core_features": [
       "AI Writing Mentor (Editor)",
-      "Story Workshop with Video Inspiration", 
+      "Story Workshop with Video Inspiration",
       "Guild Collaboration System",
       "Story Library & Downloads",
       "Interactive Learning Journey"

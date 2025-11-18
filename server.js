@@ -1,12 +1,54 @@
 const express = require('express');
 const path = require('path');
+const compression = require('compression');
+const rateLimit = require('express-rate-limit');
 
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Middleware
+// Middleware - Compression
+app.use(compression());
+
+// Middleware - Static files with caching
+app.use(express.static(path.join(__dirname, 'public'), {
+    maxAge: '1d', // Cache for 1 day
+    etag: true,
+    lastModified: true
+}));
+
+// Middleware - JSON parsing
 app.use(express.json({ limit: '10mb' }));
-app.use(express.static(path.join(__dirname, 'public')));
+
+// Rate limiters
+const aiLimiter = rateLimit({
+    windowMs: 60 * 1000, // 1 minute
+    max: 20, // 20 requests per minute
+    message: { 
+        error: 'Too many AI requests, please try again in a minute!',
+        hint: 'The StoryForge Guild appreciates your enthusiasm, but take a breath!'
+    },
+    standardHeaders: true,
+    legacyHeaders: false
+});
+
+const imageLimiter = rateLimit({
+    windowMs: 5 * 60 * 1000, // 5 minutes
+    max: 10, // 10 requests per 5 minutes
+    message: { 
+        error: 'Too many image generation requests, please wait before creating more illustrations.',
+        hint: 'Illustrations take time to forge!'
+    },
+    standardHeaders: true,
+    legacyHeaders: false
+});
+
+// Set cache headers for API responses
+app.use((req, res, next) => {
+    if (req.path.startsWith('/api/')) {
+        res.set('Cache-Control', 'no-store'); // Don't cache API responses
+    }
+    next();
+});
 
 // Get API key from environment variable
 const GEMINI_KEY = process.env.GEMINI_API_KEY;
@@ -23,7 +65,7 @@ app.get('/health', (req, res) => {
 });
 
 // StoryForge AI endpoint for all creative writing assistance
-app.post('/api/storyforge-ai', async (req, res) => {
+app.post('/api/storyforge-ai', aiLimiter, async (req, res) => {
     try {
         // Check if API key is configured
         if (!GEMINI_KEY) {
@@ -83,7 +125,7 @@ app.post('/api/storyforge-ai', async (req, res) => {
 });
 
 // Image generation endpoint using Gemini 2.0 Flash Image Generation
-app.post('/api/generate-image', async (req, res) => {
+app.post('/api/generate-image', imageLimiter, async (req, res) => {
     try {
         const { prompt, pageNumber } = req.body;
 
