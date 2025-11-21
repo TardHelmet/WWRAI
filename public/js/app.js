@@ -1,4 +1,4 @@
-snip// Global state
+// Global state
 let currentUser = '';
 let currentStory = '';
 let currentRevision = 0;
@@ -2038,149 +2038,206 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Guild page
-    document.getElementById('allowCollaboration').addEventListener('click', async () => {
-        document.getElementById('guildChoice').style.display = 'none';
-        document.getElementById('guildStorySection').style.display = 'block';
-        
-        guildRevisionCount = 0;
-        const guildStoryDiv = document.getElementById('guildStory');
-        guildStoryDiv.innerHTML = '<div class="loading">The Guild writer is crafting their version...</div>';
+    const allowCollaboration = document.getElementById('allowCollaboration');
+    if (allowCollaboration) {
+        allowCollaboration.addEventListener('click', async () => {
+            document.getElementById('guildChoice').style.display = 'none';
+            document.getElementById('guildStorySection').style.display = 'block';
+            
+            guildRevisionCount = 0;
+            const guildStoryDiv = document.getElementById('guildStory');
+            guildStoryDiv.innerHTML = '<div class="loading">The Guild writer is crafting their version...</div>';
 
-        const guildStory = await callStoryForgeAI(currentStory, 'guild_story');
-        currentGuildStory = guildStory;
-        typeWriter(guildStoryDiv, guildStory);
-    });
+            const guildStory = await callStoryForgeAI(currentStory, 'guild_story');
+            currentGuildStory = guildStory;
+            typeWriter(guildStoryDiv, guildStory);
+        });
+    }
 
-    document.getElementById('declineCollaboration').addEventListener('click', () => {
-        displayFormattedStory('finalStory', currentStory);
-        showPage('successPage');
-    });
+    const declineCollaboration = document.getElementById('declineCollaboration');
+    if (declineCollaboration) {
+        declineCollaboration.addEventListener('click', () => {
+            displayFormattedStory('finalStory', currentStory);
+            showPage('successPage');
+        });
+    }
 
-    document.getElementById('submitFeedback').addEventListener('click', async () => {
-        const feedback = document.getElementById('feedbackInput').value.trim();
-        if (!feedback) {
-            alert('Please provide feedback for the Guild writer!');
-            return;
-        }
+    const submitFeedback = document.getElementById('submitFeedback');
+    if (submitFeedback) {
+        submitFeedback.addEventListener('click', async () => {
+            const feedback = document.getElementById('feedbackInput').value.trim();
+            if (!feedback) {
+                alert('Please provide feedback for the Guild writer!');
+                return;
+            }
 
-        guildRevisionCount++;
-        
-        // Show loading for both response and new story
-        const guildStoryDiv = document.getElementById('guildStory');
-        guildStoryDiv.innerHTML = '<div class="loading">The Guild writer is revising the story based on your feedback...</div>';
+            guildRevisionCount++;
+            
+            // Show loading for both response and new story
+            const guildStoryDiv = document.getElementById('guildStory');
+            guildStoryDiv.innerHTML = '<div class="loading">The Guild writer is revising the story based on your feedback...</div>';
 
-        // Get both the response AND the revised story
-        const revisedStory = await callStoryForgeAI(feedback, 'guild_feedback', currentGuildStory);
-        const writerResponse = await callStoryForgeAI(feedback, 'guild_feedback_response');
-        
-        // Update the current story
-        currentGuildStory = revisedStory;
-        typeWriter(guildStoryDiv, revisedStory);
-        
-        // Show the writer's response
-        const responseDiv = document.createElement('div');
-        responseDiv.className = 'ai-response';
-        const p = document.createElement('p');
-        responseDiv.innerHTML = '';
-        responseDiv.appendChild(p)
-        typeWriter(p, writerResponse);
-        document.getElementById('guildStorySection').appendChild(responseDiv);
+            // Get both the response AND the revised story
+            const revisedStory = await callStoryForgeAI(feedback, 'guild_feedback', currentGuildStory);
+            const writerResponse = await callStoryForgeAI(feedback, 'guild_feedback_response');
+            
+            // Update the current story
+            currentGuildStory = revisedStory;
+            typeWriter(guildStoryDiv, revisedStory);
+            
+            // Show the writer's response
+            const responseDiv = document.createElement('div');
+            responseDiv.className = 'ai-response';
+            const p = document.createElement('p');
+            responseDiv.innerHTML = '';
+            responseDiv.appendChild(p)
+            typeWriter(p, writerResponse);
+            document.getElementById('guildStorySection').appendChild(responseDiv);
 
-        document.getElementById('feedbackInput').value = '';
+            document.getElementById('feedbackInput').value = '';
 
-        if (guildRevisionCount >= maxGuildRevisions) {
-            document.getElementById('approveFinalStory').textContent = 'Finish Story!';
-        }
-    });
+            if (guildRevisionCount >= maxGuildRevisions) {
+                const approveFinalStoryBtn = document.getElementById('approveFinalStory');
+                if (approveFinalStoryBtn) {
+                    approveFinalStoryBtn.textContent = 'Finish Story!';
+                }
+            }
+        });
+    }
 
-    document.getElementById('approveFinalStory').addEventListener('click', () => {
-        displayFormattedStory('finalStory', currentGuildStory);
-        showPage('successPage');
-    });
+    const approveFinalStory = document.getElementById('approveFinalStory');
+    if (approveFinalStory) {
+        approveFinalStory.addEventListener('click', () => {
+            displayFormattedStory('finalStory', currentGuildStory);
+            showPage('successPage');
+        });
+    }
 
     // Success page
-    document.getElementById('saveStory').addEventListener('click', () => {
-        const title = document.getElementById('storyTitle').value.trim();
-        const finalStoryDiv = document.getElementById('finalStory');
-        const finalStory = finalStoryDiv.innerHTML; // Get formatted HTML
-        
-        saveStoryToLibrary(title, currentStory, finalStory);
-        alert('Story saved to your library!');
-        
-        // Reset for next story
-        currentStory = '';
-        currentGuildStory = '';
-        currentRevision = 0;
-        guildRevisionCount = 0;
-        
-        showPage('libraryPage');
-        loadLibrary();
-    });
+    const saveStory = document.getElementById('saveStory');
+    if (saveStory) {
+        saveStory.addEventListener('click', () => {
+            const title = document.getElementById('storyTitle').value.trim();
+            const finalStoryDiv = document.getElementById('finalStory');
+            const finalStory = finalStoryDiv.innerHTML; // Get formatted HTML
+            
+            saveStoryToLibrary(title, currentStory, finalStory);
+            alert('Story saved to your library!');
+            
+            // Reset for next story
+            currentStory = '';
+            currentGuildStory = '';
+            currentRevision = 0;
+            guildRevisionCount = 0;
+            
+            showPage('libraryPage');
+            loadLibrary();
+        });
+    }
 
-    document.getElementById('downloadStory').addEventListener('click', downloadStory);
+    const downloadStoryBtn = document.getElementById('downloadStory');
+    if (downloadStoryBtn) {
+        downloadStoryBtn.addEventListener('click', downloadStory);
+    }
 
-    document.getElementById('createAnother').addEventListener('click', () => {
-        // Reset story state
-        currentStory = '';
-        currentGuildStory = '';
-        currentRevision = 0;
-        guildRevisionCount = 0;
-        document.getElementById('storyInput').value = '';
-        showPage('workshopPage');
-    });
+    const createAnother = document.getElementById('createAnother');
+    if (createAnother) {
+        createAnother.addEventListener('click', () => {
+            // Reset story state
+            currentStory = '';
+            currentGuildStory = '';
+            currentRevision = 0;
+            guildRevisionCount = 0;
+            document.getElementById('storyInput').value = '';
+            showPage('workshopPage');
+        });
+    }
 
-    document.getElementById('viewLibrary').addEventListener('click', () => {
-        showPage('libraryPage');
-        loadLibrary();
-    });
+    const viewLibraryBtn = document.getElementById('viewLibrary');
+    if (viewLibraryBtn) {
+        viewLibraryBtn.addEventListener('click', () => {
+            showPage('libraryPage');
+            loadLibrary();
+        });
+    }
 
     // Illustrated book functionality
-    document.getElementById('createIllustratedBook').addEventListener('click', createIllustratedBook);
+    const createIllustratedBookBtn = document.getElementById('createIllustratedBook');
+    if (createIllustratedBookBtn) {
+        createIllustratedBookBtn.addEventListener('click', createIllustratedBook);
+    }
     
-    document.getElementById('prevPage').addEventListener('click', () => {
-        if (currentPageIndex > 0) {
-            showBookPage(currentPageIndex - 1);
-        }
-    });
+    const prevPageBtn = document.getElementById('prevPage');
+    if (prevPageBtn) {
+        prevPageBtn.addEventListener('click', () => {
+            if (currentPageIndex > 0) {
+                showBookPage(currentPageIndex - 1);
+            }
+        });
+    }
     
-    document.getElementById('nextPage').addEventListener('click', () => {
-        if (currentPageIndex < illustratedPages.length - 1) {
-            showBookPage(currentPageIndex + 1);
-        }
-    });
+    const nextPageBtn = document.getElementById('nextPage');
+    if (nextPageBtn) {
+        nextPageBtn.addEventListener('click', () => {
+            if (currentPageIndex < illustratedPages.length - 1) {
+                showBookPage(currentPageIndex + 1);
+            }
+        });
+    }
     
-    document.getElementById('backToStory').addEventListener('click', () => {
-        showPage('successPage');
-    });
+    const backToStoryBtn = document.getElementById('backToStory');
+    if (backToStoryBtn) {
+        backToStoryBtn.addEventListener('click', () => {
+            showPage('successPage');
+        });
+    }
     
-   document.getElementById('downloadIllustratedBook').addEventListener('click', () => {
-   downloadIllustratedBookAsPDF();
-    });
+    const downloadIllustratedBookBtn = document.getElementById('downloadIllustratedBook');
+    if (downloadIllustratedBookBtn) {
+        downloadIllustratedBookBtn.addEventListener('click', () => {
+            downloadIllustratedBookAsPDF();
+        });
+    }
 
     // Library page
-    document.getElementById('newStoryButton').addEventListener('click', () => {
-        document.getElementById('storyInput').value = '';
-        showPage('workshopPage');
-    });
+    const newStoryButton = document.getElementById('newStoryButton');
+    if (newStoryButton) {
+        newStoryButton.addEventListener('click', () => {
+            document.getElementById('storyInput').value = '';
+            showPage('workshopPage');
+        });
+    }
 
-    document.getElementById('clearLibraryButton').addEventListener('click', clearLibrary);
+    const clearLibraryButton = document.getElementById('clearLibraryButton');
+    if (clearLibraryButton) {
+        clearLibraryButton.addEventListener('click', clearLibrary);
+    }
 
     // Story Reader Page
-    document.getElementById('prevStoryPage').addEventListener('click', () => {
-        if (storyReaderInfo.currentPage > 0) {
-            storyReaderInfo.currentPage--;
-            showStoryReaderPage();
-        }
-    });
+    const prevStoryPageBtn = document.getElementById('prevStoryPage');
+    if (prevStoryPageBtn) {
+        prevStoryPageBtn.addEventListener('click', () => {
+            if (storyReaderInfo.currentPage > 0) {
+                storyReaderInfo.currentPage--;
+                showStoryReaderPage();
+            }
+        });
+    }
 
-    document.getElementById('nextStoryPage').addEventListener('click', () => {
-        if (storyReaderInfo.currentPage < storyReaderInfo.paragraphs.length - 1) {
-            storyReaderInfo.currentPage++;
-            showStoryReaderPage();
-        }
-    });
+    const nextStoryPageBtn = document.getElementById('nextStoryPage');
+    if (nextStoryPageBtn) {
+        nextStoryPageBtn.addEventListener('click', () => {
+            if (storyReaderInfo.currentPage < storyReaderInfo.paragraphs.length - 1) {
+                storyReaderInfo.currentPage++;
+                showStoryReaderPage();
+            }
+        });
+    }
 
-    document.getElementById('backToLibraryFromReader').addEventListener('click', () => {
-        showPage('libraryPage');
-    });
+    const backToLibraryFromReaderBtn = document.getElementById('backToLibraryFromReader');
+    if (backToLibraryFromReaderBtn) {
+        backToLibraryFromReaderBtn.addEventListener('click', () => {
+            showPage('libraryPage');
+        });
+    }
 });
