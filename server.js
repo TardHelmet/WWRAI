@@ -50,8 +50,9 @@ app.use((req, res, next) => {
     next();
 });
 
-// Get API key from environment variable
+// Get API keys from environment variables
 const GEMINI_KEY = process.env.GEMINI_API_KEY;
+const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY;
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -64,14 +65,14 @@ app.get('/health', (req, res) => {
     });
 });
 
-// StoryForge AI endpoint for all creative writing assistance
+// StoryForge AI endpoint for all creative writing assistance (using Claude)
 app.post('/api/storyforge-ai', aiLimiter, async (req, res) => {
     try {
         // Check if API key is configured
-        if (!GEMINI_KEY) {
-            console.error('❌ GEMINI_API_KEY not configured');
+        if (!ANTHROPIC_KEY) {
+            console.error('❌ ANTHROPIC_API_KEY not configured');
             return res.status(500).json({
-                error: 'AI service not configured. Please set GEMINI_API_KEY environment variable.',
+                error: 'AI service not configured. Please set ANTHROPIC_API_KEY environment variable.',
                 hint: 'The StoryForge Guild needs an API key to connect with our AI mentors!'
             });
         }
@@ -79,23 +80,37 @@ app.post('/api/storyforge-ai', aiLimiter, async (req, res) => {
         console.log('🎭 StoryForge AI request received');
         console.log('📝 Request payload:', JSON.stringify(req.body, null, 2));
 
-        const response = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`,
-            {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'User-Agent': 'StoryForge/1.0 - Where Stories Are Forged'
-                },
-                body: JSON.stringify(req.body)
-            }
-        );
+        // Extract the prompt from the Gemini-style request format
+        const prompt = req.body.contents?.[0]?.parts?.[0]?.text || '';
+        const maxTokens = req.body.generationConfig?.maxOutputTokens || 1024;
+        const temperature = req.body.generationConfig?.temperature || 0.8;
 
-        console.log('🤖 Gemini API response status:', response.status);
+        const response = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-api-key': ANTHROPIC_KEY,
+                'anthropic-version': '2023-06-01',
+                'User-Agent': 'StoryForge/1.0 - Where Stories Are Forged'
+            },
+            body: JSON.stringify({
+                model: 'claude-3-5-haiku-20241022',
+                max_tokens: maxTokens,
+                temperature: temperature,
+                messages: [
+                    {
+                        role: 'user',
+                        content: prompt
+                    }
+                ]
+            })
+        });
+
+        console.log('🤖 Claude API response status:', response.status);
 
         if (!response.ok) {
             const errorText = await response.text();
-            console.error('❌ Gemini API Error:', response.status, errorText);
+            console.error('❌ Claude API Error:', response.status, errorText);
             return res.status(response.status).json({
                 error: `AI service error: ${response.status}`,
                 details: errorText,
@@ -107,12 +122,27 @@ app.post('/api/storyforge-ai', aiLimiter, async (req, res) => {
         console.log('✅ StoryForge AI call successful');
 
         // Log the response for debugging (truncated)
-        const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        const responseText = data.content?.[0]?.text;
         if (responseText) {
             console.log('📖 AI Response preview:', responseText.substring(0, 150) + '...');
         }
 
-        res.json(data);
+        // Transform Claude response to match Gemini format for frontend compatibility
+        const transformedResponse = {
+            candidates: [
+                {
+                    content: {
+                        parts: [
+                            {
+                                text: responseText || ''
+                            }
+                        ]
+                    }
+                }
+            ]
+        };
+
+        res.json(transformedResponse);
 
     } catch (error) {
         console.error('💥 StoryForge server error:', error);
@@ -142,9 +172,9 @@ app.post('/api/generate-image', imageLimiter, async (req, res) => {
             });
         }
 
-        // Using Gemini 2.0 Flash Preview Image Generation
+        // Using Gemini 2.0 Flash Experimental Image Generation
         const response = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-preview-image-generation:generateContent?key=${GEMINI_KEY}`,
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GEMINI_KEY}`,
             {
                 method: 'POST',
                 headers: {
@@ -241,7 +271,7 @@ app.get('/api/test-image', async (req, res) => {
         const testPrompt = "Children's book illustration, simple drawing style. A happy orange cat with white paws sitting in a sunny garden. Friendly and colorful, suitable for children.";
 
         const testResponse = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-preview-image-generation:generateContent?key=${GEMINI_KEY}`,
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GEMINI_KEY}`,
             {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -294,29 +324,38 @@ app.get('/api/test-image', async (req, res) => {
 // Test endpoint for AI connectivity
 app.get('/api/test-ai', async (req, res) => {
     try {
-        console.log('🧪 Testing StoryForge AI connection...');
+        console.log('🧪 Testing StoryForge AI connection (Claude)...');
 
-        if (!GEMINI_KEY) {
+        if (!ANTHROPIC_KEY) {
             return res.json({
                 error: 'No API key configured',
                 configured: false,
-                message: 'Set GEMINI_API_KEY environment variable'
+                message: 'Set ANTHROPIC_API_KEY environment variable'
             });
         }
 
-        const testResponse = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`,
-            {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    contents: [{ parts: [{ text: "Say 'StoryForge AI is working!' and nothing else." }] }]
-                })
-            }
-        );
+        const testResponse = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-api-key': ANTHROPIC_KEY,
+                'anthropic-version': '2023-06-01'
+            },
+            body: JSON.stringify({
+                model: 'claude-3-5-haiku-20241022',
+                max_tokens: 100,
+                messages: [
+                    {
+                        role: 'user',
+                        content: "Say 'StoryForge AI is working!' and nothing else."
+                    }
+                ]
+            })
+        });
 
         console.log('🧪 Test response status:', testResponse.status);
-        const result = await testResponse.text();
+        const data = await testResponse.json();
+        const result = data.content?.[0]?.text || '';
 
         res.json({
             status: testResponse.status,
@@ -330,7 +369,7 @@ app.get('/api/test-ai', async (req, res) => {
         console.error('🧪 AI test error:', error);
         res.status(500).json({
             error: error.message,
-            configured: !!GEMINI_KEY,
+            configured: !!ANTHROPIC_KEY,
             working: false
         });
     }
