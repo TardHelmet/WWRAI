@@ -128,30 +128,44 @@ function initializeVideoPlayer(videoId) {
 }
 
 function createPlayer(videoId, resolve) {
-    videoPlayer = new YT.Player('videoPlayer', {
-        height: '100%',
-        width: '100%',
-        videoId: videoId,
-        playerVars: {
-            origin: window.location.origin,  // Fix cross-origin communication
-            controls: 0,        // Hide controls
-            disablekb: 1,       // Disable keyboard
-            modestbranding: 1,  // Minimal YouTube branding
-            rel: 0,             // No related videos
-            showinfo: 0,        // No video info
-            fs: 0,              // No fullscreen button
-            iv_load_policy: 3,  // No annotations
-            autoplay: 0,        // Don't autoplay
-            start: 0            // Start from beginning
-        },
-        events: {
-            onReady: (event) => {
-                console.log('YouTube player ready');
-                resolve(event.target);
+    try {
+        console.log('🎬 Creating YouTube player for video:', videoId);
+        console.log('📍 Current origin:', window.location.origin);
+        
+        videoPlayer = new YT.Player('videoPlayer', {
+            height: '100%',
+            width: '100%',
+            videoId: videoId,
+            playerVars: {
+                enablejsapi: 1,             // Enable JavaScript API - CRITICAL for cross-origin
+                origin: window.location.origin,  // Fix cross-origin communication
+                controls: 0,        // Hide controls
+                disablekb: 1,       // Disable keyboard
+                modestbranding: 1,  // Minimal YouTube branding
+                rel: 0,             // No related videos
+                showinfo: 0,        // No video info
+                fs: 0,              // No fullscreen button
+                iv_load_policy: 3,  // No annotations
+                autoplay: 0,        // Don't autoplay
+                start: 0            // Start from beginning
             },
-            onStateChange: onPlayerStateChange
-        }
-    });
+            events: {
+                onReady: (event) => {
+                    console.log('✅ YouTube player ready');
+                    resolve(event.target);
+                },
+                onStateChange: onPlayerStateChange,
+                onError: (event) => {
+                    console.error('❌ YouTube player error:', event.data);
+                    logError(new Error(`YouTube player error: ${event.data}`), 'Player initialization');
+                }
+            }
+        });
+    } catch (error) {
+        console.error('❌ Error creating YouTube player:', error);
+        logError(error, 'Player creation');
+        resolve(null);
+    }
 }
 
 function onPlayerStateChange(event) {
