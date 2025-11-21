@@ -1,4 +1,4 @@
-snip// Global state
+// Global state
 let currentUser = '';
 let currentStory = '';
 let currentRevision = 0;
