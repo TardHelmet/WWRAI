@@ -81,32 +81,88 @@ async function displayVideoOptions() {
     
     container.innerHTML = '';
     
-    config.videos.forEach((video, index) => {
-        const videoOption = document.createElement('div');
-        videoOption.className = 'video-option';
-        videoOption.innerHTML = `
-            <img src="https://img.youtube.com/vi/${video.id}/maxresdefault.jpg" 
-                 alt="${video.title}" class="video-thumbnail">
-            <div class="video-title">${video.title}</div>
-        `;
-        
-        videoOption.addEventListener('click', () => {
-            // Remove selection from other videos
-            document.querySelectorAll('.video-option').forEach(option => {
-                option.classList.remove('selected');
+    // Handle both old and new config formats
+    const videos = config.videos || [];
+    const categories = config.categories || {};
+    
+    if (Object.keys(categories).length > 0) {
+        // New category-based format
+        Object.entries(categories).forEach(([categoryKey, category]) => {
+            // Create category header
+            const categoryHeader = document.createElement('div');
+            categoryHeader.style.marginTop = '30px';
+            categoryHeader.style.marginBottom = '16px';
+            categoryHeader.innerHTML = `
+                <h3 style="color: #1e40af; margin-bottom: 4px; font-size: 1.3rem;">${category.name}</h3>
+                <p style="color: #6b7280; font-size: 0.9rem; margin: 0;">${category.description}</p>
+            `;
+            container.appendChild(categoryHeader);
+            
+            // Create video grid for this category
+            const videoGrid = document.createElement('div');
+            videoGrid.style.display = 'grid';
+            videoGrid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(280px, 1fr))';
+            videoGrid.style.gap = '16px';
+            videoGrid.style.marginBottom = '20px';
+            
+            category.videos.forEach((video) => {
+                const videoOption = document.createElement('div');
+                videoOption.className = 'video-option';
+                videoOption.innerHTML = `
+                    <img src="https://img.youtube.com/vi/${video.id}/maxresdefault.jpg" 
+                         alt="${video.title}" class="video-thumbnail">
+                    <div class="video-title">${video.title}</div>
+                `;
+                
+                videoOption.addEventListener('click', () => {
+                    // Remove selection from other videos
+                    document.querySelectorAll('.video-option').forEach(option => {
+                        option.classList.remove('selected');
+                    });
+                    
+                    // Select this video
+                    videoOption.classList.add('selected');
+                    selectedVideo = video;
+                    
+                    // Enable start button
+                    const startButton = document.getElementById('startWithVideo');
+                    startButton.disabled = false;
+                });
+                
+                videoGrid.appendChild(videoOption);
             });
             
-            // Select this video
-            videoOption.classList.add('selected');
-            selectedVideo = video;
-            
-            // Enable start button
-            const startButton = document.getElementById('startWithVideo');
-            startButton.disabled = false;
+            container.appendChild(videoGrid);
         });
-        
-        container.appendChild(videoOption);
-    });
+    } else if (videos.length > 0) {
+        // Fallback to old flat format
+        videos.forEach((video) => {
+            const videoOption = document.createElement('div');
+            videoOption.className = 'video-option';
+            videoOption.innerHTML = `
+                <img src="https://img.youtube.com/vi/${video.id}/maxresdefault.jpg" 
+                     alt="${video.title}" class="video-thumbnail">
+                <div class="video-title">${video.title}</div>
+            `;
+            
+            videoOption.addEventListener('click', () => {
+                // Remove selection from other videos
+                document.querySelectorAll('.video-option').forEach(option => {
+                    option.classList.remove('selected');
+                });
+                
+                // Select this video
+                videoOption.classList.add('selected');
+                selectedVideo = video;
+                
+                // Enable start button
+                const startButton = document.getElementById('startWithVideo');
+                startButton.disabled = false;
+            });
+            
+            container.appendChild(videoOption);
+        });
+    }
 }
 
 function initializeVideoPlayer(videoId) {
@@ -445,16 +501,31 @@ function displayFormattedStory(containerId, storyText) {
 function typeWriter(element, text, speed = 8, paragraphSpeed = 50) {
     let i = 0;
     element.innerHTML = "";
+    
+    // Normalize paragraph breaks - replace multiple newlines with double newlines
+    const normalizedText = text.replace(/\n{2,}/g, '\n\n');
+    
     function type() {
-        if (i < text.length) {
-            if (text.charAt(i) === '\n') {
-                element.innerHTML += '<br><br>';
+        if (i < normalizedText.length) {
+            if (normalizedText.charAt(i) === '\n') {
+                // Check if this is a paragraph break (double newline)
+                if (i + 1 < normalizedText.length && normalizedText.charAt(i + 1) === '\n') {
+                    element.innerHTML += '<br><br>';
+                    i++; // Skip the next newline
+                } else {
+                    element.innerHTML += ' '; // Single newline becomes space
+                }
                 setTimeout(type, paragraphSpeed);
             } else {
-                element.innerHTML += text.charAt(i);
+                element.innerHTML += normalizedText.charAt(i);
                 setTimeout(type, speed);
             }
             i++;
+            
+            // Auto-scroll to bottom of container as text appears
+            if (element.parentElement) {
+                element.parentElement.scrollTop = element.parentElement.scrollHeight;
+            }
         }
     }
     type();
@@ -2157,14 +2228,18 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const createAnother = document.getElementById('createAnother');
     if (createAnother) {
-        createAnother.addEventListener('click', () => {
+        createAnother.addEventListener('click', async () => {
             // Reset story state
             currentStory = '';
             currentGuildStory = '';
             currentRevision = 0;
             guildRevisionCount = 0;
-            document.getElementById('storyInput').value = '';
-            showPage('workshopPage');
+            selectedVideo = null;
+            selectedInspirationText = '';
+            
+            // Load video options and show the video selection page
+            await displayVideoOptions();
+            showPage('inspirationPage');
         });
     }
 

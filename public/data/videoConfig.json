@@ -1,19 +1,58 @@
 {
-  "videos": [
-    {
-      "id": "_Td7JjCTfyc",
-      "title": "Creative Inspiration Video 1",
-      "thumbnail": "https://img.youtube.com/vi/_Td7JjCTfyc/maxresdefault.jpg"
+  "categories": {
+    "short": {
+      "name": "Quick Stories",
+      "description": "5-10 minute videos • Perfect for quick creative bursts",
+      "videos": [
+        {
+          "id": "_Td7JjCTfyc",
+          "title": "Quick Adventure"
+        },
+        {
+          "id": "_Td7JjCTfyc",
+          "title": "Fast-Paced Mystery"
+        },
+        {
+          "id": "_Td7JjCTfyc",
+          "title": "Snap Decision"
+        }
+      ]
     },
-    {
-      "id": "_Td7JjCTfyc",
-      "title": "Creative Inspiration Video 2", 
-      "thumbnail": "https://img.youtube.com/vi/_Td7JjCTfyc/maxresdefault.jpg"
+    "medium": {
+      "name": "Medium Adventures",
+      "description": "10-15 minute videos • For richer storytelling",
+      "videos": [
+        {
+          "id": "_Td7JjCTfyc",
+          "title": "Journey Begins"
+        },
+        {
+          "id": "_Td7JjCTfyc",
+          "title": "Hidden Path"
+        },
+        {
+          "id": "_Td7JjCTfyc",
+          "title": "Discovery"
+        }
+      ]
     },
-    {
-      "id": "_Td7JjCTfyc",
-      "title": "Creative Inspiration Video 3",
-      "thumbnail": "https://img.youtube.com/vi/_Td7JjCTfyc/maxresdefault.jpg"
+    "long": {
+      "name": "Epic Journeys",
+      "description": "15-20+ minute videos • For ambitious, detailed stories",
+      "videos": [
+        {
+          "id": "_Td7JjCTfyc",
+          "title": "Grand Adventure"
+        },
+        {
+          "id": "_Td7JjCTfyc",
+          "title": "Epic Quest"
+        },
+        {
+          "id": "_Td7JjCTfyc",
+          "title": "The Final Chapter"
+        }
+      ]
     }
-  ]
+  }
 }
