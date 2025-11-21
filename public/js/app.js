@@ -133,6 +133,7 @@ function createPlayer(videoId, resolve) {
         width: '100%',
         videoId: videoId,
         playerVars: {
+            origin: window.location.origin,  // Fix cross-origin communication
             controls: 0,        // Hide controls
             disablekb: 1,       // Disable keyboard
             modestbranding: 1,  // Minimal YouTube branding

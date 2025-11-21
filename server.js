@@ -80,7 +80,7 @@ app.post('/api/storyforge-ai', aiLimiter, async (req, res) => {
         console.log('📝 Request payload:', JSON.stringify(req.body, null, 2));
 
         const response = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`,
+            `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`,
             {
                 method: 'POST',
                 headers: {
@@ -305,7 +305,7 @@ app.get('/api/test-ai', async (req, res) => {
         }
 
         const testResponse = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`,
+            `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`,
             {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
