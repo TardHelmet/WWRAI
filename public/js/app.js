@@ -75,94 +75,190 @@ async function loadVideoConfig() {
     }
 }
 
+// Carousel state
+let carouselState = {
+    currentIndex: 0,
+    allVideos: [],
+    videoToCategory: {} // Map video index to category name
+};
+
 async function displayVideoOptions() {
-    const container = document.getElementById('videoContainer');
+    const carousel = document.getElementById('videoCarousel');
     const config = await loadVideoConfig();
     
-    container.innerHTML = '';
+    carousel.innerHTML = '';
+    carouselState.allVideos = [];
+    carouselState.videoToCategory = {};
+    carouselState.currentIndex = 0;
     
     // Handle both old and new config formats
     const videos = config.videos || [];
     const categories = config.categories || {};
     
     if (Object.keys(categories).length > 0) {
-        // New category-based format
+        // New category-based format - flatten into single array
         Object.entries(categories).forEach(([categoryKey, category]) => {
-            // Create category header
-            const categoryHeader = document.createElement('div');
-            categoryHeader.style.marginTop = '30px';
-            categoryHeader.style.marginBottom = '16px';
-            categoryHeader.innerHTML = `
-                <h3 style="color: #1e40af; margin-bottom: 4px; font-size: 1.3rem;">${category.name}</h3>
-                <p style="color: #6b7280; font-size: 0.9rem; margin: 0;">${category.description}</p>
-            `;
-            container.appendChild(categoryHeader);
-            
-            // Create video grid for this category
-            const videoGrid = document.createElement('div');
-            videoGrid.style.display = 'grid';
-            videoGrid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(280px, 1fr))';
-            videoGrid.style.gap = '16px';
-            videoGrid.style.marginBottom = '20px';
-            
             category.videos.forEach((video) => {
-                const videoOption = document.createElement('div');
-                videoOption.className = 'video-option';
-                videoOption.innerHTML = `
-                    <img src="https://img.youtube.com/vi/${video.id}/maxresdefault.jpg" 
-                         alt="${video.title}" class="video-thumbnail">
-                    <div class="video-title">${video.title}</div>
-                `;
-                
-                videoOption.addEventListener('click', () => {
-                    // Remove selection from other videos
-                    document.querySelectorAll('.video-option').forEach(option => {
-                        option.classList.remove('selected');
-                    });
-                    
-                    // Select this video
-                    videoOption.classList.add('selected');
-                    selectedVideo = video;
-                    
-                    // Enable start button
-                    const startButton = document.getElementById('startWithVideo');
-                    startButton.disabled = false;
-                });
-                
-                videoGrid.appendChild(videoOption);
+                const videoWithCategory = {
+                    ...video,
+                    category: category.name
+                };
+                carouselState.allVideos.push(videoWithCategory);
+                carouselState.videoToCategory[carouselState.allVideos.length - 1] = category.name;
             });
-            
-            container.appendChild(videoGrid);
         });
     } else if (videos.length > 0) {
         // Fallback to old flat format
-        videos.forEach((video) => {
-            const videoOption = document.createElement('div');
-            videoOption.className = 'video-option';
-            videoOption.innerHTML = `
-                <img src="https://img.youtube.com/vi/${video.id}/maxresdefault.jpg" 
-                     alt="${video.title}" class="video-thumbnail">
-                <div class="video-title">${video.title}</div>
-            `;
-            
-            videoOption.addEventListener('click', () => {
-                // Remove selection from other videos
-                document.querySelectorAll('.video-option').forEach(option => {
-                    option.classList.remove('selected');
-                });
-                
-                // Select this video
-                videoOption.classList.add('selected');
-                selectedVideo = video;
-                
-                // Enable start button
-                const startButton = document.getElementById('startWithVideo');
-                startButton.disabled = false;
-            });
-            
-            container.appendChild(videoOption);
+        carouselState.allVideos = videos.map(v => ({ ...v, category: 'Featured' }));
+    }
+    
+    // Create video options for carousel
+    carouselState.allVideos.forEach((video, index) => {
+        const videoOption = document.createElement('div');
+        videoOption.className = 'video-option';
+        videoOption.innerHTML = `
+            <div class="video-category">${video.category}</div>
+            <img src="https://img.youtube.com/vi/${video.id}/maxresdefault.jpg" 
+                 alt="${video.title}" class="video-thumbnail">
+            <div class="video-title">${video.title}</div>
+        `;
+        
+        videoOption.addEventListener('click', () => {
+            selectCarouselVideo(index);
+        });
+        
+        carousel.appendChild(videoOption);
+    });
+    
+    // Setup carousel controls
+    setupCarouselControls();
+    
+    // Show first video
+    showCarouselIndex(0);
+}
+
+function selectCarouselVideo(index) {
+    carouselState.currentIndex = index;
+    selectedVideo = carouselState.allVideos[index];
+    
+    // Enable start button
+    const startButton = document.getElementById('startWithVideo');
+    startButton.disabled = false;
+    
+    showCarouselIndex(index);
+}
+
+function showCarouselIndex(index) {
+    const carousel = document.getElementById('videoCarousel');
+    const totalVideos = carouselState.allVideos.length;
+    
+    // Validate index
+    if (index < 0) index = 0;
+    if (index >= totalVideos) index = totalVideos - 1;
+    
+    carouselState.currentIndex = index;
+    
+    // Calculate translation
+    const offset = -index * 100; // Each video is 100% width
+    carousel.style.transform = `translateX(${offset}%)`;
+    
+    // Update selected styling
+    document.querySelectorAll('.video-option').forEach((el, i) => {
+        if (i === index) {
+            el.classList.add('selected');
+        } else {
+            el.classList.remove('selected');
+        }
+    });
+    
+    // Update navigation buttons
+    const prevBtn = document.getElementById('prevVideo');
+    const nextBtn = document.getElementById('nextVideo');
+    if (prevBtn) prevBtn.disabled = index === 0;
+    if (nextBtn) nextBtn.disabled = index === totalVideos - 1;
+    
+    // Update indicators
+    updateCarouselIndicators(index);
+}
+
+function setupCarouselControls() {
+    const prevBtn = document.getElementById('prevVideo');
+    const nextBtn = document.getElementById('nextVideo');
+    
+    if (prevBtn) {
+        prevBtn.addEventListener('click', () => {
+            showCarouselIndex(carouselState.currentIndex - 1);
         });
     }
+    
+    if (nextBtn) {
+        nextBtn.addEventListener('click', () => {
+            showCarouselIndex(carouselState.currentIndex + 1);
+        });
+    }
+    
+    // Add swipe support for touch devices
+    setupCarouselSwipe();
+}
+
+function updateCarouselIndicators(index) {
+    const indicatorsContainer = document.getElementById('carouselIndicators');
+    if (!indicatorsContainer) return;
+    
+    const totalVideos = carouselState.allVideos.length;
+    
+    // Clear existing indicators
+    indicatorsContainer.innerHTML = '';
+    
+    // Create dots
+    for (let i = 0; i < totalVideos; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'carousel-dot';
+        if (i === index) dot.classList.add('active');
+        
+        dot.addEventListener('click', () => {
+            showCarouselIndex(i);
+        });
+        
+        indicatorsContainer.appendChild(dot);
+    }
+}
+
+function setupCarouselSwipe() {
+    const carousel = document.getElementById('videoCarousel');
+    if (!carousel) return;
+    
+    let startX = 0;
+    let currentX = 0;
+    let isDragging = false;
+    
+    carousel.addEventListener('touchstart', (e) => {
+        startX = e.touches[0].clientX;
+        isDragging = true;
+    }, { passive: true });
+    
+    carousel.addEventListener('touchmove', (e) => {
+        if (!isDragging) return;
+        currentX = e.touches[0].clientX;
+    }, { passive: true });
+    
+    carousel.addEventListener('touchend', () => {
+        if (!isDragging) return;
+        isDragging = false;
+        
+        const diff = startX - currentX;
+        const threshold = 50; // Minimum swipe distance
+        
+        if (Math.abs(diff) > threshold) {
+            if (diff > 0) {
+                // Swiped left - show next video
+                showCarouselIndex(carouselState.currentIndex + 1);
+            } else {
+                // Swiped right - show previous video
+                showCarouselIndex(carouselState.currentIndex - 1);
+            }
+        }
+    });
 }
 
 function initializeVideoPlayer(videoId) {
@@ -261,14 +357,39 @@ function startVideoWritingCycle() {
         // Slide video in from left
         videoSection.classList.remove('panel-hidden');
         videoSection.classList.add('slide-in-left');
+        
+        // Start playing video after UI transition completes
+        // This ensures the video is visible before playing
+        setTimeout(() => {
+            if (videoPlayer && videoPlayer.playVideo) {
+                try {
+                    videoPlayer.playVideo();
+                    console.log('✅ Video playback resumed');
+                } catch (error) {
+                    console.error('❌ Error resuming video playback:', error);
+                    // If autoplay fails, show a message
+                    document.getElementById('videoStatus').textContent = 'Click to play video';
+                }
+            }
+        }, 100);
     }, 500);
     
-    // Start playing video with autoplay
-    videoPlayer.playVideo();
-    
-    // Set timer for 15 seconds
+    // Set timer for 15 seconds (but check if video actually started)
     videoWritingState.playbackTimer = setTimeout(() => {
-        pauseVideoAndPromptWriting();
+        // Verify video is still playing before pausing
+        if (videoPlayer && videoPlayer.getPlayerState && videoPlayer.getPlayerState() === YT.PlayerState.PLAYING) {
+            pauseVideoAndPromptWriting();
+        } else {
+            // If video didn't play, try again
+            console.warn('⚠️ Video may not have started playing, retrying...');
+            if (videoPlayer && videoPlayer.playVideo) {
+                videoPlayer.playVideo();
+            }
+            // Reset the timer
+            videoWritingState.playbackTimer = setTimeout(() => {
+                pauseVideoAndPromptWriting();
+            }, 15000);
+        }
     }, 15000);
 }
 
