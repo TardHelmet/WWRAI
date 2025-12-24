@@ -83,59 +83,18 @@ let carouselState = {
 };
 
 async function displayVideoOptions() {
-    const carousel = document.getElementById('videoCarousel');
     const config = await loadVideoConfig();
-    
-    carousel.innerHTML = '';
-    carouselState.allVideos = [];
-    carouselState.videoToCategory = {};
-    carouselState.currentIndex = 0;
-    
-    // Handle both old and new config formats
     const videos = config.videos || [];
-    const categories = config.categories || {};
     
-    if (Object.keys(categories).length > 0) {
-        // New category-based format - flatten into single array
-        Object.entries(categories).forEach(([categoryKey, category]) => {
-            category.videos.forEach((video) => {
-                const videoWithCategory = {
-                    ...video,
-                    category: category.name
-                };
-                carouselState.allVideos.push(videoWithCategory);
-                carouselState.videoToCategory[carouselState.allVideos.length - 1] = category.name;
-            });
-        });
-    } else if (videos.length > 0) {
-        // Fallback to old flat format
-        carouselState.allVideos = videos.map(v => ({ ...v, category: 'Featured' }));
+    // Auto-select the single video
+    if (videos.length > 0) {
+        selectedVideo = videos[0];
+        // Go directly to video writing page
+        document.getElementById('selectedVideoTitle').textContent = selectedVideo.title;
+        showPage('videoWritingPage');
     }
-    
-    // Create video options for carousel
-    carouselState.allVideos.forEach((video, index) => {
-        const videoOption = document.createElement('div');
-        videoOption.className = 'video-option';
-        videoOption.innerHTML = `
-            <div class="video-category">${video.category}</div>
-            <img src="https://img.youtube.com/vi/${video.id}/maxresdefault.jpg" 
-                 alt="${video.title}" class="video-thumbnail">
-            <div class="video-title">${video.title}</div>
-        `;
-        
-        videoOption.addEventListener('click', () => {
-            selectCarouselVideo(index);
-        });
-        
-        carousel.appendChild(videoOption);
-    });
-    
-    // Setup carousel controls
-    setupCarouselControls();
-    
-    // Show first video
-    showCarouselIndex(0);
 }
+
 
 function selectCarouselVideo(index) {
     carouselState.currentIndex = index;
@@ -488,20 +447,7 @@ function showFinalWritingPrompt() {
 }
 
 function validateWritingInput() {
-    const textarea = document.getElementById('videoStoryText');
-    const currentText = textarea.value.trim();
-    const wordCount = currentText.split(/\s+/).filter(word => word.length > 0).length;
-    
-    // Update word count display
-    document.getElementById('currentWordCount').textContent = wordCount;
-    
-    // Enable continue button if minimum words written (at least 3 words)
-    const continueButton = document.getElementById('continueWatching');
-    if (wordCount >= 3) {
-        continueButton.disabled = false;
-    } else {
-        continueButton.disabled = true;
-    }
+    // No longer needed - validation done on submit
 }
 
 function continueVideoOrSubmit() {
@@ -580,6 +526,15 @@ function showPage(pageId) {
     document.querySelectorAll('.page').forEach(page => {
         page.classList.remove('active');
     });
+    
+    // Check if user has stories for welcome page
+    if (pageId === 'welcomePage') {
+        const stories = loadFromStorage('stories') || [];
+        const readButton = document.getElementById('readChoice');
+        if (readButton) {
+            readButton.style.display = stories.length > 0 ? 'inline-block' : 'none';
+        }
+    }
     const page = document.getElementById(pageId);
     if (page) {
         page.classList.add('active');
@@ -1647,26 +1602,20 @@ function updateWordCountGoal() {
 
 // Enhanced validate writing input with word goals
 function validateWritingInputEnhanced() {
-    updateWordCountGoal();
-    
-    const textarea = document.getElementById('videoStoryText');
-    const currentText = textarea.value.trim();
-    const wordCount = currentText.split(/\s+/).filter(word => word.length > 0).length;
-    const wordGoal = videoWritingState.wordGoal;
-    
-    // Enable continue button if word goal is met
-    const continueButton = document.getElementById('continueWatching');
-    if (wordCount >= wordGoal) {
-        continueButton.disabled = false;
-    } else {
-        continueButton.disabled = true;
-    }
+    // Validation moved to submit handler
 }
+
 
 // Enhanced continue function with XP rewards
 function continueVideoOrSubmitEnhanced() {
     const textarea = document.getElementById('videoStoryText');
     const currentText = textarea.value.trim();
+    
+    // Check if text is empty
+    if (!currentText) {
+        alert('Before we can move on, you need to write what you have seen!');
+        return;
+    }
     
     if (videoWritingState.isVideoEnded) {
         // Save final section
