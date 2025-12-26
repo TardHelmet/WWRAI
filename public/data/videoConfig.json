@@ -1,58 +1,8 @@
 {
-  "categories": {
-    "short": {
-      "name": "Quick Stories",
-      "description": "5-10 minute videos • Perfect for quick creative bursts",
-      "videos": [
-        {
-          "id": "_Td7JjCTfyc",
-          "title": "Quick Adventure"
-        },
-        {
-          "id": "_Td7JjCTfyc",
-          "title": "Fast-Paced Mystery"
-        },
-        {
-          "id": "_Td7JjCTfyc",
-          "title": "Snap Decision"
-        }
-      ]
-    },
-    "medium": {
-      "name": "Medium Adventures",
-      "description": "10-15 minute videos • For richer storytelling",
-      "videos": [
-        {
-          "id": "_Td7JjCTfyc",
-          "title": "Journey Begins"
-        },
-        {
-          "id": "_Td7JjCTfyc",
-          "title": "Hidden Path"
-        },
-        {
-          "id": "_Td7JjCTfyc",
-          "title": "Discovery"
-        }
-      ]
-    },
-    "long": {
-      "name": "Epic Journeys",
-      "description": "15-20+ minute videos • For ambitious, detailed stories",
-      "videos": [
-        {
-          "id": "_Td7JjCTfyc",
-          "title": "Grand Adventure"
-        },
-        {
-          "id": "_Td7JjCTfyc",
-          "title": "Epic Quest"
-        },
-        {
-          "id": "_Td7JjCTfyc",
-          "title": "The Final Chapter"
-        }
-      ]
+  "videos": [
+    {
+      "id": "_Td7JjCTfyc",
+      "title": "Creative Writing Journey"
     }
-  }
+  ]
 }
