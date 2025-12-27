@@ -1,26 +1,22 @@
 <div id="inspirationPage" class="page">
     <div class="card">
-        <h2>Choose a video to inspire your story!</h2>
+        <h2>Ready to create your story?</h2>
+        <p>Watch this video and write your own creative story as you go!</p>
         
-        <!-- Carousel Container -->
-        <div class="carousel-container">
-            <div class="carousel-wrapper">
-                <div id="videoCarousel" class="video-carousel">
-                    <div class="loading">Loading videos...</div>
+        <!-- Single Video Display -->
+        <div id="videoDisplay" class="video-display">
+            <div class="video-card selected">
+                <div class="video-thumbnail">
+                    <div class="play-icon">▶</div>
                 </div>
+                <h3 id="displayedVideoTitle">Creative Writing Journey</h3>
+                <p class="video-description">Watch, pause, and write your story!</p>
             </div>
-            
-            <!-- Carousel Navigation -->
-            <button id="prevVideo" class="carousel-nav carousel-nav-prev" aria-label="Previous video">❮</button>
-            <button id="nextVideo" class="carousel-nav carousel-nav-next" aria-label="Next video">❯</button>
         </div>
         
-        <!-- Carousel Indicators -->
-        <div id="carouselIndicators" class="carousel-indicators"></div>
-        
-        <!-- Fixed Bottom Button -->
-        <div class="carousel-action-bar">
-            <button id="startWithVideo" disabled class="success-button">Start Writing with Selected Video</button>
+        <!-- Start Button -->
+        <div class="action-bar">
+            <button id="startWithVideo" class="success-button">Start Writing with This Video</button>
         </div>
     </div>
 </div>

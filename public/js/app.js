@@ -89,136 +89,21 @@ async function displayVideoOptions() {
     // Auto-select the single video
     if (videos.length > 0) {
         selectedVideo = videos[0];
-        // Go directly to video writing page
-        document.getElementById('selectedVideoTitle').textContent = selectedVideo.title;
-        showPage('videoWritingPage');
+        
+        // Update the displayed video title on inspiration page
+        document.getElementById('displayedVideoTitle').textContent = selectedVideo.title;
+        
+        // Show the inspiration page with single video
+        showPage('inspirationPage');
+    } else {
+        // Handle error - no videos available
+        alert('No videos are currently available. Please try again later.');
+        showPage('welcomePage');
     }
 }
 
 
-function selectCarouselVideo(index) {
-    carouselState.currentIndex = index;
-    selectedVideo = carouselState.allVideos[index];
-    
-    // Enable start button
-    const startButton = document.getElementById('startWithVideo');
-    startButton.disabled = false;
-    
-    showCarouselIndex(index);
-}
-
-function showCarouselIndex(index) {
-    const carousel = document.getElementById('videoCarousel');
-    const totalVideos = carouselState.allVideos.length;
-    
-    // Validate index
-    if (index < 0) index = 0;
-    if (index >= totalVideos) index = totalVideos - 1;
-    
-    carouselState.currentIndex = index;
-    
-    // Calculate translation
-    const offset = -index * 100; // Each video is 100% width
-    carousel.style.transform = `translateX(${offset}%)`;
-    
-    // Update selected styling
-    document.querySelectorAll('.video-option').forEach((el, i) => {
-        if (i === index) {
-            el.classList.add('selected');
-        } else {
-            el.classList.remove('selected');
-        }
-    });
-    
-    // Update navigation buttons
-    const prevBtn = document.getElementById('prevVideo');
-    const nextBtn = document.getElementById('nextVideo');
-    if (prevBtn) prevBtn.disabled = index === 0;
-    if (nextBtn) nextBtn.disabled = index === totalVideos - 1;
-    
-    // Update indicators
-    updateCarouselIndicators(index);
-}
-
-function setupCarouselControls() {
-    const prevBtn = document.getElementById('prevVideo');
-    const nextBtn = document.getElementById('nextVideo');
-    
-    if (prevBtn) {
-        prevBtn.addEventListener('click', () => {
-            showCarouselIndex(carouselState.currentIndex - 1);
-        });
-    }
-    
-    if (nextBtn) {
-        nextBtn.addEventListener('click', () => {
-            showCarouselIndex(carouselState.currentIndex + 1);
-        });
-    }
-    
-    // Add swipe support for touch devices
-    setupCarouselSwipe();
-}
-
-function updateCarouselIndicators(index) {
-    const indicatorsContainer = document.getElementById('carouselIndicators');
-    if (!indicatorsContainer) return;
-    
-    const totalVideos = carouselState.allVideos.length;
-    
-    // Clear existing indicators
-    indicatorsContainer.innerHTML = '';
-    
-    // Create dots
-    for (let i = 0; i < totalVideos; i++) {
-        const dot = document.createElement('div');
-        dot.className = 'carousel-dot';
-        if (i === index) dot.classList.add('active');
-        
-        dot.addEventListener('click', () => {
-            showCarouselIndex(i);
-        });
-        
-        indicatorsContainer.appendChild(dot);
-    }
-}
-
-function setupCarouselSwipe() {
-    const carousel = document.getElementById('videoCarousel');
-    if (!carousel) return;
-    
-    let startX = 0;
-    let currentX = 0;
-    let isDragging = false;
-    
-    carousel.addEventListener('touchstart', (e) => {
-        startX = e.touches[0].clientX;
-        isDragging = true;
-    }, { passive: true });
-    
-    carousel.addEventListener('touchmove', (e) => {
-        if (!isDragging) return;
-        currentX = e.touches[0].clientX;
-    }, { passive: true });
-    
-    carousel.addEventListener('touchend', () => {
-        if (!isDragging) return;
-        isDragging = false;
-        
-        const diff = startX - currentX;
-        const threshold = 50; // Minimum swipe distance
-        
-        if (Math.abs(diff) > threshold) {
-            if (diff > 0) {
-                // Swiped left - show next video
-                showCarouselIndex(carouselState.currentIndex + 1);
-            } else {
-                // Swiped right - show previous video
-                showCarouselIndex(carouselState.currentIndex - 1);
-            }
-        }
-    });
-}
+// Carousel functions removed - single video only
 
 function initializeVideoPlayer(videoId) {
     return new Promise((resolve) => {
